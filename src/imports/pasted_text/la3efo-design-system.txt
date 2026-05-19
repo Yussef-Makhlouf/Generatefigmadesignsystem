@@ -1,0 +1,135 @@
+Act as a senior product designer and design system architect. Create a complete, RTL-first Figma design system and MVP screen set for "لاعّفو" (La3efo), an Arabic Q&A community platform. All designs must be mobile-first, WCAG AA accessible, and ready for developer handoff with auto-layout, variants, and component properties.
+
+🎯 CORE DELIVERABLES
+1. Complete Design System (Colors, Typography, Spacing, Components, Tokens)
+2. 8 MVP Screen Flows (Mobile + Tablet + Desktop breakpoints)
+3. Interactive Prototype with RTL navigation states
+4. Developer Handoff Specs (Auto-layout, Variants, Export Settings)
+
+🎨 VISUAL IDENTITY SYSTEM
+- Brand Name: "لاعّفو" (La3efo) — meaning "Engage/Activate"
+- Primary Color: `#2563EB` (Indigo 600) — Buttons, Links, Active States
+- Secondary Color: `#0D9488` (Teal 600) — Verification Badges, Success States
+- Backgrounds: `#F9FAFB` (Page), `#FFFFFF` (Cards/Surfaces)
+- Text: `#111827` (Primary), `#6B7280` (Secondary), `#9CA3AF` (Placeholder)
+- Semantic Colors:
+  • Success: `#10B981` | Warning: `#F59E0B` | Error: `#EF4444` | Info: `#3B82F6`
+- Dark Mode Tokens: Ready with `dark:` prefix equivalents
+- Gradients: Subtle `linear-gradient(135deg, #2563EB 0%, #0D9488 100%)` for hero/CTAs only
+
+🔤 TYPOGRAPHY (Arabic-First)
+- Primary Font: "Tajawal" (Google Fonts) — Weights: 300, 400, 500, 700, 800
+- Fallback: "Cairo", "Noto Sans Arabic", system-ui
+- Global Settings: `dir="rtl"`, `text-align: right`, `line-height: 1.75`, `letter-spacing: 0`
+- Type Scale (Mobile-First):
+  • Display: 32px/700 — Page Titles
+  • H1: 24px/700 — Section Headers
+  • H2: 20px/600 — Card Titles
+  • Body: 16px/400 — Primary Content
+  • Caption: 14px/400 — Metadata, Timestamps
+  • Button: 16px/500 — All CTAs
+  • Tag: 13px/500 — Category/Tag Pills
+
+📐 SPACING & LAYOUT SYSTEM
+- Base Unit: 4px grid
+- Spacing Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96
+- Container Max-Widths: Mobile: 100%, Tablet: 768px, Desktop: 1200px
+- Border Radius:
+  • Cards: `rounded-xl` (12px)
+  • Buttons/Inputs: `rounded-lg` (10px)
+  • Pills/Tags: `rounded-full` (999px)
+- Shadows (Elevation):
+  • Level 1: `0 1px 2px rgba(0,0,0,0.05)` — Cards
+  • Level 2: `0 4px 6px -1px rgba(0,0,0,0.1)` — Modals, Dropdowns
+  • Level 3: `0 10px 15px -3px rgba(0,0,0,0.1)` — Floating Actions
+
+🧩 COMPONENT LIBRARY (With Variants & Properties)
+1. `Button` — Variants: Primary/Secondary/Tertiary/Ghost/Destructive | Sizes: SM/MD/LG | States: Default/Hover/Active/Disabled/Loading
+2. `Input` — Variants: Default/Error/Success | Types: Text/Email/Password/Search | States: Default/Focus/Filled/Disabled
+3. `TextArea` — Rich text mock toolbar, character counter, resize handle
+4. `Card/QuestionCard` — Auto-layout vertical, hover lift effect, bookmark/share actions
+5. `VoteButtons` — Vertical stack, up/down states, count display, animated feedback
+6. `Avatar` — Sizes: XS(24px)/SM(32px)/MD(40px)/LG(64px), online indicator, fallback initial
+7. `Badge` — Variants: Category/Tag/Verification/Reputation | Colors auto-map to category
+8. `ReputationBadge` — Pill component with tooltip, dynamic color tier (Beginner/Active/Expert)
+9. `SearchBar` — Autocomplete dropdown, keyboard nav indicators, mobile full-screen variant
+10. `Toast/Sonner` — Success/Error/Info variants, auto-dismiss, action button support
+11. `Skeleton` — Matching layouts for QuestionCard, Profile, Feed loading states
+12. `EmptyState` — Arabic illustration + headline + CTA, reusable for all empty views
+13. `Modal/Dialog` — RTL-aware focus trap, close button, scrollable content area
+14. `BottomNav` (Mobile) — 4 items: Feed/Search/Notifications/Profile, active state indicator
+15. `Sidebar` (Desktop) — Collapsible, category list, user stats, admin link
+
+📱 SCREEN FLOWS (Mobile-First, 3 Breakpoints: 360px, 768px, 1200px)
+1. `/` Home Feed
+   • Header: Logo (right), Search bar, Profile avatar (left)
+   • Left Sidebar (Desktop): Categories, Quick Links, User Stats
+   • Main Feed: QuestionCard list with 40/30/20/10 algorithm visual weighting
+   • Right Panel (Desktop): "Top Questions Today", "Active Contributors", "Your City Questions"
+   • Mobile: BottomNav replaces Sidebars, pull-to-refresh, infinite scroll indicator
+
+2. `/auth/login` & `/auth/register`
+   • Clean centered card, Arabic placeholder text
+   • Email/Password fields + "Forgot password?" link
+   • Social login buttons (Google/Apple) — Phase 2 placeholder
+   • Post-register: 1-step Onboarding Modal (City dropdown + 3-5 interest chips)
+   • Skip button visible, progress indicator
+
+3. `/questions/new` Creation Wizard
+   • Step 1: Title input (15-150 char counter), Description rich-text mock (20-3000 chars)
+   • Step 2: Category dropdown, Tags autocomplete (2-5 chips), Location pin button
+   • Step 3: Image upload mock (drag & drop zone, ≤5MB, JPG/PNG/WebP), preview thumbnails
+   • Step 4: Preview card (exact QuestionCard render) + "Edit" / "Publish Now" actions
+   • Progress stepper, back/next navigation, auto-save draft indicator
+
+4. `/questions/[id]` Detail View
+   • QuestionCard expanded (full description, all tags, location map snippet)
+   • AnswerSection: List of answers sorted newest, each with VoteButtons, verification badges (📸 Photo / 📍 Location), comment button
+   • CommentThread: Flat list under each answer, 10-500 char input, timestamp, author
+   • Sticky bottom bar (Mobile): "Write Answer" CTA, bookmark, share
+   • Desktop: Two-column layout (Question + Answers side-by-side)
+
+5. `/search` Results
+   • Header SearchBar with autocomplete dropdown (5Qs, 3Tags, 2Users)
+   • Filters Panel (Left/Desktop, Modal/Mobile): Category, Location, Verified-only, Unanswered, Sort (Newest/Most Votes/Unanswered)
+   • Results Grid: QuestionCard list, "No results" empty state with suggestions
+   • Mobile: Full-screen search overlay, filter chips horizontal scroll
+
+6. `/profile/[username]`
+   • Header: Avatar (LG), Name, ReputationBadge, Edit Profile button (owner only)
+   • Stats Row: Questions Asked / Answers Given / Upvotes Received / Followers
+   • Tabs: "My Questions" / "My Answers" / "Saved" / "Activity"
+   • Content List: Filtered QuestionCard/AnswerCard variants
+   • Mobile: Stats as horizontal scroll cards, tabs as segmented control
+
+7. `/notifications`
+   • List of notification items: Icon + Message + Timestamp + Unread dot
+   • Grouped by: "Today", "This Week", "Earlier"
+   • Actions: Mark as read (swipe mobile, checkbox desktop), Mark all read header action
+   • Empty state: Bell illustration + "No notifications yet" + "When you interact, updates appear here"
+
+8. `/admin` Dashboard (Role-Guarded)
+   • Stats Cards: Total Users / Questions / Answers / Reports (with trend arrows)
+   • Tables: Users List (Search, Filter by Role, Activate/Deactivate), Content Moderation Queue (Question/Answer/Comment cards with Approve/Reject/Flag actions)
+   • Settings Panel: Manage Categories, Reputation Rules, System Toggles
+   • Desktop: Three-column layout (Nav / Content / Details Panel)
+
+🔄 INTERACTION STATES & MICRO-INTERACTIONS
+- Hover: Card lift (`translateY(-2px)` + shadow increase), Button color shift
+- Tap/Click: Scale down 0.98, ripple effect on buttons
+- Voting: Animated count increment/decrement, color pulse on active state
+- Bookmark: Fill animation, confetti micro-burst on first save
+- Loading: Skeleton screens matching exact layout, shimmer animation
+- Empty: Fade-in illustration + CTA, subtle bounce on primary button
+- Error: Shake animation on invalid form fields, inline error message slide-down
+- Success: Checkmark animation, toast slide-up from bottom (mobile) / top-right (desktop)
+
+♿ ACCESSIBILITY & RTL SPECIFICS
+- All components: `dir="rtl"` enforced, flex-direction reversed where needed
+- Focus indicators: `ring-2 ring-indigo-500/50 ring-offset-2` visible on keyboard nav
+- Color contrast: All text ≥ 4.5:1 against background (verify with Stark plugin)
+- Screen reader labels: `aria-label` on icon-only buttons, descriptive alt text for images
+- Touch targets: Minimum 44x44px for all interactive elements
+- Motion: Respect `prefers-reduced-motion`, provide non-animated fallbacks
+
+📦 FIGMA FILE STRUCTURE
