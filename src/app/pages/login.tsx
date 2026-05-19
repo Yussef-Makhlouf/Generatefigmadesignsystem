@@ -5,137 +5,160 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare } from "lucide-react";
+import { motion } from "motion/react";
+
+const FEATURES = [
+  { icon: MessageSquare, text: "آلاف الأسئلة والإجابات" },
+  { icon: Shield,        text: "خبراء موثّقون" },
+  { icon: Sparkles,      text: "محتوى عربي أصيل" },
+];
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail]           = useState("");
+  const [password, setPassword]     = useState("");
+  const [showPass, setShowPass]     = useState(false);
+  const [loading, setLoading]       = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/");
-    }, 800);
+    setLoading(true);
+    setTimeout(() => { setLoading(false); navigate("/"); }, 900);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
-      {/* Background decorations */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
-      </div>
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #0F1727 0%, #1E3A5F 50%, #0A2540 100%)" }}
+    >
+      {/* Orbs */}
+      <div className="absolute top-1/4 right-0 w-80 h-80 rounded-full bg-primary/20 blur-3xl pointer-events-none animate-float" />
+      <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full bg-secondary/20 blur-3xl pointer-events-none" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute inset-0 pattern-arabic opacity-20 pointer-events-none" />
 
-      <div className="w-full max-w-md relative">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md relative z-10"
+      >
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary mb-4 shadow-lg">
-            <span className="text-white font-bold text-2xl">K</span>
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4 shadow-primary shadow-lg animate-pulse-ring">
+            <Zap className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-white">
             Khapeer
           </h1>
-          <p className="text-muted-foreground mt-1">منصة الأسئلة والخبراء العرب</p>
+          <p className="text-blue-300/80 text-sm mt-1">منصة المعرفة العربية</p>
+          <div className="flex items-center justify-center gap-4 mt-3">
+            {FEATURES.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div key={f.text} className="flex items-center gap-1 text-[11px] text-blue-300/70">
+                  <Icon className="h-3 w-3" />
+                  <span>{f.text}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <Card className="p-8 shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold">مرحباً بعودتك 👋</h2>
-            <p className="text-sm text-muted-foreground mt-1">سجل دخولك للمتابعة</p>
+        {/* Card */}
+        <Card
+          className="p-7 shadow-xl border-white/10 bg-white/95 dark:bg-card/95 backdrop-blur-md"
+          style={{ borderRadius: "var(--radius-xl)" }}
+        >
+          <div className="mb-5">
+            <h2 className="text-xl font-bold">مرحباً بعودتك</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">سجّل دخولك للمتابعة</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-input-background h-11 rounded-xl"
-                required
-              />
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm">البريد الإلكتروني</Label>
+              <div className="input-glow rounded-xl">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-11 rounded-xl bg-muted/40 border-border/60"
+                  required
+                  dir="ltr"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                <Label htmlFor="password" className="text-sm">كلمة المرور</Label>
+                <button type="button" className="text-xs text-primary hover:underline">
                   نسيت كلمة المرور؟
-                </Link>
+                </button>
               </div>
-              <div className="relative">
+              <div className="relative input-glow rounded-xl">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPass ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-input-background h-11 rounded-xl pl-10"
+                  className="h-11 rounded-xl bg-muted/40 border-border/60 pl-10"
                   required
                 />
                 <button
                   type="button"
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPass(!showPass)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-11 rounded-xl"
-              disabled={isLoading}
+              className="w-full h-11 rounded-xl gradient-primary border-0 shadow-primary shadow-sm"
+              disabled={loading}
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                "تسجيل الدخول"
-              )}
+              ) : "تسجيل الدخول"}
             </Button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-5">
             <Separator />
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
-              أو
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground whitespace-nowrap">
+              أو تابع مع
             </span>
           </div>
 
-          <Button variant="outline" className="w-full h-11 rounded-xl" disabled>
-            <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24">
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl border-border/60 hover:bg-muted/60 gap-2"
+            disabled
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            متابعة مع Google (قريباً)
+            Google (قريباً)
           </Button>
 
-          <div className="text-center mt-6">
-            <p className="text-sm text-muted-foreground">
-              ليس لديك حساب؟{" "}
-              <Link to="/auth/register" className="text-primary font-semibold hover:underline">
-                انضم الآن
-              </Link>
-            </p>
-          </div>
+          <p className="text-center text-sm text-muted-foreground mt-5">
+            ليس لديك حساب؟{" "}
+            <Link to="/auth/register" className="text-primary font-semibold hover:underline">
+              انضم الآن مجاناً
+            </Link>
+          </p>
         </Card>
-
-        {/* Feature hint */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Sparkles className="h-3 w-3 text-primary" />
-          <span>انضم إلى أكثر من ٤٨,٠٠٠ خبير عربي</span>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

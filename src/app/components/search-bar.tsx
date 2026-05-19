@@ -48,7 +48,7 @@ export function SearchBar({
   return (
     <div className={`relative ${className}`}>
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
           placeholder={placeholder}
@@ -56,18 +56,18 @@ export function SearchBar({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          className="pr-10 bg-input-background border-border rounded-lg"
+          className="pr-9 sm:pr-10 bg-input-background border-border rounded-lg h-10 sm:h-11 text-sm sm:text-base"
         />
       </div>
 
       {/* Autocomplete Dropdown */}
       {showAutocomplete && (
-        <Card className="absolute top-full left-0 right-0 mt-2 p-2 z-50 max-h-96 overflow-y-auto shadow-lg">
-          <div className="space-y-1">
+        <Card className="absolute top-full left-0 right-0 mt-2 p-1.5 sm:p-2 z-50 max-h-80 sm:max-h-96 overflow-y-auto shadow-lg">
+          <div className="space-y-0.5 sm:space-y-1">
             {results.map((result) => (
               <button
                 key={result.id}
-                className="w-full p-3 text-right hover:bg-accent rounded-lg transition-colors"
+                className="w-full p-2 sm:p-3 text-right hover:bg-accent rounded-lg transition-colors"
                 onClick={() => {
                   onSearch?.(result.title);
                   setQuery(result.title);
@@ -76,17 +76,17 @@ export function SearchBar({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-foreground truncate">
+                    <div className="font-medium text-xs sm:text-sm text-foreground truncate">
                       {result.title}
                     </div>
                     {result.subtitle && (
-                      <div className="text-xs text-muted-foreground mt-0.5">
+                      <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                         {result.subtitle}
                       </div>
                     )}
                   </div>
                   <div className="flex-shrink-0">
-                    <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
+                    <span className="text-[9px] sm:text-xs text-muted-foreground px-1.5 sm:px-2 py-0.5 sm:py-1 bg-muted rounded">
                       {result.type === "question" && "سؤال"}
                       {result.type === "tag" && "وسم"}
                       {result.type === "user" && "مستخدم"}

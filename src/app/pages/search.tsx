@@ -125,11 +125,11 @@ export function SearchPage() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-8">
       {/* Search Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4">البحث</h1>
-        <div className="flex gap-3">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">البحث</h1>
+        <div className="flex gap-2 sm:gap-3">
           <div className="flex-1">
             <SearchBar
               placeholder="ابحث عن سؤال، موضوع، أو مستخدم..."
@@ -140,13 +140,13 @@ export function SearchPage() {
           {/* Mobile Filter Button */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="md:hidden rounded-lg">
-                <SlidersHorizontal className="h-5 w-5" />
+              <Button variant="outline" className="md:hidden rounded-lg h-10 w-10 sm:h-11 sm:w-11 p-0">
+                <SlidersHorizontal className="h-4 sm:h-5 w-4 sm:w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
               <SheetHeader>
-                <SheetTitle>تصفية النتائج</SheetTitle>
+                <SheetTitle className="text-base sm:text-lg">تصفية النتائج</SheetTitle>
               </SheetHeader>
               <div className="mt-6">
                 <FilterPanel />
@@ -157,22 +157,22 @@ export function SearchPage() {
 
         {/* Active Filters - Mobile */}
         {searchQuery && (
-          <div className="flex gap-2 mt-3 overflow-x-auto md:hidden">
-            <Badge variant="secondary" className="rounded-full whitespace-nowrap">
+          <div className="flex gap-1.5 sm:gap-2 mt-2 sm:mt-3 overflow-x-auto md:hidden scrollbar-none pb-1">
+            <Badge variant="secondary" className="rounded-full whitespace-nowrap text-[10px] sm:text-xs px-2 sm:px-2.5">
               {category === "all" ? "جميع التصنيفات" : category}
             </Badge>
-            <Badge variant="secondary" className="rounded-full whitespace-nowrap">
+            <Badge variant="secondary" className="rounded-full whitespace-nowrap text-[10px] sm:text-xs px-2 sm:px-2.5">
               {sortBy === "newest" ? "الأحدث" : sortBy === "votes" ? "الأكثر تصويتاً" : "بدون إجابة"}
             </Badge>
           </div>
         )}
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex gap-4 sm:gap-6">
         {/* Desktop Filters */}
-        <aside className="hidden md:block w-64">
+        <aside className="hidden md:block w-60 lg:w-64">
           <Card className="p-4 sticky top-20">
-            <h3 className="font-semibold mb-4">تصفية النتائج</h3>
+            <h3 className="font-semibold mb-4 text-sm">تصفية النتائج</h3>
             <FilterPanel />
           </Card>
         </aside>

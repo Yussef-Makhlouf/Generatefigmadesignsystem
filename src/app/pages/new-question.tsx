@@ -40,29 +40,29 @@ export function NewQuestionPage() {
   const canProceedStep2 = category && tags.length >= 2;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl pb-20 sm:pb-8">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Button
           variant="ghost"
-          className="mb-4"
+          className="mb-3 sm:mb-4 -mr-2 rounded-xl h-9 text-sm"
           onClick={() => navigate("/")}
         >
           <ArrowRight className="h-4 w-4 ml-2" />
           العودة
         </Button>
-        <h1 className="text-2xl font-bold mb-2">اطرح سؤالاً جديداً</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">اطرح سؤالاً جديداً</h1>
+        <p className="text-muted-foreground text-sm">
           شارك معرفتك واحصل على إجابات من المجتمع
         </p>
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-6 sm:mb-8">
         {[1, 2, 3, 4].map((s, index) => (
           <div key={s} className="flex items-center">
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
+              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold transition-all text-sm sm:text-base ${
                 s === step
                   ? "bg-primary text-primary-foreground"
                   : s < step
@@ -74,7 +74,7 @@ export function NewQuestionPage() {
             </div>
             {index < 3 && (
               <div
-                className={`h-1 w-16 transition-all ${
+                className={`h-1 w-8 sm:w-16 transition-all ${
                   s < step ? "bg-secondary" : "bg-muted"
                 }`}
               />
@@ -85,16 +85,16 @@ export function NewQuestionPage() {
 
       {/* Step 1: Title & Description */}
       {step === 1 && (
-        <Card className="p-6">
-          <div className="space-y-6">
+        <Card className="p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">عنوان السؤال</Label>
+              <Label htmlFor="title" className="text-sm">عنوان السؤال</Label>
               <Input
                 id="title"
                 placeholder="اكتب سؤالك بشكل واضح ومباشر..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="bg-input-background"
+                className="bg-input-background h-11 text-sm sm:text-base"
                 maxLength={150}
               />
               <p className="text-xs text-muted-foreground text-left">

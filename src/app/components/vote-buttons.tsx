@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 
 interface VoteButtonsProps {
@@ -9,6 +8,7 @@ interface VoteButtonsProps {
   userVote?: "up" | "down" | null;
   onVote?: (direction: "up" | "down") => void;
   className?: string;
+  size?: "sm" | "md";
 }
 
 export function VoteButtons({
@@ -16,6 +16,7 @@ export function VoteButtons({
   userVote: initialUserVote = null,
   onVote,
   className = "",
+  size = "sm",
 }: VoteButtonsProps) {
   const [votes, setVotes] = useState(initialVotes);
   const [userVote, setUserVote] = useState<"up" | "down" | null>(initialUserVote);
@@ -23,88 +24,78 @@ export function VoteButtons({
   const handleVote = (direction: "up" | "down") => {
     let newVotes = votes;
     let newUserVote: "up" | "down" | null = direction;
-    let toastMessage = "";
+    let msg = "";
 
     if (userVote === direction) {
-      // Remove vote
       newVotes = direction === "up" ? votes - 1 : votes + 1;
       newUserVote = null;
-      toastMessage = "تم إلغاء التصويت";
+      msg = "تم إلغاء التصويت";
     } else if (userVote) {
-      // Change vote
       newVotes = direction === "up" ? votes + 2 : votes - 2;
-      toastMessage = direction === "up" ? "تم التصويت: مفيد" : "تم التصويت: غير مفيد";
+      msg = direction === "up" ? "↑ مفيد" : "↓ غير مفيد";
     } else {
-      // New vote
       newVotes = direction === "up" ? votes + 1 : votes - 1;
-      toastMessage = direction === "up" ? "تم التصويت: مفيد" : "تم التصويت: غير مفيد";
+      msg = direction === "up" ? "↑ مفيد" : "↓ غير مفيد";
     }
 
     setVotes(newVotes);
     setUserVote(newUserVote);
     onVote?.(direction);
-
-    // Show toast feedback
-    if (toastMessage) {
-      toast.success(toastMessage, {
-        duration: 1500,
-        position: "bottom-center"
-      });
-    }
+    if (msg) toast(msg, { duration: 1200, position: "bottom-center" });
   };
+
+  const iconSize = size === "md" ? "h-4 sm:h-5 w-4 sm:w-5" : "h-3.5 sm:h-4 w-3.5 sm:w-4";
+  const btnSize = size === "md" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-6 w-6 sm:h-7 sm:w-7";
 
   return (
     <div className={`flex flex-col items-center gap-1 ${className}`}>
-      <motion.div
-        whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1 }}
+      {/* Up */}
+      <motion.button
+        whileTap={{ scale: 0.85 }}
+        whileHover={{ scale: 1.12 }}
+        onClick={(e) => { e.stopPropagation(); handleVote("up"); }}
+        className={`${btnSize} flex items-center justify-center rounded-xl transition-all duration-150 ripple ${
+          userVote === "up"
+            ? "gradient-primary text-white shadow-primary shadow-sm"
+            : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+        }`}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`h-8 w-8 p-0 rounded-full transition-all ${
+        <ChevronUp className={iconSize} />
+      </motion.button>
+
+      {/* Count */}
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={votes}
+          initial={{ scale: 1.3, opacity: 0.5 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.7, opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className={`text-[10px] sm:text-xs font-bold tabular-nums min-w-[1.5rem] sm:min-w-[1.75rem] text-center vote-number ${
             userVote === "up"
-              ? "text-primary bg-primary/10 hover:bg-primary/20 shadow-sm shadow-primary/20"
-              : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+              ? "text-primary"
+              : userVote === "down"
+              ? "text-destructive"
+              : "text-muted-foreground"
           }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleVote("up");
-          }}
         >
-          <ChevronUp className="h-5 w-5" />
-        </Button>
-      </motion.div>
-      
-      <motion.span
-        key={votes}
-        initial={{ scale: 1.2, color: userVote === "up" ? "#2563EB" : userVote === "down" ? "#EF4444" : "#6B7280" }}
-        animate={{ scale: 1, color: userVote === "up" ? "#2563EB" : userVote === "down" ? "#EF4444" : "#6B7280" }}
-        className="text-sm font-semibold min-w-[2rem] text-center"
+          {votes}
+        </motion.span>
+      </AnimatePresence>
+
+      {/* Down */}
+      <motion.button
+        whileTap={{ scale: 0.85 }}
+        whileHover={{ scale: 1.12 }}
+        onClick={(e) => { e.stopPropagation(); handleVote("down"); }}
+        className={`${btnSize} flex items-center justify-center rounded-xl transition-all duration-150 ripple ${
+          userVote === "down"
+            ? "bg-destructive text-white shadow-sm"
+            : "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+        }`}
       >
-        {votes}
-      </motion.span>
-      
-      <motion.div
-        whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1 }}
-      >
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`h-8 w-8 p-0 rounded-full transition-all ${
-            userVote === "down"
-              ? "text-destructive bg-destructive/10 hover:bg-destructive/20 shadow-sm shadow-destructive/20"
-              : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleVote("down");
-          }}
-        >
-          <ChevronDown className="h-5 w-5" />
-        </Button>
-      </motion.div>
+        <ChevronDown className={iconSize} />
+      </motion.button>
     </div>
   );
 }

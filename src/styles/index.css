@@ -2,72 +2,324 @@
 @import './tailwind.css';
 @import './theme.css';
 
+/* ─── Global Typography ─── */
 body {
-  font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
   direction: rtl;
   text-align: right;
-  line-height: 1.75;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+code, pre, .font-mono {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  direction: ltr;
+  text-align: left;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* RTL Icon Flipping for specific icons that need directional awareness */
-[dir="rtl"] .flip-rtl {
-  transform: scaleX(-1);
-}
 
-/* Smooth scrolling for better UX */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Better focus visible for accessibility */
+/* ─── Focus Accessible ─── */
 *:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
-/* Custom scrollbar styling for modern browsers */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--muted);
-}
-
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
-  border-radius: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ─── RTL Icon flip ─── */
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+/* ─── Glassmorphism ─── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
 }
 
-::-webkit-scrollbar-thumb:hover {
+/* ─── Card Elevation ─── */
+.card-sm   { box-shadow: var(--shadow-sm); }
+.card-md   { box-shadow: var(--shadow-md); }
+.card-lg   { box-shadow: var(--shadow-lg); }
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── Gradient Utilities ─── */
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-soft {
+  background: var(--gradient-soft);
+}
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+@keyframes bounce-cta {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.animate-fade-in       { animation: fadeIn 0.35s ease-out both; }
+.animate-fade-in-up    { animation: fadeInUp 0.4s ease-out both; }
+.animate-slide-in      { animation: slideInRight 0.35s ease-out both; }
+.animate-scale-in      { animation: scaleIn 0.3s ease-out both; }
+.animate-bounce-cta    { animation: bounce-cta 2s ease-in-out infinite; }
+.animate-float         { animation: float 3s ease-in-out infinite; }
+.animate-pulse-ring    { animation: pulse-ring 2s ease-in-out infinite; }
+
+/* Stagger children */
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ─── Skeleton Shimmer ─── */
+.skeleton {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--card) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ─── Ripple Effect ─── */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.ripple:active::after { opacity: 1; }
+
+/* ─── Badge Pulse (unread indicator) ─── */
+.badge-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--destructive);
+  animation: pulse-ring 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* ─── Verification Badge Glow ─── */
+.verified-glow {
+  box-shadow: 0 0 0 2px var(--secondary), 0 0 12px rgba(13, 148, 136, 0.3);
+}
+
+/* ─── Vote Count Number ─── */
+.vote-number {
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* ─── Tag hover ─── */
+.tag-pill {
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.tag-pill:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transform: scale(1.04);
+}
+
+/* ─── Input Focus Glow ─── */
+.input-glow:focus-within {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ─── Active Nav Indicator ─── */
+.nav-indicator {
+  position: relative;
+}
+.nav-indicator.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
   background: var(--primary);
 }
 
-/* Ensure proper Arabic text rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+/* ─── Arabic Geometric Pattern (empty state bg) ─── */
+.pattern-arabic {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(37, 99, 235, 0.03) 20px,
+      rgba(37, 99, 235, 0.03) 21px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 20px,
+      rgba(13, 148, 136, 0.03) 20px,
+      rgba(13, 148, 136, 0.03) 21px
+    );
 }
 
-/* Animation for page transitions */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* ─── Prose for answer content ─── */
+.prose-arabic {
+  line-height: 1.9;
+  word-break: break-word;
+}
+.prose-arabic p  { margin-bottom: 0.875em; }
+.prose-arabic strong { font-weight: 700; }
+.prose-arabic code {
+  background: var(--muted);
+  padding: 0.125em 0.375em;
+  border-radius: var(--radius-sm);
+  font-size: 0.875em;
+  direction: ltr;
+  display: inline-block;
+}
+.prose-arabic pre {
+  background: var(--muted);
+  padding: 1em;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+  margin: 0.75em 0;
+}
+
+/* ─── Touch target minimum ─── */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Safe Area for Mobile ─── */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── Scrollbar hidden ─── */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Responsive Spacing ─── */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+/* ─── Extra Small Breakpoint (xs) - 480px ─── */
+@media (min-width: 480px) {
+  .xs\:inline {
+    display: inline;
+  }
+  .xs\:hidden {
+    display: none;
+  }
+  .xs\:flex {
+    display: flex;
+  }
+  .xs\:block {
+    display: block;
+  }
+}
+
+/* ─── Mobile Optimizations ─── */
+@media (max-width: 640px) {
+  /* Reduce motion on mobile for better performance */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Improve tap targets */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ─── Smooth scrolling on larger screens only ─── */
+@media (min-width: 1024px) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

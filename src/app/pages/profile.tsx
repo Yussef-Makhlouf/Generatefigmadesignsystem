@@ -67,43 +67,44 @@ export function ProfilePage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-5xl animate-fade-in">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl animate-fade-in pb-20 sm:pb-8">
       {/* Profile Header */}
-      <Card className="overflow-hidden mb-6">
+      <Card className="overflow-hidden mb-4 sm:mb-6">
         {/* Cover */}
-        <div className="h-32 bg-gradient-to-l from-primary/30 via-secondary/20 to-primary/10 relative">
+        <div className="h-24 sm:h-32 bg-gradient-to-l from-primary/30 via-secondary/20 to-primary/10 relative">
           <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_left,_var(--primary)_0%,_transparent_60%)]" />
         </div>
 
-        <div className="px-6 pb-6">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
           {/* Avatar row */}
-          <div className="flex items-end justify-between -mt-12 mb-4">
+          <div className="flex items-end justify-between -mt-10 sm:-mt-12 mb-3 sm:mb-4">
             <div className="relative">
-              <Avatar className="h-24 w-24 ring-4 ring-card shadow-lg">
+              <Avatar className="h-16 w-16 sm:h-24 sm:w-24 ring-4 ring-card shadow-lg">
                 <AvatarImage src={user.avatar} />
-                <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary to-secondary text-white">
+                <AvatarFallback className="text-xl sm:text-3xl font-bold bg-gradient-to-br from-primary to-secondary text-white">
                   {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               {/* Verified badge */}
-              <div className="absolute bottom-1 right-1 bg-secondary rounded-full p-0.5">
-                <CheckCircle2 className="h-4 w-4 text-white" />
+              <div className="absolute bottom-0.5 sm:bottom-1 right-0.5 sm:right-1 bg-secondary rounded-full p-0.5">
+                <CheckCircle2 className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
               </div>
             </div>
 
-            <div className="flex gap-2 pb-1">
+            <div className="flex gap-1.5 sm:gap-2 pb-1">
               {isOwnProfile ? (
-                <Button variant="outline" className="rounded-xl">
-                  <Settings className="h-4 w-4 ml-2" />
-                  تعديل الملف
+                <Button variant="outline" className="rounded-xl h-8 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm">
+                  <Settings className="h-3.5 sm:h-4 w-3.5 sm:w-4 ml-1.5 sm:ml-2" />
+                  <span className="hidden xs:inline">تعديل الملف</span>
+                  <span className="xs:hidden">تعديل</span>
                 </Button>
               ) : (
                 <Button
-                  className={`rounded-xl ${isFollowing ? "variant-outline" : ""}`}
+                  className={`rounded-xl h-8 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm ${isFollowing ? "variant-outline" : ""}`}
                   variant={isFollowing ? "outline" : "default"}
                   onClick={() => setIsFollowing(!isFollowing)}
                 >
-                  <UserPlus className="h-4 w-4 ml-2" />
+                  <UserPlus className="h-3.5 sm:h-4 w-3.5 sm:w-4 ml-1.5 sm:ml-2" />
                   {isFollowing ? "متابَع" : "متابعة"}
                 </Button>
               )}
@@ -111,54 +112,57 @@ export function ProfilePage() {
           </div>
 
           {/* Name & bio */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h1 className="text-xl font-bold">{user.name}</h1>
-              <Badge variant="secondary" className="rounded-full text-xs">
-                <Star className="h-3 w-3 ml-1 text-amber-500" />
+          <div className="mb-3 sm:mb-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-bold">{user.name}</h1>
+              <Badge variant="secondary" className="rounded-full text-[10px] sm:text-xs px-2 py-0.5">
+                <Star className="h-2.5 sm:h-3 w-2.5 sm:w-3 ml-1 text-amber-500" />
                 {user.level}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-2 leading-relaxed">{user.bio}</p>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2 leading-relaxed">{user.bio}</p>
+            <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted-foreground flex-wrap">
               <div className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                <span>{user.location}</span>
+                <MapPin className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+                <span className="hidden xs:inline">{user.location}</span>
+                <span className="xs:hidden">الرياض</span>
               </div>
               <div className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>انضم في {user.joined}</span>
+                <Calendar className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+                <span className="hidden sm:inline">انضم في {user.joined}</span>
+                <span className="sm:hidden">{user.joined}</span>
               </div>
               <div className="flex items-center gap-1 text-orange-500">
-                <Flame className="h-3.5 w-3.5" />
+                <Flame className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
                 <span>سلسلة {user.streak} أيام</span>
               </div>
             </div>
           </div>
 
           {/* Reputation & Level */}
-          <div className="mb-4">
+          <div className="mb-3 sm:mb-4">
             <div className="flex items-center justify-between mb-1">
               <ReputationBadge points={user.reputation} />
               {isOwnProfile && (
                 <Link
                   to="/reputation"
-                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                  className="text-[10px] sm:text-xs text-primary hover:underline flex items-center gap-1"
                 >
                   <Zap className="h-3 w-3" />
-                  سجل السمعة
+                  <span className="hidden xs:inline">سجل السمعة</span>
                 </Link>
               )}
             </div>
             <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-primary" />
-                  المستوى التالي: محترف
+                  <Zap className="h-2.5 sm:h-3 w-2.5 sm:w-3 text-primary" />
+                  <span className="hidden xs:inline">المستوى التالي: محترف</span>
+                  <span className="xs:hidden">التالي: محترف</span>
                 </span>
                 <span>{user.levelProgress}%</span>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div className="h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
                   style={{ width: `${user.levelProgress}%` }}
@@ -168,34 +172,34 @@ export function ProfilePage() {
           </div>
 
           {/* Badges */}
-          <div className="mb-5">
-            <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-              <Award className="h-3.5 w-3.5" />
+          <div className="mb-4 sm:mb-5">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 flex items-center gap-1">
+              <Award className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               الشارات
             </p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-1.5 sm:gap-2 flex-wrap">
               {BADGES.map((badge) => (
                 <span
                   key={badge.label}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${badge.color}`}
+                  className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs border ${badge.color}`}
                 >
-                  <badge.icon className="h-3.5 w-3.5" />
-                  {badge.label}
+                  <badge.icon className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+                  <span className="hidden xs:inline">{badge.label}</span>
                 </span>
               ))}
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3">
             {[
               { label: "أسئلة", value: user.stats.questions, color: "text-primary" },
               { label: "إجابات", value: user.stats.answers, color: "text-secondary" },
               { label: "تصويتات", value: user.stats.upvotes, color: "text-green-600" },
               { label: "متابعين", value: user.stats.followers, color: "text-foreground" },
             ].map((stat) => (
-              <div key={stat.label} className="bg-muted rounded-xl p-3 text-center">
-                <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
+              <div key={stat.label} className="bg-muted rounded-xl p-2 sm:p-3 text-center">
+                <div className={`text-base sm:text-xl font-bold ${stat.color}`}>{stat.value}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
               </div>
             ))}
