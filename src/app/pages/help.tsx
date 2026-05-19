@@ -4,7 +4,6 @@ import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   HelpCircle,
   Search,
@@ -15,10 +14,11 @@ import {
   Users,
   BookOpen,
   Zap,
-  Award,
-  ChevronLeft,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
+  HelpCircle as QuestionIcon
 } from "lucide-react";
+import { motion } from "motion/react";
 
 const faqCategories = [
   {
@@ -74,7 +74,7 @@ const faqCategories = [
   {
     id: "answers",
     title: "الإجابات",
-    icon: MessageSquare,
+    icon: BookOpen,
     faqs: [
       {
         question: "كيف أكتب إجابة مفيدة؟",
@@ -112,7 +112,7 @@ const faqCategories = [
         answer: "كلما زادت نقاطك، حصلت على صلاحيات أكثر مثل التعديل على منشورات الآخرين، الإشراف على المحتوى، والوصول لميزات حصرية."
       },
       {
-        question: "ما هي الشارات والإنجازات؟",
+        question: "ما هي الشارات والإنجازات？",
         answer: "الشارات هي جوائز تحصل عليها عند تحقيق إنجازات معينة، مثل 'مجيب سريع' عند الإجابة على سؤال خلال 15 دقيقة من نشره."
       },
       {
@@ -202,7 +202,8 @@ const quickGuides = [
       "اختر الوسوم المناسبة (حتى 5 وسوم)",
       "راجع سؤالك ثم اضغط 'نشر السؤال'"
     ],
-    icon: MessageSquare
+    icon: MessageSquare,
+    theme: "emerald"
   },
   {
     title: "كيفية الإجابة على سؤال",
@@ -213,7 +214,8 @@ const quickGuides = [
       "أضف مصادر أو روابط لمعلومات إضافية",
       "راجع إجابتك واضغط 'نشر الإجابة'"
     ],
-    icon: BookOpen
+    icon: BookOpen,
+    theme: "emerald"
   },
   {
     title: "كيفية بناء سمعتك",
@@ -224,7 +226,8 @@ const quickGuides = [
       "انضم للمساحات في مجالات خبرتك",
       "احصل على الشارات والإنجازات"
     ],
-    icon: Trophy
+    icon: Trophy,
+    theme: "gold"
   }
 ];
 
@@ -244,80 +247,159 @@ export function HelpPage() {
     ? filteredFaqs[0]
     : faqCategories.find(c => c.id === activeCategory);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-6 max-w-5xl animate-fade-in">
+    <div className="max-w-5xl w-full mx-auto relative z-10">
+      
+      {/* Decorative Glow Orbs */}
+      <div className="absolute top-12 left-1/4 w-72 h-72 rounded-full bg-primary/5 blur-[80px] pointer-events-none -z-10" />
+      <div className="absolute bottom-20 right-1/4 w-80 h-80 rounded-full bg-secondary/4 blur-[100px] pointer-events-none -z-10" />
+
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary mb-4 shadow-lg">
-          <HelpCircle className="h-8 w-8 text-white" />
+      <div className="text-center mb-10 relative">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary p-[1px] mb-5 shadow-primary/10 shadow-lg animate-float">
+          <div className="w-full h-full bg-background rounded-[15px] flex items-center justify-center backdrop-blur-md">
+            <HelpCircle className="h-9 w-9 text-primary" />
+          </div>
         </div>
-        <h1 className="text-3xl font-bold mb-2">مركز المساعدة</h1>
-        <p className="text-muted-foreground">كل ما تحتاج معرفته عن Khapeer</p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">
+          <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent filter drop-shadow-sm">
+            مركز المعرفة والدعم
+          </span>
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
+          اكتشف الإرشادات، واقرأ الأسئلة الشائعة، أو تواصل مع الخبراء لتحقيق أقصى استفادة من منصتك المعرفية.
+        </p>
       </div>
 
-      {/* Search */}
-      <div className="max-w-2xl mx-auto mb-8">
-        <div className="relative">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      {/* Search Bar Container */}
+      <div className="max-w-2xl mx-auto mb-12 animate-fade-in">
+        <div className="relative group premium-glass-card rounded-2xl p-1 border-border/60 hover:border-primary/30 input-glow transition-all duration-300">
+          <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input
-            placeholder="ابحث عن إجابة..."
+            placeholder="ابحث عن سؤال، موضوع، أو إجابة تفصيلية..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-12 h-14 text-base rounded-2xl bg-card shadow-sm"
+            className="pr-12 pl-4 h-14 text-base border-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-text-placeholder"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 bg-muted/40 hover:bg-muted/80 rounded-md numeral"
+            >
+              مسح
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Quick Guides */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      {/* Quick Guides Header */}
+      <div className="flex items-center gap-2 mb-5">
+        <Sparkles className="h-5 w-5 text-secondary animate-pulse-gold" />
+        <h2 className="text-lg sm:text-xl font-bold">إرشادات الوصول السريع</h2>
+      </div>
+
+      {/* Quick Guides Grid */}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12"
+      >
         {quickGuides.map((guide, index) => {
           const Icon = guide.icon;
+          const isGold = guide.theme === "gold";
           return (
-            <Card key={index} className="p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-5 w-5 text-primary" />
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className={`rounded-2xl p-6 transition-all duration-300 ${
+                isGold ? "premium-gold-card" : "premium-glass-card"
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+                  isGold 
+                    ? "bg-secondary/10 text-secondary border border-secondary/20" 
+                    : "bg-primary/10 text-primary border border-primary/20"
+                }`}>
+                  <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm">{guide.title}</h3>
+                <h3 className="font-bold text-sm sm:text-base text-foreground leading-tight">{guide.title}</h3>
               </div>
-              <ol className="space-y-2">
+              
+              <ol className="space-y-3.5">
                 {guide.steps.map((step, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-muted-foreground">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-semibold">
+                  <li key={i} className="flex gap-3 text-xs sm:text-sm text-text-secondary leading-relaxed">
+                    <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[11px] sm:text-xs flex items-center justify-center font-bold numeral ${
+                      isGold 
+                        ? "bg-secondary/15 text-secondary shadow-sm shadow-secondary/5 border border-secondary/10" 
+                        : "bg-primary/15 text-primary shadow-sm shadow-primary/5 border border-primary/10"
+                    }`}>
                       {i + 1}
                     </span>
-                    <span className="leading-relaxed">{step}</span>
+                    <span className="flex-1 pt-0.5">{step}</span>
                   </li>
                 ))}
               </ol>
-            </Card>
+            </motion.div>
           );
         })}
+      </motion.div>
+
+      {/* FAQ Section Title */}
+      <div className="flex items-center gap-2 mb-6">
+        <QuestionIcon className="h-5 w-5 text-primary" />
+        <h2 className="text-lg sm:text-xl font-bold">الأسئلة الشائعة وتفاصيل النظام</h2>
       </div>
 
       {/* FAQ Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Category Navigation */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        {/* Category Navigation (Shown only if not searching) */}
         {!searchQuery && (
-          <div className="lg:col-span-1">
-            <Card className="p-3 sticky top-20">
-              <h3 className="font-semibold mb-2 px-2">الفئات</h3>
+          <div className="lg:col-span-1 lg:sticky lg:top-24">
+            <Card className="p-3 premium-glass-card border-border/60 shadow-lg rounded-2xl">
+              <h3 className="font-bold text-xs text-text-muted tracking-wider uppercase mb-3 px-3">تصنيفات الأسئلة</h3>
               <nav className="space-y-1">
                 {faqCategories.map((category) => {
                   const Icon = category.icon;
+                  const isActive = activeCategory === category.id;
                   return (
                     <button
                       key={category.id}
                       onClick={() => setActiveCategory(category.id)}
-                      className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg transition-colors text-right ${
-                        activeCategory === category.id
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-accent"
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 text-right group touch-target ${
+                        isActive
+                          ? "bg-gradient-to-l from-primary/15 to-primary/5 text-primary border-r-2 border-primary font-bold shadow-sm shadow-primary/5"
+                          : "hover:bg-muted/40 hover:pr-4 text-text-secondary hover:text-foreground"
                       }`}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="text-sm">{category.title}</span>
-                      <Badge variant="secondary" className="mr-auto text-xs h-5">
+                      <Icon className={`h-4.5 w-4.5 flex-shrink-0 transition-transform duration-300 ${
+                        isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-foreground"
+                      }`} />
+                      <span className="text-xs sm:text-sm font-medium flex-1 truncate">{category.title}</span>
+                      <Badge 
+                        variant="secondary" 
+                        className={`mr-auto text-[10px] sm:text-xs h-5 px-2 rounded-md numeral font-bold ${
+                          isActive 
+                            ? "bg-primary/20 text-primary border border-primary/20" 
+                            : "bg-muted/60 text-muted-foreground"
+                        }`}
+                      >
                         {category.faqs.length}
                       </Badge>
                     </button>
@@ -328,72 +410,88 @@ export function HelpPage() {
           </div>
         )}
 
-        {/* FAQ Content */}
-        <div className={searchQuery ? "lg:col-span-4" : "lg:col-span-3"}>
+        {/* FAQ Content Area */}
+        <div className={searchQuery ? "lg:col-span-4 animate-fade-in" : "lg:col-span-3 animate-fade-in"}>
           {searchQuery && filteredFaqs.length === 0 ? (
-            <Card className="p-12 text-center">
-              <HelpCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-              <p className="text-muted-foreground mb-4">لم نجد نتائج لبحثك</p>
-              <Button variant="outline" onClick={() => setSearchQuery("")}>
-                عرض جميع الأسئلة
+            <Card className="p-14 text-center premium-glass-card rounded-2xl border-dashed border-border/60">
+              <HelpCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-20 animate-pulse" />
+              <h3 className="text-lg font-bold mb-1.5">لم نجد نتائج مطابقة لبحثك</h3>
+              <p className="text-xs sm:text-sm text-text-muted mb-6 max-w-sm mx-auto leading-relaxed">
+                تأكد من كتابة الكلمات بشكل صحيح، أو ابحث عن كلمة واحدة عامة، أو تصفح الأقسام الجانبية.
+              </p>
+              <Button variant="outline" onClick={() => setSearchQuery("")} className="rounded-xl touch-target hover:bg-muted border-border/80">
+                عرض جميع تصنيفات المساعدة
               </Button>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {(searchQuery ? filteredFaqs : [currentCategory!]).map((category) => (
-                <Card key={category.id} className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <category.icon className="h-5 w-5 text-primary" />
-                    <h2 className="text-xl font-bold">{category.title}</h2>
+                <div key={category.id} className="premium-glass-card p-5 sm:p-7 rounded-2xl border-border/50 shadow-md">
+                  <div className="flex items-center gap-3 mb-5 border-b border-border/30 pb-4">
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <category.icon className="h-4.5 w-4.5" />
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-extrabold text-foreground">{category.title}</h2>
                   </div>
 
-                  <Accordion type="single" collapsible className="space-y-2">
+                  <Accordion type="single" collapsible className="space-y-3">
                     {category.faqs.map((faq, index) => (
                       <AccordionItem
                         key={index}
                         value={`item-${index}`}
-                        className="border border-border rounded-xl overflow-hidden"
+                        className="border border-border/40 rounded-xl overflow-hidden bg-card/20 hover:bg-card/40 hover:border-primary/10 transition-all duration-300"
                       >
-                        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/50 transition-colors">
-                          <span className="text-right font-semibold text-sm">
+                        <AccordionTrigger className="px-4.5 py-4 hover:no-underline hover:text-primary transition-all duration-200 text-right">
+                          <span className="text-xs sm:text-sm font-bold text-text-primary leading-snug">
                             {faq.question}
                           </span>
                         </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4">
-                          <p className="text-sm text-muted-foreground leading-relaxed">
+                        <AccordionContent className="px-4.5 pb-4 pt-1 text-xs sm:text-sm text-text-secondary leading-relaxed border-t border-border/20 bg-muted/10">
+                          <p className="prose-arabic whitespace-pre-line">
                             {faq.answer}
                           </p>
                         </AccordionContent>
                       </AccordionItem>
                     ))}
                   </Accordion>
-                </Card>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Contact Support */}
-      <Card className="p-6 mt-8 bg-gradient-to-l from-primary/5 to-secondary/5 border-primary/20">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="h-6 w-6 text-primary" />
+      {/* Breathtaking Contact Support Callout */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="relative overflow-hidden p-6 sm:p-8 mt-12 rounded-2xl bg-gradient-to-l from-primary/15 via-background/40 to-secondary/10 border border-primary/20 shadow-lg"
+      >
+        {/* Shimmer sweep effect */}
+        <div className="absolute inset-0 gold-shimmer-effect opacity-[0.06] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4 text-right flex-1 min-w-0">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary p-[1px] shadow-md shadow-primary/5 flex-shrink-0 animate-pulse-ring">
+              <div className="w-full h-full bg-background rounded-[15px] flex items-center justify-center">
+                <MessageSquare className="h-6.5 w-6.5 text-primary" />
+              </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-1">لم تجد إجابة لسؤالك؟</h3>
-              <p className="text-sm text-muted-foreground">
-                فريق الدعم جاهز لمساعدتك
+              <h3 className="font-extrabold text-base sm:text-lg mb-1 text-foreground leading-tight">ألم تجد إجابة وافية لاستفسارك؟</h3>
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                لا تقلق! فريق دعم خبير جاهز على مدار الساعة لمساعدتك وحل جميع المشاكل التقنية أو التنظيمية.
               </p>
             </div>
           </div>
-          <Button className="rounded-xl">
-            <ExternalLink className="h-4 w-4 ml-2" />
-            تواصل مع الدعم
+          <Button className="rounded-xl px-6 h-12 bg-primary hover:bg-primary-hover text-white shadow-md shadow-primary/20 touch-target w-full md:w-auto font-bold flex items-center gap-2 group transition-all duration-300 hover:scale-[1.03]">
+            <ExternalLink className="h-4.5 w-4.5 group-hover:rotate-12 transition-transform" />
+            <span>تواصل مباشر مع الدعم</span>
           </Button>
         </div>
-      </Card>
+      </motion.div>
     </div>
   );
 }

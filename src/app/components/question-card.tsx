@@ -4,7 +4,7 @@ import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { MessageSquare, Bookmark, Share2, MapPin, Eye } from "lucide-react";
 import { VoteButtons } from "./vote-buttons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 interface QuestionCardProps {
@@ -42,18 +42,25 @@ export function QuestionCard({
   isBookmarked: initialBookmarked = false,
   views = 0,
   onVote,
+  onBookmark,
   onShare,
   onClick,
 }: QuestionCardProps) {
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
 
+  useEffect(() => {
+    setBookmarked(initialBookmarked);
+  }, [initialBookmarked]);
+
   const handleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setBookmarked(!bookmarked);
-    toast.success(bookmarked ? "تم إزالة السؤال من المحفوظات" : "تم حفظ السؤال", {
+    const nextVal = !bookmarked;
+    setBookmarked(nextVal);
+    toast.success(nextVal ? "تم حفظ السؤال" : "تم إزالة السؤال من المحفوظات", {
       duration: 1500,
       position: "bottom-center",
     });
+    onBookmark?.();
   };
 
   const handleShare = (e: React.MouseEvent) => {
@@ -68,12 +75,12 @@ export function QuestionCard({
 
   return (
     <Card
-      className="group relative overflow-hidden cursor-pointer border border-border/60 bg-card card-hover animate-fade-in"
+      className="group relative overflow-hidden cursor-pointer premium-glass-card animate-fade-in"
       style={{ borderRadius: "var(--radius-lg)" }}
       onClick={onClick}
     >
       {/* Top accent hover line */}
-      <div className="absolute top-0 inset-x-0 h-0.5 gradient-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute top-0 inset-x-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <div className="p-3 sm:p-5">
         <div className="flex gap-2 sm:gap-4">
@@ -104,7 +111,7 @@ export function QuestionCard({
                 >
                   <Badge
                     variant="secondary"
-                    className="rounded-full text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer border-0 font-normal tag-pill"
+                    className="rounded-full text-[10px] sm:text-xs px-2.5 py-0.5 bg-muted/40 text-foreground/80 border border-border/30 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all duration-300 font-medium tag-pill"
                   >
                     #{tag}
                   </Badge>
@@ -113,7 +120,7 @@ export function QuestionCard({
               {tags.length > 3 && (
                 <Badge
                   variant="secondary"
-                  className="rounded-full text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 bg-muted border-0 font-normal"
+                  className="rounded-full text-[10px] sm:text-xs px-2.5 py-0.5 bg-muted/30 border border-border/20 text-muted-foreground font-medium"
                 >
                   +{tags.length - 3}
                 </Badge>
@@ -130,7 +137,7 @@ export function QuestionCard({
               >
                 <Avatar className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0">
                   <AvatarImage src={author.avatar} />
-                  <AvatarFallback className="text-[9px] sm:text-[10px] gradient-primary text-white font-bold">
+                <AvatarFallback className="text-[9px] sm:text-[10px] bg-primary text-white font-bold">
                     {author.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>

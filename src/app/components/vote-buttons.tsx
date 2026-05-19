@@ -54,10 +54,10 @@ export function VoteButtons({
         whileTap={{ scale: 0.85 }}
         whileHover={{ scale: 1.12 }}
         onClick={(e) => { e.stopPropagation(); handleVote("up"); }}
-        className={`${btnSize} flex items-center justify-center rounded-xl transition-all duration-150 ripple ${
+        className={`${btnSize} flex items-center justify-center rounded-xl border transition-all duration-300 ripple ${
           userVote === "up"
-            ? "gradient-primary text-white shadow-primary shadow-sm"
-            : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+            ? "gradient-primary text-white border-primary shadow-primary shadow-md animate-pulse-ring"
+            : "bg-muted/35 text-muted-foreground border-border/30 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
         }`}
       >
         <ChevronUp className={iconSize} />
@@ -71,7 +71,7 @@ export function VoteButtons({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.7, opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className={`text-[10px] sm:text-xs font-bold tabular-nums min-w-[1.5rem] sm:min-w-[1.75rem] text-center vote-number ${
+          className={`text-[10px] sm:text-xs font-bold font-numbers min-w-[1.5rem] sm:min-w-[1.75rem] text-center vote-number ${
             userVote === "up"
               ? "text-primary"
               : userVote === "down"
@@ -88,10 +88,10 @@ export function VoteButtons({
         whileTap={{ scale: 0.85 }}
         whileHover={{ scale: 1.12 }}
         onClick={(e) => { e.stopPropagation(); handleVote("down"); }}
-        className={`${btnSize} flex items-center justify-center rounded-xl transition-all duration-150 ripple ${
+        className={`${btnSize} flex items-center justify-center rounded-xl border transition-all duration-300 ripple ${
           userVote === "down"
-            ? "bg-destructive text-white shadow-sm"
-            : "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            ? "bg-destructive text-white border-destructive shadow-md"
+            : "bg-muted/35 text-muted-foreground border-border/30 hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive"
         }`}
       >
         <ChevronDown className={iconSize} />

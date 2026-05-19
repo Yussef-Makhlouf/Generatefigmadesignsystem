@@ -5,8 +5,10 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
-import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare } from "lucide-react";
+import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft } from "lucide-react";
 import { motion } from "motion/react";
+import { useAppState } from "../context/AppStateContext";
+import { toast } from "sonner";
 
 const FEATURES = [
   { icon: MessageSquare, text: "آلاف الأسئلة والإجابات" },
@@ -16,6 +18,7 @@ const FEATURES = [
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { users, setCurrentUser } = useAppState();
   const [email, setEmail]           = useState("");
   const [password, setPassword]     = useState("");
   const [showPass, setShowPass]     = useState(false);
@@ -24,18 +27,41 @@ export function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); navigate("/"); }, 900);
+    setTimeout(() => {
+      setLoading(false);
+      const cleanEmail = email.toLowerCase().trim();
+      let matchedUser = users.find(u => cleanEmail.startsWith(u.username) || cleanEmail.includes(u.username));
+      if (!matchedUser) {
+        matchedUser = users[0]; // Ahmad Mohamed
+      }
+      setCurrentUser(matchedUser);
+      toast.success(`مرحباً بك مجدداً، ${matchedUser.name}!`, {
+        position: "bottom-center",
+        duration: 2000,
+      });
+      navigate("/");
+    }, 900);
   };
 
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #0F1727 0%, #1E3A5F 50%, #0A2540 100%)" }}
+      style={{ background: "linear-gradient(135deg, hsl(180, 22%, 6%) 0%, hsl(170, 95%, 10%) 50%, hsl(43, 96%, 6%) 100%)" }}
     >
-      {/* Orbs */}
-      <div className="absolute top-1/4 right-0 w-80 h-80 rounded-full bg-primary/20 blur-3xl pointer-events-none animate-float" />
-      <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full bg-secondary/20 blur-3xl pointer-events-none" style={{ animationDelay: "1.5s" }} />
-      <div className="absolute inset-0 pattern-arabic opacity-20 pointer-events-none" />
+      {/* Dynamic Orbs */}
+      <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none animate-float" />
+      <div className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full bg-secondary/10 blur-3xl pointer-events-none" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-25 pointer-events-none" />
+
+      {/* Back button */}
+      <Button
+        variant="ghost"
+        className="absolute top-6 right-6 text-white/80 hover:text-white hover:bg-white/10 rounded-xl"
+        onClick={() => navigate("/")}
+      >
+        <span>الرئيسية</span>
+        <ChevronLeft className="h-4 w-4 mr-1.5 flip-rtl" />
+      </Button>
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -44,20 +70,21 @@ export function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
-        <div className="text-center mb-7">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4 shadow-primary shadow-lg animate-pulse-ring">
             <Zap className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white">
-            Khapeer
+          <h1 className="text-3xl font-bold text-white tracking-wide font-heading">
+            خبير
           </h1>
-          <p className="text-blue-300/80 text-sm mt-1">منصة المعرفة العربية</p>
-          <div className="flex items-center justify-center gap-4 mt-3">
+          <p className="text-muted-foreground text-sm mt-1">منصة المعرفة العربية الراقية</p>
+          
+          <div className="flex items-center justify-center gap-4 mt-4">
             {FEATURES.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.text} className="flex items-center gap-1 text-[11px] text-blue-300/70">
-                  <Icon className="h-3 w-3" />
+                <div key={f.text} className="flex items-center gap-1.5 text-[11px] font-medium text-white/60">
+                  <Icon className="h-3.5 w-3.5 text-secondary" />
                   <span>{f.text}</span>
                 </div>
               );
@@ -67,17 +94,17 @@ export function LoginPage() {
 
         {/* Card */}
         <Card
-          className="p-7 shadow-xl border-white/10 bg-white/95 dark:bg-card/95 backdrop-blur-md"
+          className="p-8 shadow-xl border border-white/10 bg-black/40 backdrop-blur-xl text-white"
           style={{ borderRadius: "var(--radius-xl)" }}
         >
-          <div className="mb-5">
-            <h2 className="text-xl font-bold">مرحباً بعودتك</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">سجّل دخولك للمتابعة</p>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-white font-heading">مرحباً بعودتك</h2>
+            <p className="text-sm text-white/60 mt-0.5">سجّل دخولك للمتابعة واستعراض الخبرات</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm">البريد الإلكتروني</Label>
+              <Label htmlFor="email" className="text-sm text-white/80 font-medium">البريد الإلكتروني</Label>
               <div className="input-glow rounded-xl">
                 <Input
                   id="email"
@@ -85,7 +112,7 @@ export function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl bg-muted/40 border-border/60"
+                  className="h-11 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 text-white placeholder:text-white/30"
                   required
                   dir="ltr"
                 />
@@ -94,8 +121,8 @@ export function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm">كلمة المرور</Label>
-                <button type="button" className="text-xs text-primary hover:underline">
+                <Label htmlFor="password" className="text-sm text-white/80 font-medium">كلمة المرور</Label>
+                <button type="button" className="text-xs text-secondary hover:underline">
                   نسيت كلمة المرور؟
                 </button>
               </div>
@@ -106,12 +133,12 @@ export function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 rounded-xl bg-muted/40 border-border/60 pl-10"
+                  className="h-11 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 text-white placeholder:text-white/30 pl-10"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   onClick={() => setShowPass(!showPass)}
                 >
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -121,7 +148,7 @@ export function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 rounded-xl gradient-primary border-0 shadow-primary shadow-sm"
+              className="w-full h-11 rounded-xl gradient-primary border-0 shadow-primary shadow-sm hover:opacity-90 transition-all text-white font-bold"
               disabled={loading}
             >
               {loading ? (
@@ -130,16 +157,16 @@ export function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative my-5">
-            <Separator />
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground whitespace-nowrap">
+          <div className="relative my-6">
+            <Separator className="bg-white/10" />
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 px-3 text-xs text-white/40 whitespace-nowrap">
               أو تابع مع
             </span>
           </div>
 
           <Button
             variant="outline"
-            className="w-full h-11 rounded-xl border-border/60 hover:bg-muted/60 gap-2"
+            className="w-full h-11 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 gap-2 cursor-not-allowed opacity-60"
             disabled
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -151,9 +178,9 @@ export function LoginPage() {
             Google (قريباً)
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground mt-5">
+          <p className="text-center text-sm text-white/60 mt-6">
             ليس لديك حساب؟{" "}
-            <Link to="/auth/register" className="text-primary font-semibold hover:underline">
+            <Link to="/auth/register" className="text-secondary font-semibold hover:underline">
               انضم الآن مجاناً
             </Link>
           </p>

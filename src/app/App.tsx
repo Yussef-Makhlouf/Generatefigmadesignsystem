@@ -3,6 +3,7 @@ import { router } from "./routes";
 import { Toaster } from "./components/ui/sonner";
 import { ErrorBoundary } from "./components/error-boundary";
 import { useEffect } from "react";
+import { AppStateProvider } from "./context/AppStateContext";
 
 export default function App() {
   useEffect(() => {
@@ -13,8 +14,10 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <RouterProvider router={router} />
-      <Toaster />
+      <AppStateProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </AppStateProvider>
     </ErrorBoundary>
   );
 }

@@ -8,12 +8,12 @@ interface ReputationBadgeProps {
 }
 
 const TIERS = [
-  { min: 0,    max: 100,  name: "مبتدئ",  icon: Zap,      bg: "bg-slate-100 dark:bg-slate-800",   text: "text-slate-600 dark:text-slate-300",  border: "border-slate-200 dark:border-slate-700" },
-  { min: 100,  max: 500,  name: "عضو",    icon: Star,     bg: "bg-blue-50 dark:bg-blue-950",     text: "text-blue-700 dark:text-blue-300",    border: "border-blue-200 dark:border-blue-800" },
-  { min: 500,  max: 1000, name: "مساهم",  icon: Shield,   bg: "bg-violet-50 dark:bg-violet-950", text: "text-violet-700 dark:text-violet-300", border: "border-violet-200 dark:border-violet-800" },
-  { min: 1000, max: 2500, name: "خبير",   icon: Flame,    bg: "bg-teal-50 dark:bg-teal-950",     text: "text-teal-700 dark:text-teal-300",    border: "border-teal-200 dark:border-teal-800" },
-  { min: 2500, max: 5000, name: "محترف",  icon: Crown,    bg: "bg-amber-50 dark:bg-amber-950",   text: "text-amber-700 dark:text-amber-300",  border: "border-amber-200 dark:border-amber-800" },
-  { min: 5000, max: Infinity, name: "أسطورة", icon: Sparkles, bg: "bg-rose-50 dark:bg-rose-950", text: "text-rose-700 dark:text-rose-300",    border: "border-rose-200 dark:border-rose-800" },
+  { min: 0,    max: 100,  name: "مبتدئ",  icon: Zap,      bg: "bg-muted text-foreground/75", border: "border-border" },
+  { min: 100,  max: 500,  name: "عضو",    icon: Star,     bg: "bg-primary/5 text-primary", border: "border-primary/20" },
+  { min: 500,  max: 1000, name: "مساهم",  icon: Shield,   bg: "bg-primary/10 text-primary", border: "border-primary/35" },
+  { min: 1000, max: 2500, name: "خبير",   icon: Flame,    bg: "bg-primary/15 text-primary shadow-sm shadow-primary/10", border: "border-primary/50" },
+  { min: 2500, max: 5000, name: "محترف",  icon: Crown,    bg: "bg-secondary/10 text-secondary shadow-sm shadow-secondary/10", border: "border-secondary/40" },
+  { min: 5000, max: Infinity, name: "أسطورة", icon: Sparkles, bg: "bg-secondary/15 text-secondary shadow-md shadow-secondary/20 relative overflow-hidden gold-shimmer-effect", border: "border-secondary/60 animate-pulse-gold" },
 ];
 
 export function ReputationBadge({ points, className = "", showLabel = true }: ReputationBadgeProps) {
@@ -25,7 +25,7 @@ export function ReputationBadge({ points, className = "", showLabel = true }: Re
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold cursor-default select-none ${tier.bg} ${tier.text} ${tier.border} ${className}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold cursor-default select-none ${tier.bg} ${tier.border} ${className}`}
           >
             <Icon className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="tabular-nums">{points.toLocaleString("ar-SA")}</span>

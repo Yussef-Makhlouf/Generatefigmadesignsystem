@@ -1,5 +1,7 @@
 // Mock data for La3efo platform - can be replaced with API calls
 
+export type AccountType = "individual" | "business" | "restaurant" | "clinic" | "doctor" | "activity";
+
 export interface User {
   id: string;
   name: string;
@@ -9,6 +11,28 @@ export interface User {
   bio?: string;
   location?: string;
   joined: string;
+  accountType: AccountType;
+  
+  // Specific entity details (optional)
+  businessCategory?: string;       // e.g. "مأكولات", "صحة وعيادات", "ترفيه"
+  businessLicense?: string;        // License or medical registration number
+  businessAddress?: string;        // Detailed street address
+  businessRating?: number;         // Average star rating (1.0 to 5.0)
+  reviewsCount?: number;           // Total count of place reviews received
+  operatingHours?: string;         // e.g. "9:00 ص - 10:00 م"
+  isVerifiedEntity?: boolean;      // Moderation flag
+}
+
+export interface AttachmentLink {
+  title: string;
+  url: string;
+}
+
+export interface AttachmentLocation {
+  name: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Question {
@@ -19,6 +43,7 @@ export interface Question {
     name: string;
     avatar?: string;
     reputation: number;
+    accountType?: AccountType;
   };
   votes: number;
   answers: number;
@@ -26,6 +51,11 @@ export interface Question {
   location?: string;
   timestamp: string;
   isBookmarked?: boolean;
+  
+  // Attachment fields
+  images?: string[];
+  links?: AttachmentLink[];
+  locationDetail?: AttachmentLocation;
 }
 
 export interface Answer {
@@ -36,6 +66,7 @@ export interface Answer {
     name: string;
     avatar?: string;
     reputation: number;
+    accountType?: AccountType;
   };
   votes: number;
   timestamp: string;
@@ -44,6 +75,11 @@ export interface Answer {
     label: string;
   };
   comments: Comment[];
+  
+  // Attachment fields
+  images?: string[];
+  links?: AttachmentLink[];
+  locationDetail?: AttachmentLocation;
 }
 
 export interface Comment {
@@ -51,6 +87,25 @@ export interface Comment {
   answerId: string;
   author: string;
   content: string;
+  timestamp: string;
+  
+  // Attachment fields
+  images?: string[];
+  links?: AttachmentLink[];
+}
+
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  entityId: string;                // The business user's ID being reviewed
+  entityName: string;
+  rating: number;                  // 1 to 5 stars
+  comment: string;
+  visitDate?: string;
+  images?: string[];
+  links?: AttachmentLink[];
   timestamp: string;
 }
 
@@ -61,9 +116,10 @@ export const mockUsers: User[] = [
     name: "أحمد محمد",
     username: "ahmed",
     reputation: 1250,
-    bio: "مطور برمجيات مهتم بالتقنية والتعليم",
+    bio: "مطور برمجيات مهتم بالتقنية والتعليم والمشورة المحلية",
     location: "الرياض، السعودية",
     joined: "يناير 2025",
+    accountType: "individual",
   },
   {
     id: "2",
@@ -73,6 +129,7 @@ export const mockUsers: User[] = [
     bio: "مهندسة برمجيات | خبيرة في React و Node.js",
     location: "جدة، السعودية",
     joined: "ديسمبر 2024",
+    accountType: "individual",
   },
   {
     id: "3",
@@ -81,7 +138,59 @@ export const mockUsers: User[] = [
     reputation: 450,
     location: "الدمام، السعودية",
     joined: "فبراير 2025",
+    accountType: "individual",
   },
+  {
+    id: "b1",
+    name: "مطعم المذاق العربي",
+    username: "arabic_taste",
+    reputation: 500,
+    bio: "أشهى المأكولات الشرقية والمشويات الأصيلة في قلب العاصمة",
+    location: "الرياض، السعودية",
+    joined: "يناير 2025",
+    accountType: "restaurant",
+    businessCategory: "مأكولات",
+    businessLicense: "1010203040",
+    businessAddress: "شارع التحلية، الرياض",
+    businessRating: 4.8,
+    reviewsCount: 24,
+    operatingHours: "1:00 م - 1:00 ص",
+    isVerifiedEntity: true,
+  },
+  {
+    id: "b2",
+    name: "عيادة الدكتور فهد لطب الأسنان",
+    username: "dr_fahad_dental",
+    reputation: 850,
+    bio: "عيادة متخصصة في زراعة وتجميل الأسنان بأحدث التقنيات الطبية",
+    location: "جدة، السعودية",
+    joined: "فبراير 2025",
+    accountType: "clinic",
+    businessCategory: "صحة وعيادات",
+    businessLicense: "M-553229",
+    businessAddress: "طريق الملك، جدة",
+    businessRating: 4.6,
+    reviewsCount: 18,
+    operatingHours: "9:00 ص - 9:00 م",
+    isVerifiedEntity: true,
+  },
+  {
+    id: "b3",
+    name: "سينما ريل الرياض",
+    username: "reel_riyadh",
+    reputation: 350,
+    bio: "تجربة سينمائية فاخرة بأحدث تقنيات العرض والصوت العالمية المبتكرة",
+    location: "الرياض، السعودية",
+    joined: "مارس 2025",
+    accountType: "activity",
+    businessCategory: "ترفيه",
+    businessLicense: "2020405060",
+    businessAddress: "رياض بارك مول، الرياض",
+    businessRating: 4.2,
+    reviewsCount: 15,
+    operatingHours: "10:00 ص - 2:00 ص",
+    isVerifiedEntity: false,
+  }
 ];
 
 // Sample questions

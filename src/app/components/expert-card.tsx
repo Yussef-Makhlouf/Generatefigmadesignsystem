@@ -24,30 +24,30 @@ export function ExpertCard({ expert }: ExpertCardProps) {
   const navigate = useNavigate();
   return (
     <div
-      className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent transition-colors cursor-pointer group"
+      className="flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-border/60 hover:bg-muted/40 transition-all duration-300 cursor-pointer group"
       onClick={() => navigate(`/profile/${expert.id}`)}
     >
       <div className="relative flex-shrink-0">
-        <Avatar className="h-11 w-11">
+        <Avatar className="h-11 w-11 border border-border/30">
           <AvatarImage src={expert.avatar} />
-          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-primary/10 to-secondary/15 text-primary font-bold">
             {expert.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
         {expert.verified && (
-          <CheckCircle2 className="absolute -bottom-0.5 -right-0.5 h-4 w-4 text-secondary bg-card rounded-full" />
+          <CheckCircle2 className="absolute -bottom-0.5 -right-0.5 h-4 w-4 text-secondary bg-background rounded-full verified-glow animate-pulse-gold" />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
-          <p className="text-sm font-semibold truncate">{expert.name}</p>
+          <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{expert.name}</p>
         </div>
         <p className="text-xs text-muted-foreground truncate">{expert.title}</p>
         <div className="flex items-center gap-2 mt-1">
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 rounded-full">
+          <Badge variant="secondary" className="text-[10px] px-2 py-0 h-4 rounded-full bg-muted/50 border border-border/20 text-muted-foreground font-normal">
             {expert.specialty}
           </Badge>
-          <div className="flex items-center gap-0.5 text-[10px] text-amber-500">
+          <div className="flex items-center gap-0.5 text-[10px] text-secondary font-semibold font-numbers">
             <Star className="h-3 w-3 fill-current" />
             <span>{expert.rating}</span>
           </div>
@@ -56,7 +56,7 @@ export function ExpertCard({ expert }: ExpertCardProps) {
       <Button
         size="sm"
         variant="outline"
-        className="flex-shrink-0 h-7 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+        className="flex-shrink-0 h-7 px-2.5 text-xs rounded-lg border-primary/20 text-primary hover:border-primary hover:bg-primary/5 opacity-0 group-hover:opacity-100 transition-all duration-300"
         onClick={(e) => {
           e.stopPropagation();
           navigate(`/profile/${expert.id}`);
