@@ -10,6 +10,7 @@ import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft, Star, T
 import { motion } from "motion/react";
 import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
+import { signIn } from "../../lib/services";
 
 const FEATURES = [
   { icon: MessageSquare, text: "آلاف الأسئلة والإجابات التقنية" },
@@ -19,29 +20,55 @@ const FEATURES = [
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { users, setCurrentUser } = useAppState();
   const [email, setEmail]           = useState("");
   const [password, setPassword]     = useState("");
   const [showPass, setShowPass]     = useState(false);
   const [loading, setLoading]       = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
       const cleanEmail = email.toLowerCase().trim();
-      let matchedUser = users.find(u => cleanEmail.startsWith(u.username) || cleanEmail.includes(u.username));
-      if (!matchedUser) {
-        matchedUser = users[0]; // Ahmad Mohamed
+      const { user, error } = await signIn(cleanEmail, password);
+
+      if (error) {
+        // Map common Supabase error codes to friendly Arabic text
+        let friendlyError = error;
+        if (error.includes("Invalid login credentials")) {
+          friendlyError = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        } else if (error.includes("Email not confirmed")) {
+          friendlyError = "البريد الإلكتروني لم يتم تأكيده بعد. يرجى مراجعة بريدك الإلكتروني.";
+        }
+        
+        toast.error(`فشل تسجيل الدخول: ${friendlyError}`, {
+          position: "bottom-center",
+          duration: 3000,
+        });
+        setLoading(false);
+        return;
       }
-      setCurrentUser(matchedUser);
-      toast.success(`مرحباً بك مجدداً، ${matchedUser.name}!`, {
+
+      if (user) {
+        toast.success(`مرحباً بك مجدداً، ${user.name}!`, {
+          position: "bottom-center",
+          duration: 2000,
+        });
+        navigate("/");
+      } else {
+        toast.error("فشل تحميل بيانات الحساب الشخصي.", {
+          position: "bottom-center",
+        });
+        setLoading(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("حدث خطأ غير متوقع أثناء تسجيل الدخول.", {
         position: "bottom-center",
-        duration: 2000,
+        duration: 3000,
       });
-      navigate("/");
-    }, 900);
+      setLoading(false);
+    }
   };
 
   return (

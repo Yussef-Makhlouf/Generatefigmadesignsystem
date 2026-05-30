@@ -26,8 +26,7 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { currentUser } = useAppState();
 
-  // ── Auth check (replace with real token validation for backend) ──
-  const isAuthenticated = Boolean(currentUser);
+  const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
   const isAdmin = currentUser?.accountType === "admin";
 
   const hasAccess =

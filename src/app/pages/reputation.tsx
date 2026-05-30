@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -27,112 +28,47 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "../../lib/supabase";
+import type { ReputationLog } from "../../lib/database.types";
 
-const weeklyData = [
-  { day: "السبت", points: 850 },
-  { day: "الأحد", points: 920 },
-  { day: "الاثنين", points: 1050 },
-  { day: "الثلاثاء", points: 980 },
-  { day: "الأربعاء", points: 1100 },
-  { day: "الخميس", points: 1180 },
-  { day: "الجمعة", points: 1250 },
-];
-
-const monthlyData = [
-  { week: "الأسبوع 1", earned: 120, lost: 10 },
-  { week: "الأسبوع 2", earned: 95, lost: 5 },
-  { week: "الأسبوع 3", earned: 180, lost: 15 },
-  { week: "الأسبوع 4", earned: 145, lost: 8 },
-];
-
-const yearlyData = [
-  { month: "يناير", points: 320 },
-  { month: "فبراير", points: 450 },
-  { month: "مارس", points: 580 },
-  { month: "أبريل", points: 620 },
-  { month: "مايو", points: 750 },
-  { month: "يونيو", points: 890 },
-  { month: "يوليو", points: 950 },
-  { month: "أغسطس", points: 1050 },
-  { month: "سبتمبر", points: 1100 },
-  { month: "أكتوبر", points: 1150 },
-  { month: "نوفمبر", points: 1200 },
-  { month: "ديسمبر", points: 1250 },
-];
-
-const recentEvents = [
-  {
-    id: "1",
-    type: "answer_accepted",
-    icon: CheckCircle2,
-    color: "text-success bg-success-light border border-success/10",
-    title: "تم قبول إجابتك",
-    description: 'على سؤال "كيف أتعلم البرمجة؟"',
-    points: +25,
-    timestamp: "منذ ساعة",
-  },
-  {
-    id: "2",
-    type: "upvote_received",
-    icon: ThumbsUp,
-    color: "text-primary bg-primary-light border border-primary/10",
-    title: "تصويت إيجابي على إجابتك",
-    description: 'على سؤال "ما هي أفضل IDE؟"',
-    points: +10,
-    timestamp: "منذ 3 ساعات",
-  },
-  {
-    id: "3",
-    type: "question_asked",
-    icon: MessageSquare,
-    color: "text-secondary bg-secondary-light border border-secondary/10",
-    title: "طرحت سؤالاً",
-    description: '"كيف أتعلم React؟"',
-    points: +5,
-    timestamp: "منذ 5 ساعات",
-  },
-  {
-    id: "4",
-    type: "downvote_received",
-    icon: TrendingDown,
-    color: "text-destructive bg-destructive/10 border border-destructive/10",
-    title: "تصويت سلبي على إجابتك",
-    description: 'على سؤال "ما هو الفرق بين...؟"',
-    points: -2,
-    timestamp: "منذ يوم",
-  },
-  {
-    id: "5",
-    type: "answer_accepted",
-    icon: CheckCircle2,
-    color: "text-success bg-success-light border border-success/10",
-    title: "تم قبول إجابتك",
-    description: 'على سؤال "كيف أنشئ API REST؟"',
-    points: +25,
-    timestamp: "منذ يوم",
-  },
-  {
-    id: "6",
-    type: "upvote_received",
-    icon: ThumbsUp,
-    color: "text-primary bg-primary-light border border-primary/10",
-    title: "تصويت إيجابي على سؤالك",
-    description: 'على سؤال "ما أفضل لغة للمبتدئين؟"',
-    points: +10,
-    timestamp: "منذ يومين",
-  },
-  {
-    id: "7",
-    type: "bookmark_received",
-    icon: BookMarked,
-    color: "text-accent-foreground bg-accent/20 border border-accent/30",
-    title: "حُفظ سؤالك من قبل مستخدم",
-    description: '"كيف أتعلم البرمجة من الصفر؟"',
-    points: +2,
-    timestamp: "منذ يومين",
-  },
-];
+// ── Map reputation log reason → display info ─────────────────
+function mapLogToEvent(log: ReputationLog) {
+  const positive = log.points >= 0;
+  const iconMap: Record<string, any> = {
+    answer_accepted: CheckCircle2,
+    upvote_answer: ThumbsUp,
+    upvote_question: ThumbsUp,
+    question_asked: MessageSquare,
+    downvote: TrendingDown,
+    bookmark: BookMarked,
+  };
+  const reason = log.reason ?? "";
+  const Icon =
+    iconMap[reason] ??
+    (positive ? TrendingUp : TrendingDown);
+  const color = positive
+    ? "text-primary bg-primary-light border border-primary/10"
+    : "text-destructive bg-destructive/10 border border-destructive/10";
+  const titleMap: Record<string, string> = {
+    answer_accepted: "تم قبول إجابتك",
+    upvote_answer: "تصويت إيجابي على إجابتك",
+    upvote_question: "تصويت إيجابي على سؤالك",
+    question_asked: "طرحت سؤالاً جديداً",
+    downvote: "تصويت سلبي",
+    bookmark: "حُفظ سؤالك",
+  };
+  return {
+    id: log.id,
+    icon: Icon,
+    color,
+    title: titleMap[reason] ?? reason,
+    description: log.ref_id ? `ref: ${log.ref_id}` : "",
+    points: log.points,
+    timestamp: new Date(log.created_at).toLocaleDateString("ar-SA"),
+  };
+}
 
 const REPUTATION_LEVELS = [
   { name: "مبتدئ", min: 0, max: 100, color: "bg-muted-foreground/30 text-muted-foreground" },
@@ -164,7 +100,70 @@ export function ReputationPage() {
   const { currentUser, questions, answers } = useAppState();
   const [chartRange, setChartRange] = useState<"week" | "month" | "year">("week");
 
-  const currentPoints = currentUser.reputation;
+  const currentPoints = currentUser.reputation ?? 0;
+  const userId = currentUser.id;
+
+  // ── Real reputation logs from Supabase ──────────────────
+  const { data: reputationLogs = [], isLoading: logsLoading } = useQuery<ReputationLog[]>({
+    queryKey: ["reputationLogs", userId],
+    queryFn: async () => {
+      if (!userId || userId === "1") return [];
+      const { data, error } = await supabase
+        .from("reputation_logs")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) return [];
+      return (data ?? []) as ReputationLog[];
+    },
+    enabled: !!userId && userId !== "1",
+  });
+
+  const recentEvents = reputationLogs.slice(0, 10).map(mapLogToEvent);
+
+  // Build chart data from real logs
+  const buildChartData = () => {
+    if (reputationLogs.length === 0) return [];
+    if (chartRange === "week") {
+      const days = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+      const map = new Map<string, number>();
+      reputationLogs.forEach((log) => {
+        const d = new Date(log.created_at);
+        const dayName = d.toLocaleDateString("ar-SA", { weekday: "long" });
+        map.set(dayName, (map.get(dayName) ?? 0) + log.points);
+      });
+      return days.map((day) => ({ day, points: map.get(day) ?? 0 }));
+    }
+    if (chartRange === "month") {
+      const weeks = ["الأسبوع 1", "الأسبوع 2", "الأسبوع 3", "الأسبوع 4"];
+      const earned = [0, 0, 0, 0];
+      const lost = [0, 0, 0, 0];
+      reputationLogs.forEach((log) => {
+        const d = new Date(log.created_at);
+        const weekIdx = Math.min(Math.floor((d.getDate() - 1) / 7), 3);
+        if (log.points > 0) earned[weekIdx] += log.points;
+        else lost[weekIdx] += Math.abs(log.points);
+      });
+      return weeks.map((week, i) => ({ week, earned: earned[i], lost: lost[i] }));
+    }
+    // year
+    const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    const map = new Map<string, number>();
+    reputationLogs.forEach((log) => {
+      const d = new Date(log.created_at);
+      const month = months[d.getMonth()];
+      map.set(month, (map.get(month) ?? 0) + log.points);
+    });
+    return months.map((month) => ({ month, points: map.get(month) ?? 0 }));
+  };
+
+  const chartData = buildChartData();
+  const monthlyData = buildChartData().filter((d) => "earned" in d) as any[];
+
+  const xKey =
+    chartRange === "week" ? "day" : chartRange === "month" ? "week" : "month";
+
   const currentLevel = REPUTATION_LEVELS.find(
     (l) => currentPoints >= l.min && currentPoints < l.max
   ) || REPUTATION_LEVELS[0];
@@ -173,18 +172,16 @@ export function ReputationPage() {
     ? ((currentPoints - currentLevel.min) / (nextLevel.min - currentLevel.min)) * 100
     : 100;
 
-  const chartData =
-    chartRange === "week"
-      ? weeklyData
-      : chartRange === "month"
-      ? yearlyData.slice(0, 8)
-      : yearlyData;
+  const userQuestionsCount = questions.filter(q => q.author_id === userId).length;
+  const userAnswersCount = answers.filter(a => a.author_id === userId).length;
 
-  const xKey =
-    chartRange === "week" ? "day" : chartRange === "month" ? "week" : "month";
-
-  const userQuestionsCount = questions.filter(q => q.author.name === currentUser.name).length;
-  const userAnswersCount = answers.filter(a => a.author.name === currentUser.name).length;
+  const monthlyPoints = reputationLogs
+    .filter((log) => {
+      const logDate = new Date(log.created_at);
+      const now = new Date();
+      return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, log) => sum + log.points, 0);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -229,8 +226,8 @@ export function ReputationPage() {
             },
             {
               label: "مكتسب هذا الشهر",
-              value: (userAnswersCount * 25 + userQuestionsCount * 5).toLocaleString("ar-SA"),
-              rawVal: userAnswersCount * 25 + userQuestionsCount * 5,
+              value: monthlyPoints.toLocaleString("ar-SA"),
+              rawVal: monthlyPoints,
               icon: TrendingUp,
               color: "text-primary",
               bg: "bg-primary-light border-primary/20",
@@ -395,46 +392,54 @@ export function ReputationPage() {
               </div>
             </Card>
 
-            {/* Recent Events */}
+            {/* Recent Events — Real Supabase data */}
             <Card className="premium-glass-card border-strong/30 p-6 rounded-2xl">
               <div className="mb-5">
                 <h2 className="text-lg font-bold font-heading">سجل الأحداث الأخيرة</h2>
                 <p className="text-xs text-text-muted">العمليات والتصويتات الأخيرة المؤثرة على سمعتك</p>
               </div>
-              <div className="space-y-4">
-                {recentEvents.map((event) => {
-                  const Icon = event.icon;
-                  return (
-                    <div
-                      key={event.id}
-                      className="flex items-start gap-4 p-3 rounded-xl hover:bg-primary/[0.02] border border-transparent hover:border-strong/10 transition-all duration-300"
-                    >
-                      <div className={`p-2.5 rounded-xl shrink-0 ${event.color}`}>
-                        <Icon className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground">{event.title}</p>
-                        <p className="text-xs text-text-secondary mt-1 line-clamp-1">
-                          {event.description}
-                        </p>
-                        <p className="text-[10px] text-text-muted mt-0.5 numeral">{event.timestamp}</p>
-                      </div>
-                      <Badge
-                        className={`shrink-0 text-xs font-bold rounded-lg border px-2.5 py-1 ${
-                          event.points > 0
-                            ? "bg-success-light text-success border-success/20"
-                            : "bg-destructive/10 text-destructive border-destructive/20"
-                        }`}
+              {logsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : recentEvents.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">لا توجد أحداث بعد. ابدأ بطرح أسئلة والإجابة عليها!</p>
+              ) : (
+                <div className="space-y-4">
+                  {recentEvents.map((event) => {
+                    const Icon = event.icon;
+                    return (
+                      <div
+                        key={event.id}
+                        className="flex items-start gap-4 p-3 rounded-xl hover:bg-primary/[0.02] border border-transparent hover:border-strong/10 transition-all duration-300"
                       >
-                        <span className="numeral">
-                          {event.points > 0 ? "+" : ""}
-                          {event.points.toLocaleString("ar-SA")}
-                        </span>
-                      </Badge>
-                    </div>
-                  );
-                })}
-              </div>
+                        <div className={`p-2.5 rounded-xl shrink-0 ${event.color}`}>
+                          <Icon className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-foreground">{event.title}</p>
+                          <p className="text-xs text-text-secondary mt-1 line-clamp-1">
+                            {event.description}
+                          </p>
+                          <p className="text-[10px] text-text-muted mt-0.5 numeral">{event.timestamp}</p>
+                        </div>
+                        <Badge
+                          className={`shrink-0 text-xs font-bold rounded-lg border px-2.5 py-1 ${
+                            event.points > 0
+                              ? "bg-success-light text-success border-success/20"
+                              : "bg-destructive/10 text-destructive border-destructive/20"
+                          }`}
+                        >
+                          <span className="numeral">
+                            {event.points > 0 ? "+" : ""}
+                            {event.points.toLocaleString("ar-SA")}
+                          </span>
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Card>
           </div>
 

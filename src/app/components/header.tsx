@@ -220,16 +220,34 @@ export function Header() {
               </Link>
             </Button> */}
 
-            {/* Avatar */}
-            <Link to="/profile/me" className="flex-shrink-0 mr-1 sm:mr-2 relative group" aria-label="ملفي الشخصي">
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Avatar className="relative h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-transparent group-hover:ring-primary/40 transition-all duration-300 cursor-pointer shadow-sm">
-                <AvatarImage src={currentUser?.avatar || ""} />
-                <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-bold text-xs sm:text-sm">
-                  {avatarLetter}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+            {/* User Profile Avatar OR Sign-in/Sign-up Buttons */}
+            {currentUser && currentUser.id !== "1" && currentUser.username !== "guest" ? (
+              <Link to="/profile/me" className="flex-shrink-0 mr-1 sm:mr-2 relative group" aria-label="ملفي الشخصي">
+                <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Avatar className="relative h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-transparent group-hover:ring-primary/40 transition-all duration-300 cursor-pointer shadow-sm">
+                  <AvatarImage src={currentUser?.avatar || ""} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-bold text-xs sm:text-sm">
+                    {avatarLetter}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-9 px-3 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Link to="/auth/login">تسجيل الدخول</Link>
+                </Button>
+                <Button
+                  asChild
+                  className="h-9 px-4 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-hover text-white shadow-sm transition-all hover:scale-105 active:scale-95 border border-primary/20"
+                >
+                  <Link to="/auth/register">إنشاء حساب</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </header>

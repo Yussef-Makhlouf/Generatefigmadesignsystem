@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { QuestionCard } from "../components/question-card";
-import { ExpertCard, FEATURED_EXPERTS } from "../components/expert-card";
+import { ExpertCard } from "../components/expert-card";
 import { Card } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
@@ -9,30 +9,12 @@ import { Button } from "../components/ui/button";
 import { cn } from "../components/ui/utils";
 import {
   Trophy, Sparkles, Flame, Zap, ChevronLeft,
-  MessageSquare, Users, TrendingUp, PenSquare, Hash,
+  MessageSquare, Users, TrendingUp, PenSquare, Hash, Loader2,
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
+import { questionToCardProps } from "../../lib/database.types";
 import { motion } from "motion/react";
-
-const topContributors = [
-  { name: "محمد الأحمد",    reputation: 5420, answers: 234, streak: 14 },
-  { name: "نورة السعيد",    reputation: 4850, answers: 198, streak: 7 },
-  { name: "عبدالرحمن الخالد", reputation: 3920, answers: 156, streak: 5 },
-];
-
-const hotToday = [
-  { id: "1", title: "كيف أبدأ في تعلم Python من الصفر؟", votes: 89, hot: true, answers: 22 },
-  { id: "2", title: "ما هي أفضل IDE للجافا في ٢٠٢٥؟",    votes: 67, answers: 14 },
-  { id: "3", title: "نصائح للتحضير لمقابلة عمل تقنية",    votes: 54, answers: 9 },
-];
-
-const PLATFORM_STATS = [
-  { icon: MessageSquare, value: "٨٢٣٤",  label: "سؤال", color: "text-primary",   bg: "bg-primary/10" },
-  { icon: Users,         value: "٢٤٥٨",  label: "عضو",  color: "text-secondary", bg: "bg-secondary/10" },
-  { icon: TrendingUp,    value: "١٥٦٧٨", label: "إجابة",color: "text-green-600", bg: "bg-green-100" },
-];
-
-const TRENDING_TAGS = ["برمجة", "ذكاء اصطناعي", "React", "تصميم", "Python", "تعليم", "تطوير ويب"];
+import { usePlatformStats, useTrendingTags, useHotQuestions, useTopContributors } from "../../lib/hooks/use-stats";
 
 const FILTERS = [
   { key: "recent",     label: "الأحدث",         icon: null },
@@ -41,15 +23,64 @@ const FILTERS = [
   { key: "unanswered", label: "بدون إجابة",       icon: null },
 ];
 
+function formatArabicNumber(n: number): string {
+  return n.toLocaleString("ar-SA");
+}
+
 export function HomePage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, voteQuestion, toggleBookmark } = useAppState();
+  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [] } = useAppState();
   const [filter, setFilter] = useState("recent");
 
+  // Map real database profiles of experts/businesses or high reputation users
+  const realFeaturedExperts = [...users]
+    .sort((a, b) => (b.reputation ?? 0) - (a.reputation ?? 0))
+    .map((u) => ({
+      id: u.username ?? u.id,
+      name: u.name,
+      avatar: u.avatar_url ?? undefined,
+      title: u.bio || u.business_category || "خبير معتمد",
+      specialty: u.business_category || "مساهم",
+      rating: parseFloat(u.business_rating ?? "5.0"),
+      answers: u.reputation ?? 0,
+      verified: u.is_verified_entity || false,
+    }))
+    .slice(0, 3);
+
+  // ── Real backend data ─────────────────────────────────────
+  const { data: stats } = usePlatformStats();
+  const { data: trendingTags = [] } = useTrendingTags(10);
+  const { data: hotQuestions = [] } = useHotQuestions(5);
+  const { data: topContributors = [] } = useTopContributors(3);
+
+  const PLATFORM_STATS = [
+    {
+      icon: MessageSquare,
+      value: stats ? formatArabicNumber(stats.questions_count) : "…",
+      label: "سؤال",
+      color: "text-primary",
+      bg: "bg-primary/10",
+    },
+    {
+      icon: Users,
+      value: stats ? formatArabicNumber(stats.users_count) : "…",
+      label: "عضو",
+      color: "text-secondary",
+      bg: "bg-secondary/10",
+    },
+    {
+      icon: TrendingUp,
+      value: stats ? formatArabicNumber(stats.answers_count) : "…",
+      label: "إجابة",
+      color: "text-green-600",
+      bg: "bg-green-100",
+    },
+  ];
+
   const filteredQuestions = filter === "popular"
-    ? [...questions].sort((a, b) => b.votes - a.votes)
+    ? [...questions].sort((a, b) => b.votes_count - a.votes_count)
     : filter === "unanswered"
-    ? questions.filter((q) => q.answers === 0)
+    ? questions.filter((q) => q.answers_count === 0)
     : questions;
 
   return (
@@ -129,64 +160,89 @@ export function HomePage() {
         </motion.div>
 
         {/* Bento Cell 2: Live Daily Challenge (1/3 width on desktop) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-          className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
-        >
-          <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-10 pointer-events-none" />
-          {/* Accent light source */}
-          <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
+        {hotQuestions[0] ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
+          >
+            <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-10 pointer-events-none" />
+            {/* Accent light source */}
+            <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
 
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <Badge className="bg-secondary/15 text-secondary border border-secondary/25 text-[10px] px-2.5 py-0.5 rounded-full flex items-center font-semibold">
-                <Zap className="h-3 w-3 ml-1 text-yellow-500 animate-bounce shrink-0" />
-                تحدي اليوم المفتوح
-              </Badge>
-              <span className="text-[10px] text-muted-foreground font-numbers">ينتهي خلال ١٨ ساعة</span>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <Badge className="bg-secondary/15 text-secondary border border-secondary/25 text-[10px] px-2.5 py-0.5 rounded-full flex items-center font-semibold">
+                  <Zap className="h-3 w-3 ml-1 text-yellow-500 animate-bounce shrink-0" />
+                  الأكثر تصويتاً اليوم
+                </Badge>
+                <span className="text-[10px] text-muted-foreground font-numbers">
+                  {hotQuestions[0].votes_count} تصويت
+                </span>
+              </div>
+
+              <h3
+                className="font-bold text-neutral-800 dark:text-neutral-100 text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer"
+                onClick={() => navigate(`/questions/${hotQuestions[0].id}`)}
+              >
+                {hotQuestions[0].title}
+              </h3>
+              
+              <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
+                {hotQuestions[0].content}
+              </p>
             </div>
 
-            <h3 className="font-bold text-neutral-800 dark:text-neutral-100 text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer" onClick={() => navigate("/questions/4")}>
-              ما هي أبرز الفروق الجوهرية بين REST API و GraphQL؟
-            </h3>
-            
-            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
-              شاركونا النقاش حول معايير الأداء وسرعة الاستجابة ومرونة جلب البيانات من الخوادم الحديثة.
-            </p>
-          </div>
-
-          <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-secondary font-bold font-numbers">
-              <Trophy className="h-4 w-4 text-secondary animate-float shrink-0" />
-              <span>+٥٠ نقطة سمعة</span>
+            <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-secondary font-bold font-numbers">
+                <Trophy className="h-4 w-4 text-secondary animate-float shrink-0" />
+                <span>+٥٠ نقطة سمعة</span>
+              </div>
+              <Button
+                className="rounded-xl h-9 text-xs px-4 bg-secondary border-0 shadow-secondary shadow-sm hover:shadow-md text-white font-semibold"
+                onClick={() => navigate(`/questions/${hotQuestions[0].id}`)}
+              >
+                أجب الآن
+              </Button>
             </div>
-            <Button
-              className="rounded-xl h-9 text-xs px-4 bg-secondary border-0 shadow-secondary shadow-sm hover:shadow-md text-white font-semibold"
-              onClick={() => navigate("/questions/4")}
-            >
-              أجب الآن ونل الجائزة
-            </Button>
-          </div>
-        </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex items-center justify-center min-h-[260px] sm:min-h-[280px]"
+          >
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </motion.div>
+        )}
         
       </div>
 
-      {/* ── Trending Tags Strip ── */}
+      {/* ── Trending Tags Strip (Real backend data) ── */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-1 scrollbar-none">
         <Hash className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground shrink-0" />
-        {TRENDING_TAGS.map((tag, i) => (
-          <Link key={tag} to={`/tags/${encodeURIComponent(tag)}`}>
-            <Badge
-              variant="outline"
-              className="shrink-0 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs cursor-pointer border-border/80 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all tag-pill whitespace-nowrap"
-              style={{ animationDelay: `${i * 40}ms` }}
-            >
-              {tag}
-            </Badge>
-          </Link>
-        ))}
+        {trendingTags.length > 0
+          ? trendingTags.map((tag, i) => (
+              <Link key={tag.id} to={`/tags/${encodeURIComponent(tag.name)}`}>
+                <Badge
+                  variant="outline"
+                  className="shrink-0 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs cursor-pointer border-border/80 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all tag-pill whitespace-nowrap"
+                  style={{ animationDelay: `${i * 40}ms` }}
+                >
+                  {tag.name}
+                </Badge>
+              </Link>
+            ))
+          : // Skeleton placeholder tags while loading
+            Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i}
+                className="shrink-0 h-6 rounded-full bg-muted/40 animate-pulse"
+                style={{ width: `${50 + i * 10}px` }}
+              />
+            ))}
       </div>
 
       <div className="flex gap-4 lg:gap-6">
@@ -242,7 +298,7 @@ export function HomePage() {
                 transition={{ duration: 0.25 }}
               >
                 <QuestionCard
-                  {...q}
+                  {...questionToCardProps(q)}
                   isBookmarked={bookmarkedIds.includes(q.id)}
                   onVote={(dir) => voteQuestion(q.id, dir)}
                   onBookmark={() => toggleBookmark(q.id)}
@@ -263,7 +319,7 @@ export function HomePage() {
         {/* ── Right Panel (Desktop) ── */}
         <aside className="hidden lg:flex flex-col w-72 shrink-0 gap-4">
 
-          {/* Hot Today */}
+          {/* Hot Today — Real backend data */}
           <Card className="p-4 premium-glass-card" style={{ borderRadius: "var(--radius-lg)" }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -277,32 +333,43 @@ export function HomePage() {
               </Link>
             </div>
             <div className="space-y-3">
-              {hotToday.map((q, i) => (
-                <button
-                  key={q.id}
-                  onClick={() => navigate(`/questions/${q.id}`)}
-                  className="w-full flex gap-3 text-right group hover:bg-muted/40 rounded-xl p-2 -m-2 transition-all duration-300 border border-transparent hover:border-border/30"
-                >
-                  <div
-                    className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold font-numbers border"
-                    style={{
-                      background: i === 0 ? "var(--gradient-primary)" : "var(--muted)",
-                      color: i === 0 ? "#fff" : "var(--foreground)",
-                      borderColor: i === 0 ? "var(--primary)" : "var(--border)",
-                    }}
-                  >
-                    {q.votes}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs leading-relaxed line-clamp-2 group-hover:text-primary transition-colors">
-                      {q.title}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 font-numbers">
-                      {q.answers} إجابة
-                    </p>
-                  </div>
-                </button>
-              ))}
+              {hotQuestions.length > 0
+                ? hotQuestions.map((q, i) => (
+                    <button
+                      key={q.id}
+                      onClick={() => navigate(`/questions/${q.id}`)}
+                      className="w-full flex gap-3 text-right group hover:bg-muted/40 rounded-xl p-2 -m-2 transition-all duration-300 border border-transparent hover:border-border/30"
+                    >
+                      <div
+                        className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold font-numbers border"
+                        style={{
+                          background: i === 0 ? "var(--gradient-primary)" : "var(--muted)",
+                          color: i === 0 ? "#fff" : "var(--foreground)",
+                          borderColor: i === 0 ? "var(--primary)" : "var(--border)",
+                        }}
+                      >
+                        {q.votes_count}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs leading-relaxed line-clamp-2 group-hover:text-primary transition-colors">
+                          {q.title}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 font-numbers">
+                          {q.answers_count} إجابة
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                : // Skeleton
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex gap-3 animate-pulse">
+                      <div className="shrink-0 w-8 h-8 rounded-xl bg-muted" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 bg-muted rounded w-full" />
+                        <div className="h-3 bg-muted rounded w-3/4" />
+                      </div>
+                    </div>
+                  ))}
             </div>
           </Card>
  
@@ -320,13 +387,13 @@ export function HomePage() {
               </Link>
             </div>
             <div className="space-y-1">
-              {FEATURED_EXPERTS.slice(0, 3).map((expert) => (
+              {realFeaturedExperts.map((expert) => (
                 <ExpertCard key={expert.id} expert={expert} />
               ))}
             </div>
           </Card>
  
-          {/* Top Contributors */}
+          {/* Top Contributors — Real backend data */}
           <Card className="p-4 premium-gold-card overflow-hidden relative" style={{ borderRadius: "var(--radius-lg)" }}>
             <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-secondary/5 blur-xl pointer-events-none" />
             <div className="flex items-center gap-2 mb-4">
@@ -336,39 +403,49 @@ export function HomePage() {
               <h3 className="font-semibold text-sm">أنشط المساهمين</h3>
             </div>
             <div className="space-y-2">
-              {topContributors.map((user, i) => (
-                <Link
-                  key={user.name}
-                  to={`/profile/${user.name}`}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/30 border border-transparent hover:border-border/30 transition-all duration-300"
-                >
-                  <div className="relative shrink-0">
-                    <Avatar className="h-8 w-8 border border-border/40">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="gradient-primary text-white text-xs font-bold">
-                        {user.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white border border-background shadow-sm ${
-                        i === 0 ? "bg-secondary" : i === 1 ? "bg-slate-400" : "bg-amber-700"
-                      }`}
+              {topContributors.length > 0
+                ? topContributors.map((user, i) => (
+                    <Link
+                      key={user.id}
+                      to={`/profile/${user.username}`}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/30 border border-transparent hover:border-border/30 transition-all duration-300"
                     >
-                      {i + 1}
+                      <div className="relative shrink-0">
+                        <Avatar className="h-8 w-8 border border-border/40">
+                          <AvatarImage src={user.avatar_url ?? ""} />
+                          <AvatarFallback className="gradient-primary text-white text-xs font-bold">
+                            {user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white border border-background shadow-sm ${
+                            i === 0 ? "bg-secondary" : i === 1 ? "bg-slate-400" : "bg-amber-700"
+                          }`}
+                        >
+                          {i + 1}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{user.name}</p>
+                        <p className="text-[10px] text-muted-foreground font-numbers">
+                          {user.reputation.toLocaleString("ar-SA")} نقطة
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-[10px] text-secondary font-semibold font-numbers">
+                        <Flame className="h-3 w-3 animate-float" />
+                      </div>
+                    </Link>
+                  ))
+                : // Skeleton
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2 animate-pulse">
+                      <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 bg-muted rounded w-3/4" />
+                        <div className="h-2.5 bg-muted rounded w-1/2" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{user.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-numbers">
-                      {user.reputation.toLocaleString("ar-SA")} نقطة
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-0.5 text-[10px] text-secondary font-semibold font-numbers">
-                    <Flame className="h-3 w-3 animate-float" />
-                    <span>{user.streak}</span>
-                  </div>
-                </Link>
-              ))}
+                  ))}
             </div>
             <Button
               variant="outline"

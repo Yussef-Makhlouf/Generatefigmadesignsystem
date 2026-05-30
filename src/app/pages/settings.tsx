@@ -820,7 +820,7 @@ export function SettingsPage() {
 
                       {review.images && review.images.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-3">
-                          {review.images.map((img, idx) => (
+                          {review.images.map((img: string, idx: number) => (
                             <img
                               key={idx}
                               src={img}

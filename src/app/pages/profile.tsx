@@ -451,7 +451,7 @@ export function ProfilePage() {
       </div>
 
       {/* Content Tabs Wrapper */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <TabsList className="w-full justify-start bg-glass-bg/20 backdrop-blur-md border border-border/30 p-1 rounded-2xl mb-6 flex flex-wrap gap-1 h-auto">
           {isBusiness ? (
             <>
@@ -613,7 +613,7 @@ export function ProfilePage() {
                     {/* Review Attachments: Multiple Images */}
                     {review.images && review.images.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none mb-3">
-                        {review.images.map((img, index) => (
+                        {review.images.map((img: string, index: number) => (
                           <img
                             key={index}
                             src={img}
@@ -627,7 +627,7 @@ export function ProfilePage() {
                     {/* Review Attachments: Reference Links */}
                     {review.links && review.links.length > 0 && (
                       <div className="flex flex-wrap gap-2 border-t border-border/10 pt-3">
-                        {review.links.map((link, idx) => (
+                        {review.links.map((link: { url: string; title: string }, idx: number) => (
                           <a
                             key={idx}
                             href={link.url}
@@ -852,7 +852,7 @@ export function ProfilePage() {
 
                     {review.images && review.images.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-none">
-                        {review.images.map((img, idx) => (
+                        {review.images.map((img: string, idx: number) => (
                           <img
                             key={idx}
                             src={img}

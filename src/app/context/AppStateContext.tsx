@@ -1,92 +1,32 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "../../lib/supabase";
 import {
-  Question,
-  Answer,
-  User,
-  mockQuestions as initialQuestions,
-  mockUsers,
-  AttachmentLink,
-  AttachmentLocation,
-  Review,
-} from "../data/mock-data";
+  getQuestions,
+  getAnswers,
+  createQuestion,
+  createAnswer,
+  addComment,
+  toggleBookmark as apiToggleBookmark,
+  updateProfile as apiUpdateProfile,
+  toggleEntityVerification,
+  deleteReview as apiDeleteReview,
+  deleteQuestion as apiDeleteQuestion,
+  castVote,
+  createReview,
+} from "../../lib/services";
+import type { Question, Answer, Profile, CreateQuestionInput, CreateAnswerInput, TargetType, VoteType, NotificationItem } from "../../lib/database.types";
+import { notificationToItem } from "../../lib/database.types";
 
-// Initial mock answers since they are inline in question-detail.tsx, let's define a robust set
-const initialAnswers: Answer[] = [
-  {
-    id: "a1",
-    questionId: "1",
-    content: "أنصحك بالبدء بلغة Python فهي سهلة التعلم وممتازة للمبتدئين. يمكنك استخدام منصات مثل Codecademy أو freeCodeCamp. المهم هو الممارسة اليومية وبناء مشاريع صغيرة.",
-    author: { name: "سارة علي", avatar: "", reputation: 2840 },
-    votes: 28,
-    timestamp: "منذ ساعة",
-    verified: { type: "photo", label: "تم التحقق من الخبرة" },
-    comments: [
-      { id: "c1", answerId: "a1", author: "خالد عبدالله", content: "نصيحة رائعة، شكراً!", timestamp: "منذ 30 دقيقة" },
-    ],
-  },
-  {
-    id: "a2",
-    questionId: "1",
-    content: "بالإضافة لما ذكر، أنصحك بالانضمام لمجتمعات المطورين المحلية والعالمية. التعلم مع آخرين يساعد كثيراً في الاستمرارية والتحفيز.",
-    author: { name: "خالد عبدالله", avatar: "", reputation: 450 },
-    votes: 15,
-    timestamp: "منذ 45 دقيقة",
-    verified: { type: "location", label: "من نفس المدينة" },
-    comments: [],
-  },
-  {
-    id: "a3",
-    questionId: "1",
-    content: "أهم شيء هو تحديد هدفك أولاً. هل تريد تطوير تطبيقات ويب؟ أم علم البيانات؟ أم تطوير الألعاب؟ كل مجال له مساره المناسب.",
-    author: { name: "فاطمة حسن", avatar: "", reputation: 940 },
-    votes: 11,
-    timestamp: "منذ ساعتين",
-    comments: [],
-  },
-];
-
-const initialReviews: Review[] = [
-  {
-    id: "r1",
-    userId: "1",
-    userName: "أحمد محمد",
-    entityId: "b1",
-    entityName: "مطعم المذاق العربي",
-    rating: 5,
-    comment: "المشويات هنا مذهلة والخدمة سريعة وممتازة! أنصح بشدة بزيارته وعائلته.",
-    visitDate: "2026-05-10",
-    timestamp: "منذ أسبوع",
-  },
-  {
-    id: "r2",
-    userId: "2",
-    userName: "سارة علي",
-    entityId: "b2",
-    entityName: "عيادة الدكتور فهد لطب الأسنان",
-    rating: 5,
-    comment: "دكتور فهد محترف جداً والعيادة غاية في النظافة والتعقيم. الخدمة كانت رائعة وبدون ألم.",
-    visitDate: "2026-05-15",
-    timestamp: "منذ يومين",
-  }
-];
-
-export interface NotificationItem {
-  id: string;
-  type: "like" | "answer" | "system" | "achievement";
-  title: string;
-  content: string;
-  timestamp: string;
-  read: boolean;
-}
-
+// State structures for UI compatibility
 interface AppState {
   questions: Question[];
   answers: Answer[];
-  currentUser: User;
-  users: User[];
+  currentUser: any;
+  users: any[];
   notifications: NotificationItem[];
   bookmarkedIds: string[];
-  reviews: Review[];
+  reviews: any[];
 }
 
 interface AppStateContextProps extends AppState {
@@ -96,24 +36,19 @@ interface AppStateContextProps extends AppState {
     tags: string[],
     location?: string,
     images?: string[],
-    links?: AttachmentLink[],
-    locationDetail?: AttachmentLocation
-  ) => string;
+    links?: any[],
+    locationDetail?: any
+  ) => Promise<string | null>;
   deleteQuestion: (id: string) => void;
   addAnswer: (
     questionId: string,
     content: string,
     verifiedType?: "photo" | "location",
     images?: string[],
-    links?: AttachmentLink[],
-    locationDetail?: AttachmentLocation
+    links?: any[],
+    locationDetail?: any
   ) => void;
-  addComment: (
-    answerId: string,
-    content: string,
-    images?: string[],
-    links?: AttachmentLink[]
-  ) => void;
+  addComment: (answerId: string, content: string) => void;
   voteQuestion: (questionId: string, dir: "up" | "down") => void;
   voteAnswer: (answerId: string, dir: "up" | "down") => void;
   toggleBookmark: (questionId: string) => boolean;
@@ -122,19 +57,19 @@ interface AppStateContextProps extends AppState {
     bio: string,
     location: string,
     avatar: string,
-    interests: string[],
-    extraFields?: Partial<User>
+    tags?: any[],
+    businessInfo?: any
   ) => void;
   addNotification: (type: "like" | "answer" | "system" | "achievement", title: string, content: string) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
-  setCurrentUser: React.Dispatch<React.SetStateAction<User>>;
+  setCurrentUser: React.Dispatch<React.SetStateAction<any>>;
   addReview: (
     entityId: string,
     rating: number,
     comment: string,
     images?: string[],
-    links?: AttachmentLink[],
+    links?: any[],
     visitDate?: string
   ) => void;
   toggleVerifyEntity: (userId: string) => void;
@@ -144,230 +79,375 @@ interface AppStateContextProps extends AppState {
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
 
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User>(() => {
-    const saved = localStorage.getItem("khapeer_current_user");
-    if (saved) return JSON.parse(saved);
-    return mockUsers[0]; // احمد محمد
+  const queryClient = useQueryClient();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Fetch current user
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "" };
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUserId)
+        .single();
+      if (!data) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "" };
+      return {
+        ...data,
+        avatar: data.avatar_url ?? "",
+        businessCategory: data.business_category ?? "",
+        businessLicense: data.business_license ?? "",
+        businessAddress: data.business_address ?? "",
+        operatingHours: data.operating_hours ?? "",
+        isVerifiedEntity: data.is_verified_entity,
+      };
+    },
+    enabled: !!currentUserId,
   });
 
-  const [questions, setQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem("khapeer_questions");
-    if (saved) return JSON.parse(saved);
-    return initialQuestions;
+  // Questions query
+  const { data: questions = [] } = useQuery({
+    queryKey: ["questions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("questions")
+        .select(`
+          *,
+          author:profiles(*),
+          question_tags(tag_id, tags(*)),
+          question_attachments(*)
+        `)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data ?? []).map((q: any) => {
+        const authorProfile = q.author;
+        const tagNames = (q.question_tags ?? []).map((qt: any) => qt.tags?.name).filter(Boolean);
+        const images = (q.question_attachments ?? [])
+          .filter((att: any) => att.type === "image")
+          .map((att: any) => att.url);
+        const links = (q.question_attachments ?? [])
+          .filter((att: any) => att.type === "link")
+          .map((att: any) => ({ title: att.title ?? "", url: att.url ?? "" }));
+        const locAtt = (q.question_attachments ?? []).find((att: any) => att.type === "location");
+        const locationDetail = locAtt ? {
+          name: locAtt.title ?? "",
+          address: locAtt.address ?? undefined,
+          lat: locAtt.lat ? parseFloat(locAtt.lat) : undefined,
+          lng: locAtt.lng ? parseFloat(locAtt.lng) : undefined,
+        } : undefined;
+
+        return {
+          ...q,
+          id: q.id,
+          author_id: q.author_id,
+          title: q.title,
+          description: q.content,
+          content: q.content,
+          category: q.category,
+          location: q.location,
+          votes: q.votes_count,
+          votes_count: q.votes_count,
+          answers: q.answers_count,
+          answers_count: q.answers_count,
+          views: q.views_count,
+          views_count: q.views_count,
+          tags: tagNames,
+          images,
+          links,
+          locationDetail,
+          author: {
+            name: authorProfile?.name ?? "مستخدم",
+            avatar: authorProfile?.avatar_url ?? undefined,
+            reputation: authorProfile?.reputation ?? 0,
+          },
+          timestamp: q.created_at,
+          is_deleted: q.is_deleted,
+          created_at: q.created_at,
+          updated_at: q.updated_at,
+        };
+      }) as Question[];
+    },
+    staleTime: 60000,
   });
 
-  const [answers, setAnswers] = useState<Answer[]>(() => {
-    const saved = localStorage.getItem("khapeer_answers");
-    if (saved) return JSON.parse(saved);
-    return initialAnswers;
+  // Answers query
+  const { data: answers = [] } = useQuery({
+    queryKey: ["answers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("answers")
+        .select(`
+          *,
+          author:profiles(*),
+          answer_attachments(*),
+          comments(
+            *,
+            author:profiles(*)
+          )
+        `)
+        .eq("is_deleted", false);
+      
+      if (error) throw error;
+      
+      return (data ?? []).map((a: any) => {
+        const authorProfile = a.author;
+        const images = (a.answer_attachments ?? [])
+          .filter((att: any) => att.type === "image")
+          .map((att: any) => att.url);
+        const links = (a.answer_attachments ?? [])
+          .filter((att: any) => att.type === "link")
+          .map((att: any) => ({ title: att.title ?? "", url: att.url ?? "" }));
+        const locAtt = (a.answer_attachments ?? []).find((att: any) => att.type === "location");
+        const locationDetail = locAtt ? {
+          name: locAtt.title ?? "",
+          address: locAtt.address ?? undefined,
+          lat: locAtt.lat ? parseFloat(locAtt.lat) : undefined,
+          lng: locAtt.lng ? parseFloat(locAtt.lng) : undefined,
+        } : undefined;
+
+        // Verified type
+        const verified = a.verified_type ? {
+          type: a.verified_type,
+          label: a.verified_label ?? (a.verified_type === "photo" ? "مُثبت بصورة ميدانية" : "مُثبت بموقع جغرافي")
+        } : undefined;
+
+        const mappedComments = (a.comments ?? []).map((c: any) => ({
+          id: c.id,
+          content: c.content,
+          author: c.author?.name ?? "مستخدم",
+          timestamp: c.created_at,
+        }));
+
+        return {
+          ...a,
+          id: a.id,
+          questionId: a.question_id,
+          question_id: a.question_id,
+          author_id: a.author_id,
+          content: a.content,
+          votes: a.votes_count,
+          votes_count: a.votes_count,
+          is_accepted: a.is_accepted,
+          verified,
+          images,
+          links,
+          locationDetail,
+          author: {
+            name: authorProfile?.name ?? "مستخدم",
+            avatar: authorProfile?.avatar_url ?? undefined,
+            reputation: authorProfile?.reputation ?? 0,
+          },
+          timestamp: a.created_at,
+          comments: mappedComments,
+          is_deleted: a.is_deleted,
+          created_at: a.created_at,
+          updated_at: a.updated_at,
+        };
+      }) as Answer[];
+    },
+    staleTime: 60000,
   });
 
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem("khapeer_users");
-    if (saved) return JSON.parse(saved);
-    return mockUsers;
+  // Users query
+  const { data: users = [] } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*");
+      return (data ?? []) as any[];
+    },
   });
 
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem("khapeer_notifications");
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        id: "n1",
-        type: "answer",
-        title: "إجابة جديدة على سؤالك",
-        content: "أضافت سارة علي إجابة جديدة على سؤالك 'كيف يمكنني تعلم البرمجة من الصفر؟'",
-        timestamp: "منذ ساعة",
-        read: false,
-      },
-      {
-        id: "n2",
-        type: "achievement",
-        title: "إنجاز جديد!",
-        content: "لقد حصلت على شارة 'مساهم نشط' لتفاعلك المستمر هذا الأسبوع.",
-        timestamp: "منذ يومين",
-        read: true,
-      },
-    ];
+  // Bookmarks
+  const { data: bookmarkedIds = [] } = useQuery({
+    queryKey: ["bookmarks", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [] as string[];
+      const { data } = await supabase
+        .from("bookmarks")
+        .select("question_id")
+        .eq("user_id", currentUserId);
+      return (data?.map((b: any) => b.question_id) as string[]) ?? [];
+    },
+    enabled: !!currentUserId,
   });
 
-  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem("khapeer_bookmarks");
-    return saved ? JSON.parse(saved) : ["1", "3"]; // Default bookmarks matching mockSaved
+  // Notifications query
+  const { data: notifications = [] } = useQuery<NotificationItem[]>({
+    queryKey: ["notifications", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", currentUserId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(notificationToItem);
+    },
+    enabled: !!currentUserId,
   });
 
-  const [reviews, setReviews] = useState<Review[]>(() => {
-    const saved = localStorage.getItem("khapeer_reviews");
-    return saved ? JSON.parse(saved) : initialReviews;
+  // Reviews query
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["reviews"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select(`
+          *,
+          reviewer:profiles(*),
+          entity:profiles!entity_id(*),
+          review_attachments(*)
+        `)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data ?? []).map((r: any) => {
+        const reviewerProfile = r.reviewer;
+        const images = (r.review_attachments ?? [])
+          .filter((att: any) => att.type === "image")
+          .map((att: any) => att.url);
+        const links = (r.review_attachments ?? [])
+          .filter((att: any) => att.type === "link")
+          .map((att: any) => ({ title: att.title ?? "", url: att.url ?? "" }));
+        
+        return {
+          id: r.id,
+          userId: r.reviewer_id,
+          userName: reviewerProfile?.name ?? "مستخدم",
+          userAvatar: reviewerProfile?.avatar_url ?? "",
+          entityId: r.entity_id,
+          entityName: r.entity?.name ?? "منشأة",
+          rating: r.rating,
+          comment: r.comment,
+          visitDate: r.visit_date,
+          timestamp: new Date(r.created_at).toLocaleDateString("ar-SA"),
+          images,
+          links,
+        };
+      });
+    },
   });
 
-  // Sync to localStorage
+  // Realtime subscription for notifications
   useEffect(() => {
-    localStorage.setItem("khapeer_current_user", JSON.stringify(currentUser));
-  }, [currentUser]);
+    if (!currentUserId) return;
+    
+    const channel = supabase
+      .channel(`notifications:${currentUserId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["notifications", currentUserId] });
+        }
+      )
+      .subscribe();
 
-  useEffect(() => {
-    localStorage.setItem("khapeer_questions", JSON.stringify(questions));
-  }, [questions]);
-
-  useEffect(() => {
-    localStorage.setItem("khapeer_answers", JSON.stringify(answers));
-  }, [answers]);
-
-  useEffect(() => {
-    localStorage.setItem("khapeer_users", JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem("khapeer_notifications", JSON.stringify(notifications));
-  }, [notifications]);
-
-  useEffect(() => {
-    localStorage.setItem("khapeer_bookmarks", JSON.stringify(bookmarkedIds));
-  }, [bookmarkedIds]);
-
-  useEffect(() => {
-    localStorage.setItem("khapeer_reviews", JSON.stringify(reviews));
-  }, [reviews]);
-
-  // Actions
-  const addQuestion = (
-    title: string,
-    description: string,
-    tags: string[],
-    location?: string,
-    images?: string[],
-    links?: AttachmentLink[],
-    locationDetail?: AttachmentLocation
-  ) => {
-    const newId = (questions.length + 1).toString();
-    const newQ: Question = {
-      id: newId,
-      title,
-      description,
-      author: {
-        name: currentUser.name,
-        avatar: currentUser.avatar,
-        reputation: currentUser.reputation,
-        accountType: currentUser.accountType,
-      },
-      votes: 0,
-      answers: 0,
-      tags,
-      location,
-      timestamp: "الآن",
-      images,
-      links,
-      locationDetail,
+    return () => {
+      channel.unsubscribe();
     };
-    setQuestions((prev) => [newQ, ...prev]);
-    // award reputation for asking question
-    setCurrentUser((prev) => ({ ...prev, reputation: prev.reputation + 5 }));
-    return newId;
+  }, [currentUserId, queryClient]);
+
+  // Auth listener
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setCurrentUserId(user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Mutations
+  const createQuestionMutation = useMutation({
+    mutationFn: ({ authorId, input }: { authorId: string; input: CreateQuestionInput }) =>
+      createQuestion(authorId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["questions"] }),
+  });
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: apiDeleteQuestion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["questions"] }),
+  });
+
+  const createAnswerMutation = useMutation({
+    mutationFn: ({ authorId, input }: { authorId: string; input: CreateAnswerInput }) =>
+      createAnswer(authorId, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["answers"] });
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+    },
+  });
+
+  const toggleBookmarkMutation = useMutation({
+    mutationFn: ({ userId, questionId }: { userId: string; questionId: string }) =>
+      apiToggleBookmark(userId, questionId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+  });
+
+  const voteMutation = useMutation({
+    mutationFn: ({ userId, targetId, targetType, voteType }: { userId: string; targetId: string; targetType: TargetType; voteType: VoteType }) =>
+      castVote(userId, targetId, targetType, voteType),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: ["answers"] });
+    },
+  });
+
+  // Action handlers
+  const addQuestion = async (title: string, description: string, tags: string[], location?: string, images?: string[], links?: any[], locationDetail?: any) => {
+    if (!currentUserId) return null;
+    const input: CreateQuestionInput = { title, content: description, category: location ?? undefined, location: undefined, tags, images, links, locationDetail };
+    const result = await createQuestionMutation.mutateAsync({ authorId: currentUserId, input });
+    return result?.id ?? null;
   };
 
   const deleteQuestion = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
-    setAnswers((prev) => prev.filter((a) => a.questionId !== id));
-    setBookmarkedIds((prev) => prev.filter((bid) => bid !== id));
+    deleteQuestionMutation.mutate(id);
   };
 
-  const addAnswer = (
-    questionId: string,
-    content: string,
-    verifiedType?: "photo" | "location",
-    images?: string[],
-    links?: AttachmentLink[],
-    locationDetail?: AttachmentLocation
-  ) => {
-    const newId = "a_" + (answers.length + 1).toString();
-    const newAns: Answer = {
-      id: newId,
-      questionId,
-      content,
-      author: {
-        name: currentUser.name,
-        avatar: currentUser.avatar,
-        reputation: currentUser.reputation,
-        accountType: currentUser.accountType,
-      },
-      votes: 0,
-      timestamp: "الآن",
-      comments: [],
-      verified: verifiedType ? { type: verifiedType, label: verifiedType === "photo" ? "تم التحقق بالصورة" : "من نفس المدينة" } : undefined,
-      images,
-      links,
-      locationDetail,
-    };
-    setAnswers((prev) => [...prev, newAns]);
-
-    // Update answer count on question
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === questionId ? { ...q, answers: q.answers + 1 } : q))
-    );
-
-    // Award reputation
-    setCurrentUser((prev) => ({ ...prev, reputation: prev.reputation + 15 }));
+  const addAnswer = (questionId: string, content: string, verifiedType?: "photo" | "location", images?: string[], links?: any[], locationDetail?: any) => {
+    if (!currentUserId) return;
+    const input: CreateAnswerInput = { question_id: questionId, content, verified_type: verifiedType, images, links, locationDetail };
+    createAnswerMutation.mutate({ authorId: currentUserId, input });
   };
 
-  const addComment = (
-    answerId: string,
-    content: string,
-    images?: string[],
-    links?: AttachmentLink[]
-  ) => {
-    const newComment = {
-      id: "c_" + Date.now().toString(),
-      answerId,
-      author: currentUser.name,
-      content,
-      timestamp: "الآن",
-      images,
-      links,
-    };
-
-    setAnswers((prev) =>
-      prev.map((ans) =>
-        ans.id === answerId ? { ...ans, comments: [...ans.comments, newComment] } : ans
-      )
-    );
+  const addCommentHandler = (answerId: string, content: string) => {
+    if (!currentUserId) return;
+    addComment(answerId, currentUserId, content);
+    queryClient.invalidateQueries({ queryKey: ["answers"] });
   };
 
   const voteQuestion = (questionId: string, dir: "up" | "down") => {
-    setQuestions((prev) =>
-      prev.map((q) => {
-        if (q.id === questionId) {
-          const delta = dir === "up" ? 1 : -1;
-          return { ...q, votes: q.votes + delta };
-        }
-        return q;
-      })
-    );
+    if (!currentUserId) return;
+    voteMutation.mutate({ userId: currentUserId, targetId: questionId, targetType: "question", voteType: dir });
   };
 
   const voteAnswer = (answerId: string, dir: "up" | "down") => {
-    setAnswers((prev) =>
-      prev.map((a) => {
-        if (a.id === answerId) {
-          const delta = dir === "up" ? 1 : -1;
-          return { ...a, votes: a.votes + delta };
-        }
-        return a;
-      })
-    );
+    if (!currentUserId) return;
+    voteMutation.mutate({ userId: currentUserId, targetId: answerId, targetType: "answer", voteType: dir });
   };
 
-  const toggleBookmark = (questionId: string) => {
-    let isBookmarkedNow = false;
-    setBookmarkedIds((prev) => {
-      if (prev.includes(questionId)) {
-        return prev.filter((id) => id !== questionId);
-      } else {
-        isBookmarkedNow = true;
-        return [...prev, questionId];
-      }
-    });
-    return isBookmarkedNow;
+  const toggleBookmark = (questionId: string): boolean => {
+    if (!currentUserId) return false;
+    apiToggleBookmark(currentUserId, questionId);
+    const existing = bookmarkedIds.includes(questionId);
+    return !existing;
   };
 
   const updateProfile = (
@@ -375,147 +455,118 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     bio: string,
     location: string,
     avatar: string,
-    interests: string[],
-    extraFields?: Partial<User>
+    tags?: any[],
+    businessInfo?: any
   ) => {
-    const updatedUser = {
-      ...currentUser,
+    if (!currentUserId) return;
+    const input: any = {
       name,
       bio,
       location,
-      avatar,
-      ...extraFields,
+      avatar_url: avatar,
     };
-    setCurrentUser(updatedUser);
-    // also update in users list
-    setUsers((prev) =>
-      prev.map((u) => (u.id === currentUser.id ? { ...u, ...updatedUser } : u))
-    );
+    if (businessInfo) {
+      if (businessInfo.businessCategory !== undefined) input.business_category = businessInfo.businessCategory;
+      if (businessInfo.businessLicense !== undefined) input.business_license = businessInfo.businessLicense;
+      if (businessInfo.businessAddress !== undefined) input.business_address = businessInfo.businessAddress;
+      if (businessInfo.operatingHours !== undefined) input.operating_hours = businessInfo.operatingHours;
+    }
+    apiUpdateProfile(currentUserId, input);
+    queryClient.invalidateQueries({ queryKey: ["currentUser", currentUserId] });
   };
 
-  const addNotification = (type: "like" | "answer" | "system" | "achievement", title: string, content: string) => {
-    const newNotif: NotificationItem = {
-      id: "n_" + Date.now().toString(),
+  const addNotification = async (type: "like" | "answer" | "system" | "achievement", title: string, content: string) => {
+    if (!currentUserId) return;
+    await supabase.from("notifications").insert({
+      user_id: currentUserId,
       type,
       title,
       content,
-      timestamp: "الآن",
-      read: false,
-    };
-    setNotifications((prev) => [newNotif, ...prev]);
+      is_read: false
+    });
+    queryClient.invalidateQueries({ queryKey: ["notifications", currentUserId] });
   };
 
-  const markNotificationAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const markNotificationAsRead = async (id: string) => {
+    if (!currentUserId) return;
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", id)
+      .eq("user_id", currentUserId);
+    queryClient.invalidateQueries({ queryKey: ["notifications", currentUserId] });
   };
 
-  const markAllNotificationsAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllNotificationsAsRead = async () => {
+    if (!currentUserId) return;
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", currentUserId)
+      .eq("is_read", false);
+    queryClient.invalidateQueries({ queryKey: ["notifications", currentUserId] });
   };
+
+  const createReviewMutation = useMutation({
+    mutationFn: ({ reviewerId, input }: { reviewerId: string; input: any }) =>
+      createReview(reviewerId, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    },
+  });
 
   const addReview = (
     entityId: string,
     rating: number,
     comment: string,
     images?: string[],
-    links?: AttachmentLink[],
+    links?: any[],
     visitDate?: string
   ) => {
-    const newReview: Review = {
-      id: "r_" + Date.now().toString(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      entityId,
-      entityName: users.find((u) => u.id === entityId)?.name || "جهة غير معروفة",
-      rating,
-      comment,
-      visitDate,
-      images,
-      links,
-      timestamp: "الآن",
-    };
-    
-    setReviews((prev) => [newReview, ...prev]);
+    if (!currentUserId) return;
+    createReviewMutation.mutate({
+      reviewerId: currentUserId,
+      input: {
+        entity_id: entityId,
+        rating,
+        comment,
+        images,
+        links,
+        visit_date: visitDate,
+      },
+    });
+  };
 
-    // Recalculate average rating for reviewed business in users list
-    setUsers((prevUsers) =>
-      prevUsers.map((u) => {
-        if (u.id === entityId) {
-          const entityReviews = [newReview, ...reviews].filter((r) => r.entityId === entityId);
-          const totalRating = entityReviews.reduce((sum, r) => sum + r.rating, 0);
-          const avgRating = totalRating / entityReviews.length;
-          return {
-            ...u,
-            businessRating: parseFloat(avgRating.toFixed(1)),
-            reviewsCount: entityReviews.length,
-          };
-        }
-        return u;
-      })
-    );
-    
-    addNotification("like", "تقييم جديد لخدمتك!", `أضاف ${currentUser.name} تقييماً بـ ${rating} نجوم لصفحتك.`);
+  const setCurrentUser = (user: any) => {
+    setCurrentUserId(user?.id ?? null);
   };
 
   const toggleVerifyEntity = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, isVerifiedEntity: !u.isVerifiedEntity } : u))
-    );
-    if (currentUser.id === userId) {
-      setCurrentUser((prev) => ({ ...prev, isVerifiedEntity: !prev.isVerifiedEntity }));
-    }
+    const currentState = !!users.find((u: any) => u.id === userId)?.is_verified_entity;
+    toggleEntityVerification(userId, currentState);
+    queryClient.invalidateQueries({ queryKey: ["users"] });
   };
 
   const deleteReview = (reviewId: string) => {
-    const reviewToDelete = reviews.find((r) => r.id === reviewId);
-    if (!reviewToDelete) return;
-    
-    const entityId = reviewToDelete.entityId;
-    const updatedReviews = reviews.filter((r) => r.id !== reviewId);
-    setReviews(updatedReviews);
-
-    // Recalculate average rating for the entity
-    setUsers((prevUsers) =>
-      prevUsers.map((u) => {
-        if (u.id === entityId) {
-          const entityReviews = updatedReviews.filter((r) => r.entityId === entityId);
-          if (entityReviews.length === 0) {
-            return {
-              ...u,
-              businessRating: undefined,
-              reviewsCount: 0,
-            };
-          }
-          const totalRating = entityReviews.reduce((sum, r) => sum + r.rating, 0);
-          const avgRating = totalRating / entityReviews.length;
-          return {
-            ...u,
-            businessRating: parseFloat(avgRating.toFixed(1)),
-            reviewsCount: entityReviews.length,
-          };
-        }
-        return u;
-      })
-    );
+    apiDeleteReview(reviewId);
   };
 
   return (
     <AppStateContext.Provider
       value={{
-        questions,
-        answers,
-        currentUser,
-        users,
+        questions: questions ?? [],
+        answers: answers ?? [],
+        currentUser: currentUser ?? { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual" },
+        users: users ?? [],
         notifications,
         bookmarkedIds,
-        reviews,
+        reviews: reviews ?? [],
         addQuestion,
         deleteQuestion,
         addAnswer,
-        addComment,
+        addComment: addCommentHandler,
         voteQuestion,
         voteAnswer,
         toggleBookmark,
@@ -536,8 +587,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useAppState = () => {
   const context = useContext(AppStateContext);
-  if (context === undefined) {
-    throw new Error("useAppState must be used within an AppStateProvider");
-  }
+  if (!context) throw new Error("useAppState must be used within AppStateProvider");
   return context;
 };

@@ -8,6 +8,7 @@ import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { QuestionCard } from "../components/question-card";
 import { EmptyState } from "../components/empty-state";
+import { questionToCardProps } from "../../lib/database.types";
 import {
   Bookmark,
   Search,
@@ -28,12 +29,18 @@ export function SavedPage() {
 
   const savedItems = questions
     .filter((q) => bookmarkedIds.includes(q.id))
-    .map((q) => ({
-      ...q,
-      isBookmarked: true,
-      savedAt: "منذ قليل",
-      folder: q.tags[0] || "عام",
-    }));
+    .map((q) => {
+      const tagNames = (q.tags ?? []).map((t) =>
+        typeof t === "string" ? t : (t as { name: string }).name
+      );
+      return {
+        ...q,
+        isBookmarked: true,
+        savedAt: "منذ قليل",
+        folder: tagNames[0] || "عام",
+        _tagNames: tagNames,
+      };
+    });
 
   const folders = ["الكل", ...new Set(savedItems.map((i) => i.folder))];
 
@@ -41,7 +48,7 @@ export function SavedPage() {
     const matchesSearch =
       !searchQuery ||
       item.title.includes(searchQuery) ||
-      item.tags.some((t) => t.includes(searchQuery));
+      item._tagNames.some((t) => t.includes(searchQuery));
     const matchesFolder =
       activeFolder === "الكل" || item.folder === activeFolder;
     return matchesSearch && matchesFolder;
@@ -165,7 +172,8 @@ export function SavedPage() {
                 filtered.map((item) => (
                   <div key={item.id} className="relative group rounded-2xl overflow-hidden">
                     <QuestionCard
-                      {...item}
+                      {...questionToCardProps(item)}
+                      isBookmarked={true}
                       onClick={() => navigate(`/questions/${item.id}`)}
                     />
                     

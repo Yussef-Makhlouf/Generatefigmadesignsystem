@@ -197,7 +197,7 @@ export function QuestionDetailPage() {
     const content = commentContent[ansId] || "";
     if (!content.trim()) return;
 
-    addComment(ansId, content.trim(), commentImages[ansId], commentLinks[ansId]);
+    addComment(ansId, content.trim());
     toast.success("تم إضافة تعليقك بنجاح");
     
     // Clear state

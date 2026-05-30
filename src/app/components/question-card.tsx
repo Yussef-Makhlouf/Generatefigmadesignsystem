@@ -19,7 +19,7 @@ interface QuestionCardProps {
   votes: number;
   answers: number;
   tags: string[];
-  location?: string;
+  location?: string | null;
   timestamp: string;
   isBookmarked?: boolean;
   views?: number;

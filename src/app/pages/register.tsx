@@ -28,6 +28,7 @@ import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { AccountType } from "../data/mock-data";
+import { signUp, updateProfile } from "../../lib/services";
 
 const availableInterests = [
   "برمجة", "تقنية", "تصميم", "أعمال", "تعليم",
@@ -44,7 +45,6 @@ const perks = [
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { setCurrentUser } = useAppState();
   
   // Registration steps state: 1 = Selector, 2 = Form inputs, 3 = City/Interests onboarding
   const [step, setStep] = useState(1);
@@ -82,59 +82,100 @@ export function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowOnboarding(true);
-    }, 600);
+    setShowOnboarding(true);
   };
 
-  const handleOnboardingComplete = () => {
-    const username = email ? email.split("@")[0] : "user_" + Math.random().toString(36).substring(2, 6);
-    
-    // Detailed User object with conditional fields mapping perfectly to mock db schemas
-    const newUser = {
-      id: "user_" + Math.random().toString(36).substring(2, 11),
-      name: name || "مستخدم جديد",
-      username,
-      avatar: "",
-      reputation: accountType === "individual" ? 150 : 300, // Premium start for business entities
-      bio: accountType !== "individual" 
-        ? `${name} - ${businessCategory || "خدمات معتمدة"} في ${city || "المملكة"}`
-        : interests.length > 0 ? `مهتم بـ ${interests.join("، ")}` : "عضو جديد في مجتمع خبير الفكري",
-      location: city === "riyadh" ? "الرياض، السعودية" :
-                city === "jeddah" ? "جدة، السعودية" :
-                city === "dammam" ? "الدمام، السعودية" :
-                city === "mecca" ? "مكة المكرمة، السعودية" :
-                city === "medina" ? "المدينة المنورة، السعودية" :
-                city === "cairo" ? "القاهرة، مصر" :
-                city === "dubai" ? "دبي، الإمارات" : "الرياض، السعودية",
-      joined: "مايو ٢٠٢٦",
-      accountType,
+  const handleOnboardingComplete = async () => {
+    setIsLoading(true);
+    try {
+      const username = email ? email.split("@")[0] : "user_" + Math.random().toString(36).substring(2, 6);
       
-      // Dynamic fields
-      businessCategory: accountType !== "individual" ? (businessCategory || "عام") : undefined,
-      businessLicense: accountType !== "individual" ? businessLicense : undefined,
-      businessAddress: accountType !== "individual" ? businessAddress : undefined,
-      operatingHours: accountType !== "individual" ? (operatingHours || "٩ ص - ٩ م") : undefined,
-      businessRating: accountType !== "individual" ? 5.0 : undefined,
-      reviewsCount: accountType !== "individual" ? 0 : undefined,
-      isVerifiedEntity: accountType !== "individual" ? false : undefined // Needs admin approval
-    };
+      // 1. Sign up the user via Supabase Auth
+      const { user, error } = await signUp(email.toLowerCase().trim(), password, username, name, accountType);
 
-    setCurrentUser(newUser);
-    setShowOnboarding(false);
-    toast.success(`أهلاً بك في خبير، تم تفعيل حسابك بنجاح كـ ${
-      accountType === "restaurant" ? "مطعم/مقهى" :
-      accountType === "clinic" ? "مركز طبي" :
-      accountType === "doctor" ? "طبيب معتمد" :
-      accountType === "activity" ? "وجهة ترفيهية" :
-      accountType === "business" ? "جهة تجارية" : "عضو مستقل"
-    }!`, {
-      position: "bottom-center",
-      duration: 4000,
-    });
-    navigate("/");
+      if (error) {
+        let friendlyError = error;
+        if (error.includes("User already registered") || error.includes("user already exists")) {
+          friendlyError = "هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.";
+        } else if (error.includes("Password should be")) {
+          friendlyError = "كلمة المرور ضعيفة جداً. يجب أن تتكون من ٦ أحرف على الأقل.";
+        }
+        
+        toast.error(`فشل إنشاء الحساب: ${friendlyError}`, {
+          position: "bottom-center",
+          duration: 3500,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!user) {
+        toast.error("فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.", {
+          position: "bottom-center",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Map city key to display location
+      const cityMap: Record<string, string> = {
+        riyadh: "الرياض، السعودية",
+        jeddah: "جدة، السعودية",
+        dammam: "الدمام، السعودية",
+        mecca: "مكة المكرمة، السعودية",
+        medina: "المدينة المنورة، السعودية",
+        cairo: "القاهرة، مصر",
+        dubai: "دبي، الإمارات",
+        other: "مدينة أخرى",
+      };
+      const userLocation = cityMap[city] || "الرياض، السعودية";
+
+      // 3. Build bio
+      const bioText = accountType !== "individual" 
+        ? `${name} - ${businessCategory || "خدمات معتمدة"} في ${userLocation}`
+        : interests.length > 0 ? `مهتم بـ ${interests.join("، ")}` : "عضو جديد في مجتمع خبير الفكري";
+
+      // 4. Build profile updates mapping to DB columns
+      const profileUpdates: any = {
+        bio: bioText,
+        location: userLocation,
+        settings: { interests: interests }
+      };
+
+      if (accountType !== "individual") {
+        profileUpdates.business_category = businessCategory || "عام";
+        profileUpdates.business_license = businessLicense;
+        profileUpdates.business_address = businessAddress;
+        profileUpdates.operating_hours = operatingHours || "٩ ص - ٩ م";
+        profileUpdates.reputation = 300; // Premium start for business
+      } else {
+        profileUpdates.reputation = 150; // Welcome reputation points for individual
+      }
+
+      // Update user profile table
+      await updateProfile(user.id, profileUpdates);
+
+      setShowOnboarding(false);
+      toast.success(`أهلاً بك في خبير، تم تفعيل حسابك بنجاح كـ ${
+        accountType === "restaurant" ? "مطعم/مقهى" :
+        accountType === "clinic" ? "مركز طبي" :
+        accountType === "doctor" ? "طبيب معتمد" :
+        accountType === "activity" ? "وجهة ترفيهية" :
+        accountType === "business" ? "جهة تجارية" : "عضو مستقل"
+      }!`, {
+        position: "bottom-center",
+        duration: 4000,
+      });
+      navigate("/");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("حدث خطأ غير متوقع أثناء تفعيل الحساب والبيانات الشخصية.", {
+        position: "bottom-center",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleInterest = (interest: string) => {
@@ -599,16 +640,27 @@ export function RegisterPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button variant="outline" className="flex-1 rounded-xl border-border bg-muted/40 hover:bg-muted" onClick={handleOnboardingComplete}>
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-xl border-border bg-muted/40 hover:bg-muted" 
+                onClick={handleOnboardingComplete}
+                disabled={isLoading}
+              >
                 تخطي مؤقتاً
               </Button>
               <Button
-                className="flex-1 rounded-xl bg-primary text-white"
+                className="flex-1 rounded-xl bg-primary text-white flex items-center justify-center gap-1.5"
                 onClick={handleOnboardingComplete}
-                disabled={!city || interests.length < 3}
+                disabled={isLoading || !city || interests.length < 3}
               >
-                <Rocket className="h-4 w-4 ml-1.5" />
-                ابدأ الآن
+                {isLoading ? (
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Rocket className="h-4 w-4 ml-1.5 shrink-0" />
+                    <span>ابدأ الآن</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>
