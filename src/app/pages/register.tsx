@@ -24,7 +24,6 @@ import {
   Compass,
   Star
 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { AccountType } from "../data/mock-data";

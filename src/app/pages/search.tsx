@@ -12,15 +12,11 @@ import { SlidersHorizontal, Search as SearchIcon, Loader2 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 import { questionToCardProps } from "../../lib/database.types";
 import { useBackendSearch } from "../../lib/hooks/use-search";
+import { useCategories } from "../../lib/hooks/use-categories";
 
 const CATEGORIES = [
   { value: "all", label: "جميع التصنيفات" },
-  { value: "تقنية", label: "تقنية" },
-  { value: "تعليم", label: "تعليم" },
-  { value: "صحة", label: "صحة" },
-  { value: "أعمال", label: "أعمال" },
-  { value: "علوم", label: "علوم" },
-];
+]; // static fallback; real categories injected at runtime
 
 const LOCATIONS = [
   { value: "all", label: "جميع المواقع" },
@@ -40,6 +36,13 @@ const SORT_OPTIONS = [
 export function SearchPage() {
   const navigate = useNavigate();
   const { bookmarkedIds, voteQuestion, toggleBookmark } = useAppState();
+  const { categories: backendCategories } = useCategories(10);
+
+  // Merge backend cats into the dropdown ("all" is always first)
+  const allCategories = [
+    { value: "all", label: "جميع التصنيفات" },
+    ...backendCategories.map((c) => ({ value: c.name, label: c.name })),
+  ];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -73,7 +76,7 @@ export function SearchPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="premium-glass-card border-strong/40 rounded-xl">
-            {CATEGORIES.map((c) => (
+            {allCategories.map((c) => (
               <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
             ))}
           </SelectContent>
@@ -190,7 +193,7 @@ export function SearchPage() {
             <div className="flex gap-1.5 mt-3 overflow-x-auto md:hidden scrollbar-none pb-1">
               {category !== "all" && (
                 <Badge variant="secondary" className="rounded-full bg-primary-light/50 border border-primary/20 text-primary whitespace-nowrap text-[10px] px-2.5 py-0.5">
-                  {CATEGORIES.find((c) => c.value === category)?.label}
+                  {allCategories.find((c) => c.value === category)?.label}
                 </Badge>
               )}
               {location !== "all" && (

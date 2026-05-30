@@ -1,6 +1,60 @@
 import { supabase } from "../supabase";
 import type { Question, Tag, Profile } from "../database.types";
 
+// ── Category with count shape ────────────────────────────────
+export interface CategoryStat {
+  name: string;
+  count: number;
+}
+
+// Map category names → Tailwind colour class (extends automatically for new values)
+const CATEGORY_COLORS: Record<string, string> = {
+  "تقنية":         "bg-blue-500",
+  "تعليم":         "bg-green-500",
+  "برمجة":         "bg-indigo-500",
+  "ذكاء اصطناعي":  "bg-purple-500",
+  "تصميم":         "bg-pink-500",
+  "صحة":           "bg-red-500",
+  "أعمال":         "bg-amber-500",
+  "علوم":          "bg-teal-500",
+  "tech":          "bg-blue-500",
+  "education":     "bg-green-500",
+  "health":        "bg-red-500",
+  "business":      "bg-amber-500",
+  "science":       "bg-teal-500",
+};
+
+export function getCategoryColor(name: string): string {
+  return CATEGORY_COLORS[name] ?? "bg-gray-500";
+}
+
+export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]> {
+  // Fetch all non-deleted questions' category field (head=false so we get rows)
+  const { data, error } = await supabase
+    .from("questions")
+    .select("category")
+    .eq("is_deleted", false)
+    .not("category", "is", null);
+
+  if (error || !data) {
+    console.error("getCategoriesWithCounts:", error);
+    return [];
+  }
+
+  // Aggregate in-memory (Supabase JS client doesn't support GROUP BY directly)
+  const countMap = new Map<string, number>();
+  for (const row of data as { category: string | null }[]) {
+    const cat = row.category;
+    if (!cat) continue;
+    countMap.set(cat, (countMap.get(cat) ?? 0) + 1);
+  }
+
+  return Array.from(countMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, count]) => ({ name, count }));
+}
+
 // ── Platform Statistics ──────────────────────────────────────
 export interface PlatformStats {
   questions_count: number;

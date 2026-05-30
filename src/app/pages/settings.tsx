@@ -32,11 +32,28 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "../context/AppStateContext";
+import { signOut } from "../../lib/services";
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { currentUser, updateProfile, reviews, deleteReview } = useAppState();
   const [activeTab, setActiveTab] = useState("profile");
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("تم تسجيل الخروج بنجاح. رافقتك السلامة!", {
+        position: "bottom-center",
+        duration: 3000,
+      });
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      toast.error("فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.", {
+        position: "bottom-center",
+      });
+    }
+  };
   const [isSaving, setIsSaving] = useState(false);
 
   // Profile settings
@@ -729,6 +746,28 @@ export function SettingsPage() {
                 تغيير كلمة المرور
               </Button>
             </div>
+          </div>
+
+          {/* Sign Out Card */}
+          <div className="premium-glass-card p-6 border border-border/45 rounded-2xl mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-text-primary mb-1">تسجيل الخروج الآمن</h2>
+                <p className="text-xs text-text-secondary leading-relaxed font-sans">
+                  إنهاء جلستك الحالية على هذا الجهاز بشكل آمن. يمكنك تسجيل الدخول مجدداً في أي وقت.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              className="rounded-xl border-border hover:bg-muted font-bold text-xs sm:text-sm px-4 h-10 transition-all duration-200 text-foreground shrink-0"
+              onClick={handleSignOut}
+            >
+              تسجيل الخروج
+            </Button>
           </div>
 
           <div className="premium-glass-card p-6 border border-destructive/25 bg-destructive/[0.02] rounded-2xl shadow-md">

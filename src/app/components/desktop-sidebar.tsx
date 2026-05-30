@@ -3,14 +3,10 @@ import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap } from "lucide-react";
 import { ReputationBadge } from "./reputation-badge";
+import { useAppState } from "../context/AppStateContext";
+import { useCategories } from "../../lib/hooks/use-categories";
 
-const CATEGORIES = [
-  { name: "تقنية",       count: 245, color: "bg-blue-500" },
-  { name: "تعليم",       count: 189, color: "bg-green-500" },
-  { name: "برمجة",       count: 156, color: "bg-indigo-500" },
-  { name: "ذكاء اصطناعي", count: 134, color: "bg-purple-500" },
-  { name: "تصميم",       count: 98,  color: "bg-pink-500" },
-];
+
 
 const QUICK_LINKS = [
   { icon: Home,       label: "الرئيسية",     path: "/" },
@@ -24,6 +20,13 @@ const QUICK_LINKS = [
 
 export function DesktopSidebar() {
   const location = useLocation();
+  const { currentUser, questions, answers } = useAppState();
+  const { categories, isLoading: categoriesLoading } = useCategories(6);
+
+  const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
+  
+  const userQuestionsCount = questions.filter(q => q.author_id === currentUser?.id).length;
+  const userAnswersCount = answers.filter(a => a.author_id === currentUser?.id).length;
 
   const isActive = (path: string) =>
     path === "/"
@@ -57,71 +60,116 @@ export function DesktopSidebar() {
         </nav>
       </Card>
 
-      {/* Categories */}
+      {/* Categories — loaded from Supabase */}
       <Card className="p-4 shadow-sm border-border/60" style={{ borderRadius: "var(--radius-lg)" }}>
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
           التصنيفات
         </h3>
         <div className="space-y-0.5">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.name}
-              to={`/tags/${encodeURIComponent(cat.name)}`}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted transition-colors group"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${cat.color}`} />
-                <span className="text-sm group-hover:text-foreground text-muted-foreground transition-colors">
-                  {cat.name}
-                </span>
+          {categoriesLoading ? (
+            // Skeleton placeholders while fetching
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2 h-2 rounded-full bg-muted animate-pulse" />
+                  <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                </div>
+                <div className="h-4 w-6 rounded-full bg-muted animate-pulse" />
               </div>
-              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
-                {cat.count}
-              </span>
+            ))
+          ) : categories.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-3 py-2">لا توجد تصنيفات بعد</p>
+          ) : (
+            categories.map((cat) => (
+              <Link
+                key={cat.name}
+                to={`/search?category=${encodeURIComponent(cat.name)}`}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${cat.color}`} />
+                  <span className="text-sm group-hover:text-foreground text-muted-foreground transition-colors">
+                    {cat.name}
+                  </span>
+                </div>
+                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                  {cat.count}
+                </span>
+              </Link>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {/* User Stats Card OR Guest Call to Action */}
+      {isAuthenticated ? (
+        <Card className="p-4 shadow-sm border-border/60 gradient-soft" style={{ borderRadius: "var(--radius-lg)" }}>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            إحصائياتك
+          </h3>
+          <div className="mb-3">
+            <ReputationBadge points={currentUser.reputation || 0} />
+          </div>
+          <div className="space-y-2">
+            {[
+              { label: "الأسئلة",  value: userQuestionsCount.toLocaleString("ar-EG"), color: "text-primary" },
+              { label: "الإجابات", value: userAnswersCount.toLocaleString("ar-EG"), color: "text-secondary" },
+            ].map((s) => (
+              <div key={s.label} className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{s.label}</span>
+                <span className={`text-sm font-bold ${s.color}`}>{s.value}</span>
+              </div>
+            ))}
+            <Separator />
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">السلسلة</span>
+              <div className="flex items-center gap-1 text-orange-500 font-bold text-sm">
+                <Flame className="h-3.5 w-3.5" />
+                <span>٧ أيام</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Streak progress */}
+          <div className="mt-3 space-y-1">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>الهدف: ١٤ يوم</span>
+              <span>٧/١٤</span>
+            </div>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="h-full w-1/2 gradient-primary rounded-full" />
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <Card 
+          className="p-4 shadow-md border border-primary/20 bg-gradient-to-br from-neutral-900 via-neutral-950 to-primary/10 relative overflow-hidden" 
+          style={{ borderRadius: "var(--radius-lg)" }}
+        >
+          <div className="absolute top-0 left-0 w-24 h-24 rounded-full bg-primary/5 blur-xl pointer-events-none" />
+          <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 flex items-center gap-1">
+            <Zap className="h-3.5 w-3.5 text-secondary animate-float fill-secondary/20" />
+            <span>مجتمع خبير المعرفي</span>
+          </h3>
+          <p className="text-xs text-neutral-300 leading-relaxed mb-4">
+            طوّر سمعتك الرقمية، اطرح أسئلتك، أجب عن استفسارات المطورين، واكسب شارات سمعة مرموقة اليوم!
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link
+              to="/auth/register"
+              className="w-full h-9 rounded-xl bg-primary hover:bg-primary-hover border-0 shadow-sm transition-all duration-280 font-bold text-white text-xs flex items-center justify-center gap-1"
+            >
+              <span>إنشاء حساب مجاناً</span>
             </Link>
-          ))}
-        </div>
-      </Card>
-
-      {/* User Stats */}
-      <Card className="p-4 shadow-sm border-border/60 gradient-soft" style={{ borderRadius: "var(--radius-lg)" }}>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-          إحصائياتك
-        </h3>
-        <div className="mb-3">
-          <ReputationBadge points={1250} />
-        </div>
-        <div className="space-y-2">
-          {[
-            { label: "الأسئلة",  value: "١٢", color: "text-primary" },
-            { label: "الإجابات", value: "٤٨", color: "text-secondary" },
-          ].map((s) => (
-            <div key={s.label} className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{s.label}</span>
-              <span className={`text-sm font-bold ${s.color}`}>{s.value}</span>
-            </div>
-          ))}
-          <Separator />
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">السلسلة</span>
-            <div className="flex items-center gap-1 text-orange-500 font-bold text-sm">
-              <Flame className="h-3.5 w-3.5" />
-              <span>٧ أيام</span>
-            </div>
+            <Link
+              to="/auth/login"
+              className="w-full h-9 rounded-xl border border-neutral-800 bg-neutral-900/40 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all text-xs flex items-center justify-center"
+            >
+              <span>تسجيل الدخول</span>
+            </Link>
           </div>
-        </div>
-
-        {/* Streak progress */}
-        <div className="mt-3 space-y-1">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>الهدف: ١٤ يوم</span>
-            <span>٧/١٤</span>
-          </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full w-1/2 gradient-primary rounded-full" />
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
     </aside>
   );
 }

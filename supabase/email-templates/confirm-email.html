@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>تأكيد البريد الإلكتروني — خبير</title>
+  <style>
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background-color: #0f0f14;
+      color: #e2e8f0;
+      direction: rtl;
+      text-align: right;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ── Wrapper ────────────────────────────────────────── */
+    .wrapper {
+      width: 100%;
+      background-color: #0f0f14;
+      padding: 40px 16px;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: linear-gradient(145deg, #16162a 0%, #1a1a2e 50%, #16162a 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      box-shadow:
+        0 0 0 1px rgba(99,102,241,0.08),
+        0 25px 50px rgba(0,0,0,0.6),
+        0 0 80px rgba(99,102,241,0.05);
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      padding: 36px 40px 32px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.08) 100%);
+      border-bottom: 1px solid rgba(99,102,241,0.15);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: -40px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+    }
+
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 100px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 16px;
+    }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .header-sub {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* ── Body ────────────────────────────────────────────── */
+    .body {
+      padding: 36px 40px;
+    }
+
+    .greeting {
+      font-size: 16px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .greeting strong {
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+
+    /* ── CTA Button ─────────────────────────────────────── */
+    .btn-wrap {
+      text-align: center;
+      margin: 32px 0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 16px 42px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      box-shadow:
+        0 4px 20px rgba(99,102,241,0.45),
+        0 1px 3px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    /* ── Info Cards ─────────────────────────────────────── */
+    .info-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .info-card-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .info-icon.blue  { background: rgba(99,102,241,0.15); }
+    .info-icon.green { background: rgba(34,197,94,0.12);  }
+    .info-icon.amber { background: rgba(245,158,11,0.12); }
+
+    .info-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 3px;
+    }
+
+    .info-text p {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* ── Features Grid ──────────────────────────────────── */
+    .features-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .feature-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .feature-item .feat-icon { font-size: 22px; margin-bottom: 8px; }
+    .feature-item .feat-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .feature-item .feat-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    /* ── Fallback URL ───────────────────────────────────── */
+    .url-box {
+      background: rgba(15,15,20,0.8);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    .url-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .url-link {
+      font-size: 12px;
+      color: #818cf8;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2) 50%, transparent);
+      margin: 28px 0;
+    }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    .footer {
+      padding: 24px 40px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .footer-text a {
+      color: #6366f1;
+      text-decoration: none;
+    }
+
+    .social-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .social-link {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .header, .body { padding: 24px 20px; }
+      .header-title  { font-size: 22px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .btn           { padding: 14px 30px; font-size: 15px; }
+      .footer        { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="container">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="header">
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <div class="logo-icon">🧠</div>
+        <span class="logo-text">خبير</span>
+      </div>
+
+      <!-- Badge -->
+      <div>
+        <span class="header-badge">✉️ تأكيد البريد الإلكتروني</span>
+      </div>
+
+      <h1 class="header-title">مرحباً بك في مجتمع الخبراء! 🎉</h1>
+      <p class="header-sub">خطوة واحدة تفصلك عن عالم المعرفة والخبرات</p>
+    </div>
+
+    <!-- ═══ BODY ═══ -->
+    <div class="body">
+
+      <!-- Greeting -->
+      <p class="greeting">
+        أهلاً وسهلاً،<br /><br />
+        شكراً جزيلاً لانضمامك إلى منصة <strong>خبير</strong> — المجتمع العربي المعرفي الأول
+        الذي يجمع الخبراء والمحترفين وطلاب العلم في فضاء واحد متميز.<br /><br />
+        لتفعيل حسابك والبدء في رحلتك المعرفية، الرجاء الضغط على الزر أدناه:
+      </p>
+
+      <!-- CTA -->
+      <div class="btn-wrap">
+        <a href="{{ .ConfirmationURL }}" class="btn">
+          ✅ &nbsp; تأكيد بريدي الإلكتروني
+        </a>
+      </div>
+
+      <!-- Expiry notice -->
+      <div class="info-card">
+        <div class="info-card-row">
+          <div class="info-icon amber">⏱️</div>
+          <div class="info-text">
+            <h4>رابط مؤقت</h4>
+            <p>هذا الرابط صالح لمدة <strong style="color:#fbbf24">24 ساعة</strong> فقط من وقت إرساله. إذا انتهت صلاحيته يمكنك طلب رابط جديد من صفحة تسجيل الدخول.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security notice -->
+      <div class="info-card">
+        <div class="info-card-row">
+          <div class="info-icon blue">🔐</div>
+          <div class="info-text">
+            <h4>لم تطلب هذا؟</h4>
+            <p>إذا لم تقم بإنشاء حساب على منصة خبير، يمكنك تجاهل هذا البريد بأمان تام. بياناتك محمية ولن يتم تفعيل أي حساب بدون تأكيدك.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Features -->
+      <p class="features-title">ما ينتظرك بعد التفعيل 🚀</p>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feat-icon">💬</div>
+          <div class="feat-name">اطرح أسئلتك</div>
+          <div class="feat-desc">احصل على إجابات من خبراء حقيقيين</div>
+        </div>
+        <div class="feature-item">
+          <div class="feat-icon">🏆</div>
+          <div class="feat-name">نظام السمعة</div>
+          <div class="feat-desc">اكسب نقاط وارتقِ في رتبتك</div>
+        </div>
+        <div class="feature-item">
+          <div class="feat-icon">🌐</div>
+          <div class="feat-name">المجتمع العربي</div>
+          <div class="feat-desc">تواصل مع آلاف الخبراء والمحترفين</div>
+        </div>
+        <div class="feature-item">
+          <div class="feat-icon">🔖</div>
+          <div class="feat-name">حفظ المعرفة</div>
+          <div class="feat-desc">احتفظ بأفضل الإجابات والمقالات</div>
+        </div>
+      </div>
+
+      <!-- Fallback URL -->
+      <p style="font-size:13px; color:#64748b; margin-bottom:8px;">
+        إذا لم يعمل الزر، انسخ هذا الرابط والصقه في متصفحك:
+      </p>
+      <div class="url-box">
+        <div class="url-label">رابط التأكيد</div>
+        <a href="{{ .ConfirmationURL }}" class="url-link">{{ .ConfirmationURL }}</a>
+      </div>
+
+    </div><!-- /body -->
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="footer">
+      <div class="footer-logo">خبير 🧠</div>
+
+      <div class="social-row">
+        <a href="#" class="social-link" title="Twitter">𝕏</a>
+        <a href="#" class="social-link" title="LinkedIn">in</a>
+        <a href="#" class="social-link" title="Instagram">📷</a>
+      </div>
+
+      <p class="footer-text">
+        تلقيت هذا البريد لأنك سجّلت حساباً على منصة خبير.<br />
+        إذا لم تكن أنت، يرجى <a href="#">التواصل مع الدعم الفني</a> فوراً.<br /><br />
+        © 2025 منصة خبير · جميع الحقوق محفوظة
+      </p>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /wrapper -->
+</body>
+</html>
