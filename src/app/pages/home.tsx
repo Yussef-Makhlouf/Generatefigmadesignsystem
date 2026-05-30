@@ -6,6 +6,7 @@ import { Card } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { cn } from "../components/ui/utils";
 import {
   Trophy, Sparkles, Flame, Zap, ChevronLeft,
   MessageSquare, Users, TrendingUp, PenSquare, Hash,
@@ -54,68 +55,123 @@ export function HomePage() {
   return (
     <div className="max-w-7xl w-full">
 
-      {/* ── Hero Banner ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-4 sm:mb-6 p-4 sm:p-6 md:p-8 border border-primary/20 bg-primary/5"
-      >
-        {/* Arabic geometric bg pattern */}
-        <div className="absolute inset-0 pattern-arabic opacity-25" />
-        {/* Ambient color blobs — solid blur, no gradients */}
-        <div className="absolute top-0 left-0 w-32 sm:w-48 h-32 sm:h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
+      {/* ── Bento Grid Hero Section ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
+        
+        {/* Bento Cell 1: Main Core Hero Banner (2/3 width on desktop) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="md:col-span-2 relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
+        >
+          {/* Subtle Arabesque Mesh Pattern background */}
+          <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-15 pointer-events-none" />
+          <div className="absolute inset-0 pattern-arabic opacity-10 pointer-events-none" />
+          
+          {/* Ambient glassmorphic blobs */}
+          <div className="absolute top-0 left-0 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full bg-secondary/5 blur-2xl pointer-events-none" />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-primary/15 text-primary border border-primary/25 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full">
-                <Sparkles className="h-2.5 w-2.5 ml-1 text-secondary" />
-                مجتمع المعرفة العربي
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <Badge className="bg-primary/10 text-primary border border-primary/20 text-[10px] sm:text-xs px-3 py-1 rounded-full flex items-center font-medium">
+                <Sparkles className="h-3 w-3 ml-1.5 text-secondary animate-pulse-gold shrink-0" />
+                مجتمع المعرفة العربي الراقي
               </Badge>
             </div>
-            <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold leading-snug mb-2 font-heading text-foreground">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 font-heading text-neutral-900 dark:text-neutral-50">
               ابدأ بسؤال،{" "}
-              <span className="text-primary">انهِ بمعرفة</span>
+              <span className="text-primary bg-clip-text">انهِ بمعرفة</span>
             </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-md">
-              اطرح أسئلتك واحصل على إجابات من خبراء المجتمع العربي. شارك خبرتك وساعد الآخرين.
+            <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-lg mb-6">
+              اطرح أسئلتك واحصل على إجابات موثوقة من خبراء المجتمع العربي. شارك خبرتك، راكم سمعتك، وساعد الآخرين على الازدهار.
             </p>
-            {/* Platform stats */}
-            <div className="flex flex-wrap gap-3 sm:gap-5 mt-3 sm:mt-4">
+          </div>
+
+          <div className="relative z-10 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-4 pt-4 border-t border-neutral-100 dark:border-neutral-800/60">
+            {/* Stats list */}
+            <div className="flex items-center gap-4 sm:gap-6">
               {PLATFORM_STATS.map((s) => {
                 const Icon = s.icon;
                 return (
-                  <div key={s.label} className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="font-bold text-foreground font-numbers">{s.value}</span>
-                    <span className="text-muted-foreground">{s.label}</span>
+                  <div key={s.label} className="flex items-center gap-2 text-xs sm:text-sm">
+                    <div className={cn("p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 shrink-0", s.bg, s.color)}>
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-neutral-900 dark:text-neutral-50 font-numbers leading-none mb-0.5">{s.value}</span>
+                      <span className="text-muted-foreground text-[10px] leading-none">{s.label}</span>
+                    </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Magnetic/Premium buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                className="rounded-xl h-11 px-5 bg-primary border-0 shadow-primary shadow-md hover:shadow-lg text-sm font-semibold text-white transition-all duration-280 ease-spring active:scale-95 flex items-center gap-2"
+                onClick={() => navigate("/questions/new")}
+              >
+                <PenSquare className="h-4 w-4" />
+                <span>اطرح سؤالاً</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-xl h-11 px-4 border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium"
+                onClick={() => navigate("/search")}
+              >
+                <span>استعرض الأسئلة</span>
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Bento Cell 2: Live Daily Challenge (1/3 width on desktop) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+          className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
+        >
+          <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-10 pointer-events-none" />
+          {/* Accent light source */}
+          <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
+
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <Badge className="bg-secondary/15 text-secondary border border-secondary/25 text-[10px] px-2.5 py-0.5 rounded-full flex items-center font-semibold">
+                <Zap className="h-3 w-3 ml-1 text-yellow-500 animate-bounce shrink-0" />
+                تحدي اليوم المفتوح
+              </Badge>
+              <span className="text-[10px] text-muted-foreground font-numbers">ينتهي خلال ١٨ ساعة</span>
+            </div>
+
+            <h3 className="font-bold text-neutral-800 dark:text-neutral-100 text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer" onClick={() => navigate("/questions/4")}>
+              ما هي أبرز الفروق الجوهرية بين REST API و GraphQL؟
+            </h3>
+            
+            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
+              شاركونا النقاش حول معايير الأداء وسرعة الاستجابة ومرونة جلب البيانات من الخوادم الحديثة.
+            </p>
           </div>
 
-          {/* CTA Buttons — stack on mobile, row on sm+ */}
-          <div className="flex flex-col xs:flex-row sm:flex-col gap-2 sm:shrink-0">
+          <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-secondary font-bold font-numbers">
+              <Trophy className="h-4 w-4 text-secondary animate-float shrink-0" />
+              <span>+٥٠ نقطة سمعة</span>
+            </div>
             <Button
-              className="rounded-xl h-11 px-5 bg-primary border-0 shadow-primary shadow-md text-sm font-semibold text-white hover:bg-primary/90 transition-all ripple"
-              onClick={() => navigate("/questions/new")}
+              className="rounded-xl h-9 text-xs px-4 bg-secondary border-0 shadow-secondary shadow-sm hover:shadow-md text-white font-semibold"
+              onClick={() => navigate("/questions/4")}
             >
-              <PenSquare className="h-4 w-4 ml-2" />
-              اطرح سؤالاً
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-xl h-11 px-5 border-border/50 text-foreground hover:bg-muted/30 text-sm"
-              onClick={() => navigate("/search")}
-            >
-              استعرض الأسئلة
+              أجب الآن ونل الجائزة
             </Button>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+        
+      </div>
 
       {/* ── Trending Tags Strip ── */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-1 scrollbar-none">

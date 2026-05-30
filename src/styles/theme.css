@@ -1,331 +1,404 @@
 @custom-variant dark (&:is(.dark *));
 
+/* ═══════════════════════════════════════════════════════
+   KHAPEER DESIGN SYSTEM — Visual Identity Tokens v2.0
+   Tone: Calm · Premium · Stable · Arab-First
+   Palette: Emerald Wisdom + Desert Gold
+   ═══════════════════════════════════════════════════════ */
+
 :root {
   --font-size: 16px;
 
-  /* ─── Cream & Gold Premium Light Mode ─── */
-  --background: hsl(43, 30%, 96%); /* Luxurious soft cream */
-  --foreground: hsl(180, 24%, 12%); /* Deep obsidian slate */
-  --card: hsl(43, 20%, 99%);
-  --card-foreground: hsl(180, 24%, 12%);
-  --popover: hsl(43, 20%, 99%);
-  --popover-foreground: hsl(180, 24%, 12%);
+  /* ─── Motion & Physics ─────────────────────────────── */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:   cubic-bezier(0.22, 1.00, 0.36, 1);
+  --ease-out:      cubic-bezier(0.16, 1.00, 0.30, 1);
+  --ease-in-out:   cubic-bezier(0.45, 0.00, 0.55, 1.00);
+  --duration-fast:   150ms;
+  --duration-normal: 280ms;
+  --duration-slow:   450ms;
 
-  /* ─── Brand Colors ─── */
-  --primary: hsl(170, 95%, 34%); /* Deep Emerald of Wisdom */
-  --primary-foreground: #FFFFFF;
-  --primary-light: hsl(170, 95%, 96%);
-  --primary-hover: hsl(170, 90%, 28%);
+  /* ─── Cream & Gold Premium Light Mode ─────────────── */
+  --background:           hsl(44, 28%, 97%);   /* Luxurious warm cream */
+  --foreground:           hsl(180, 25%, 10%);  /* Deep obsidian slate */
+  --card:                 hsl(0, 0%, 100%);
+  --card-foreground:      hsl(180, 25%, 10%);
+  --popover:              hsl(0, 0%, 100%);
+  --popover-foreground:   hsl(180, 25%, 10%);
+  --surface:              hsl(44, 20%, 98%);
+  --surface-raised:       hsl(0, 0%, 100%);
 
-  --secondary: hsl(43, 96%, 45%); /* Sand Gold */
-  --secondary-foreground: #FFFFFF;
-  --secondary-light: hsl(43, 100%, 96%);
-  --secondary-hover: hsl(43, 90%, 38%);
+  /* ─── Brand: Emerald of Wisdom ─────────────────────── */
+  --primary-50:   hsl(170, 90%, 96%);
+  --primary-100:  hsl(170, 88%, 90%);
+  --primary-200:  hsl(170, 86%, 80%);
+  --primary-300:  hsl(170, 84%, 65%);
+  --primary-400:  hsl(170, 90%, 50%);
+  --primary-500:  hsl(170, 95%, 34%);   /* Base — Emerald of Wisdom */
+  --primary-600:  hsl(170, 92%, 28%);
+  --primary-700:  hsl(170, 90%, 22%);
+  --primary-800:  hsl(170, 88%, 16%);
+  --primary-900:  hsl(170, 86%, 10%);
 
-  /* ─── Surface & State ─── */
-  --muted: hsl(43, 15%, 91%);
-  --muted-foreground: hsl(180, 10%, 42%);
-  --accent: hsl(43, 15%, 94%);
-  --accent-foreground: hsl(180, 24%, 12%);
+  --primary:              var(--primary-500);
+  --primary-foreground:   #FFFFFF;
+  --primary-light:        var(--primary-50);
+  --primary-hover:        var(--primary-600);
 
-  /* ─── Semantic ─── */
-  --destructive: hsl(355, 85%, 52%);
+  /* ─── Brand: Desert Gold ───────────────────────────── */
+  --secondary-50:   hsl(43, 100%, 97%);
+  --secondary-100:  hsl(43, 98%, 90%);
+  --secondary-200:  hsl(43, 97%, 78%);
+  --secondary-300:  hsl(43, 96%, 65%);
+  --secondary-400:  hsl(43, 96%, 55%);
+  --secondary-500:  hsl(43, 96%, 45%);  /* Base — Desert Gold */
+  --secondary-600:  hsl(43, 94%, 38%);
+  --secondary-700:  hsl(43, 92%, 30%);
+
+  --secondary:              var(--secondary-500);
+  --secondary-foreground:   #FFFFFF;
+  --secondary-light:        var(--secondary-50);
+  --secondary-hover:        var(--secondary-600);
+
+  /* ─── Neutral Palette ──────────────────────────────── */
+  --neutral-50:   hsl(180, 15%, 98%);
+  --neutral-100:  hsl(180, 12%, 94%);
+  --neutral-200:  hsl(180, 10%, 88%);
+  --neutral-300:  hsl(180, 8%, 78%);
+  --neutral-400:  hsl(180, 7%, 62%);
+  --neutral-500:  hsl(180, 6%, 48%);
+  --neutral-600:  hsl(180, 8%, 36%);
+  --neutral-700:  hsl(180, 10%, 24%);
+  --neutral-800:  hsl(180, 12%, 16%);
+  --neutral-900:  hsl(180, 14%, 10%);
+
+  /* ─── Surface States ────────────────────────────────── */
+  --muted:              hsl(44, 14%, 92%);
+  --muted-foreground:   hsl(180, 8%, 44%);
+  --accent:             hsl(44, 14%, 94%);
+  --accent-foreground:  hsl(180, 25%, 10%);
+
+  /* ─── Semantic Colors ───────────────────────────────── */
+  --success:        hsl(150, 78%, 36%);
+  --success-light:  hsl(150, 78%, 96%);
+  --warning:        hsl(32, 92%, 44%);
+  --warning-light:  hsl(32, 92%, 96%);
+  --destructive:        hsl(356, 82%, 50%);
   --destructive-foreground: #FFFFFF;
-  --success: hsl(150, 80%, 38%);
-  --success-light: hsl(150, 80%, 96%);
-  --warning: hsl(32, 90%, 46%);
-  --warning-light: hsl(32, 90%, 96%);
-  --error: hsl(355, 85%, 52%);
-  --error-light: hsl(355, 85%, 97%);
-  --info: hsl(195, 90%, 40%);
-  --info-light: hsl(195, 90%, 96%);
+  --error:          hsl(356, 82%, 50%);
+  --error-light:    hsl(356, 82%, 97%);
+  --info:           hsl(196, 88%, 40%);
+  --info-light:     hsl(196, 88%, 96%);
 
-  /* ─── Text ─── */
-  --text-primary: hsl(180, 24%, 12%);
-  --text-secondary: hsl(180, 14%, 32%);
-  --text-muted: hsl(180, 10%, 50%);
-  --text-placeholder: hsl(180, 8%, 68%);
+  /* ─── Text Hierarchy ────────────────────────────────── */
+  --text-primary:      hsl(180, 25%, 10%);
+  --text-secondary:    hsl(180, 12%, 32%);
+  --text-muted:        hsl(180, 8%, 50%);
+  --text-placeholder:  hsl(180, 6%, 68%);
+  --text-on-primary:   #FFFFFF;
+  --text-on-secondary: #FFFFFF;
 
-  /* ─── Borders & Inputs ─── */
-  --border: rgba(13, 148, 136, 0.08);
-  --border-strong: rgba(13, 148, 136, 0.16);
-  --input: transparent;
-  --input-background: hsl(43, 20%, 99%);
-  --input-border: hsl(180, 10%, 80%);
-  --switch-background: hsl(180, 8%, 75%);
+  /* ─── Borders & Inputs ──────────────────────────────── */
+  --border:             rgba(13, 148, 136, 0.10);
+  --border-strong:      rgba(13, 148, 136, 0.20);
+  --border-subtle:      rgba(13, 148, 136, 0.05);
+  --input:              transparent;
+  --input-background:   hsl(0, 0%, 100%);
+  --input-border:       hsl(180, 10%, 82%);
+  --input-border-focus: var(--primary);
+  --switch-background:  hsl(180, 8%, 76%);
 
-  /* ─── Shadows ─── */
-  --shadow-xs: 0 1px 2px rgba(18, 32, 36, 0.03);
-  --shadow-sm: 0 2px 8px rgba(18, 32, 36, 0.05);
-  --shadow-md: 0 6px 16px rgba(18, 32, 36, 0.07);
-  --shadow-lg: 0 12px 32px rgba(18, 32, 36, 0.1);
-  --shadow-xl: 0 20px 48px rgba(18, 32, 36, 0.14);
-  --shadow-primary: 0 6px 20px rgba(13, 148, 136, 0.12);
-  --shadow-secondary: 0 6px 20px rgba(217, 119, 6, 0.12);
+  /* ─── Elevation Shadow System ───────────────────────── */
+  --shadow-xs:  0 1px 2px rgba(15, 30, 30, 0.04);
+  --shadow-sm:  0 2px 6px rgba(15, 30, 30, 0.06), 0 1px 2px rgba(15, 30, 30, 0.04);
+  --shadow-md:  0 4px 14px rgba(15, 30, 30, 0.08), 0 2px 4px rgba(15, 30, 30, 0.04);
+  --shadow-lg:  0 10px 28px rgba(15, 30, 30, 0.10), 0 4px 10px rgba(15, 30, 30, 0.06);
+  --shadow-xl:  0 20px 48px rgba(15, 30, 30, 0.12), 0 8px 20px rgba(15, 30, 30, 0.08);
+  --shadow-2xl: 0 32px 64px rgba(15, 30, 30, 0.14), 0 12px 28px rgba(15, 30, 30, 0.08);
 
-  /* ─── Radii ─── */
-  --radius: 0.875rem;       /* 14px - cards */
-  --radius-sm: 0.4375rem;   /* 7px */
-  --radius-md: 0.625rem;     /* 10px */
-  --radius-lg: 0.875rem;    /* 14px */
-  --radius-xl: 1.125rem;    /* 18px */
-  --radius-2xl: 1.625rem;    /* 26px */
+  /* ─── Brand Glow Shadows ────────────────────────────── */
+  --shadow-primary:   0 4px 18px rgba(13, 148, 136, 0.20), 0 2px 6px rgba(13, 148, 136, 0.12);
+  --shadow-secondary: 0 4px 18px rgba(202, 138, 4, 0.22), 0 2px 6px rgba(202, 138, 4, 0.14);
+  --shadow-emerald:   0 0 24px rgba(13, 148, 136, 0.18);
+  --shadow-gold:      0 0 28px rgba(202, 138, 4, 0.20);
+
+  /* ─── Border Radii ──────────────────────────────────── */
+  --radius:      0.875rem;
+  --radius-xs:   0.25rem;
+  --radius-sm:   0.4375rem;
+  --radius-md:   0.625rem;
+  --radius-lg:   0.875rem;
+  --radius-xl:   1.125rem;
+  --radius-2xl:  1.5rem;
+  --radius-3xl:  2rem;
   --radius-full: 9999px;
 
-  /* ─── Typography weights ─── */
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 700;
-  --font-weight-bold: 800;
+  /* ─── Typography Weights ────────────────────────────── */
+  --font-weight-light:     300;
+  --font-weight-normal:    400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+  --font-weight-extrabold: 800;
+  --font-weight-black:     900;
 
-  /* ─── Interaction ─── */
-  --ring: hsl(170, 95%, 34%);
+  /* ─── Typography Scale ──────────────────────────────── */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  /* ─── Spacing Scale (4px base) ──────────────────────── */
+  --space-1:   0.25rem;
+  --space-2:   0.5rem;
+  --space-3:   0.75rem;
+  --space-4:   1rem;
+  --space-5:   1.25rem;
+  --space-6:   1.5rem;
+  --space-8:   2rem;
+  --space-10:  2.5rem;
+  --space-12:  3rem;
+  --space-16:  4rem;
+  --space-20:  5rem;
+  --space-24:  6rem;
+
+  /* ─── Focus Ring ────────────────────────────────────── */
+  --ring:        var(--primary);
   --ring-offset: 2px;
+  --ring-width:  2px;
 
-  /* ─── Chart Colors ─── */
+  /* ─── Chart Palette ─────────────────────────────────── */
   --chart-1: hsl(170, 95%, 34%);
   --chart-2: hsl(43, 96%, 45%);
-  --chart-3: hsl(150, 80%, 38%);
-  --chart-4: hsl(32, 90%, 46%);
-  --chart-5: hsl(355, 85%, 52%);
-  --chart-6: hsl(265, 80%, 48%);
+  --chart-3: hsl(150, 78%, 36%);
+  --chart-4: hsl(32, 92%, 44%);
+  --chart-5: hsl(356, 82%, 50%);
+  --chart-6: hsl(265, 78%, 52%);
 
-  /* ─── Sidebar ─── */
-  --sidebar: hsl(43, 20%, 99%);
-  --sidebar-foreground: hsl(180, 24%, 12%);
-  --sidebar-primary: hsl(170, 95%, 34%);
+  /* ─── Glassmorphism ─────────────────────────────────── */
+  --glass-bg:     rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(13, 148, 136, 0.10);
+  --glass-blur:   blur(20px) saturate(180%);
+
+  /* ─── Sidebar ───────────────────────────────────────── */
+  --sidebar:                    hsl(0, 0%, 100%);
+  --sidebar-foreground:         hsl(180, 25%, 10%);
+  --sidebar-primary:            var(--primary);
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: hsl(43, 15%, 94%);
-  --sidebar-accent-foreground: hsl(180, 24%, 12%);
-  --sidebar-border: rgba(13, 148, 136, 0.08);
-  --sidebar-ring: hsl(170, 95%, 34%);
+  --sidebar-accent:             hsl(44, 14%, 94%);
+  --sidebar-accent-foreground:  hsl(180, 25%, 10%);
+  --sidebar-border:             rgba(13, 148, 136, 0.08);
+  --sidebar-ring:               var(--primary);
 
-  /* ─── Glassmorphism ─── */
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(13, 148, 136, 0.1);
-  --glass-blur: blur(20px);
-
-  /* ─── Solid Colors (Replacing Gradients) ─── */
-  --gradient-primary: var(--primary);
-  --gradient-soft: var(--primary-light);
-  --gradient-hero: var(--background);
+  /* ─── Z-Index Scale ─────────────────────────────────── */
+  --z-below:   -1;
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 20;
+  --z-modal:   30;
+  --z-popover: 40;
+  --z-toast:   50;
+  --z-top:     60;
 }
 
-/* ─── "إشعاع المعرفة" Premium Dark Mode ─── */
+/* ═══════════════════════════════════════════════════════
+   PREMIUM DARK MODE — "إشعاع المعرفة"
+   Tone: Deep Night Obsidian + Emerald Glow
+   ═══════════════════════════════════════════════════════ */
 .dark {
-  --background: hsl(180, 22%, 7%); /* Deep Night Obsidian */
-  --foreground: hsl(180, 20%, 98%); /* Slate 50 */
-  --card: hsl(180, 18%, 11%); /* Slate 850 - frosted slate surface */
-  --card-foreground: hsl(180, 20%, 98%);
-  --popover: hsl(180, 18%, 13%);
-  --popover-foreground: hsl(180, 20%, 98%);
+  --background:   hsl(180, 22%, 7%);
+  --foreground:   hsl(180, 16%, 96%);
+  --card:         hsl(180, 18%, 10%);
+  --card-foreground: hsl(180, 16%, 96%);
+  --popover:      hsl(180, 18%, 12%);
+  --popover-foreground: hsl(180, 16%, 96%);
+  --surface:      hsl(180, 18%, 10%);
+  --surface-raised: hsl(180, 16%, 13%);
 
-  --primary: hsl(170, 95%, 43%); /* The Emerald of Wisdom */
-  --primary-foreground: #FFFFFF;
-  --primary-light: rgba(0, 242, 254, 0.08);
-  --primary-hover: hsl(168, 100%, 65%);
+  --primary:              hsl(170, 90%, 42%);
+  --primary-foreground:   #FFFFFF;
+  --primary-light:        rgba(13, 148, 136, 0.10);
+  --primary-hover:        hsl(170, 88%, 52%);
+  --primary-50:           rgba(13, 148, 136, 0.08);
 
-  --secondary: hsl(43, 96%, 54%); /* Desert Gold */
-  --secondary-foreground: hsl(180, 22%, 7%);
-  --secondary-light: rgba(245, 158, 11, 0.08);
-  --secondary-hover: hsl(43, 100%, 68%);
+  --secondary:              hsl(43, 94%, 52%);
+  --secondary-foreground:   hsl(180, 22%, 7%);
+  --secondary-light:        rgba(202, 138, 4, 0.10);
+  --secondary-hover:        hsl(43, 94%, 62%);
+  --secondary-50:           rgba(202, 138, 4, 0.08);
 
-  --muted: hsl(180, 14%, 15%);
-  --muted-foreground: hsl(180, 12%, 78%);
-  --accent: hsl(180, 14%, 15%);
-  --accent-foreground: hsl(180, 20%, 98%);
+  --muted:              hsl(180, 14%, 15%);
+  --muted-foreground:   hsl(180, 10%, 72%);
+  --accent:             hsl(180, 14%, 15%);
+  --accent-foreground:  hsl(180, 16%, 96%);
 
-  --destructive: hsl(355, 90%, 60%);
+  --success:        hsl(150, 82%, 42%);
+  --success-light:  rgba(16, 185, 129, 0.12);
+  --warning:        hsl(32, 94%, 52%);
+  --warning-light:  rgba(245, 158, 11, 0.12);
+  --destructive:        hsl(356, 88%, 58%);
   --destructive-foreground: #FFFFFF;
-  --success: hsl(150, 84%, 43%);
-  --success-light: rgba(16, 185, 129, 0.12);
-  --warning: hsl(32, 95%, 52%);
-  --warning-light: rgba(245, 158, 11, 0.12);
-  --error: hsl(355, 90%, 60%);
-  --error-light: rgba(239, 68, 68, 0.12);
-  --info: hsl(195, 90%, 50%);
-  --info-light: rgba(59, 130, 246, 0.12);
+  --error:          hsl(356, 88%, 58%);
+  --error-light:    rgba(239, 68, 68, 0.12);
+  --info:           hsl(196, 90%, 50%);
+  --info-light:     rgba(59, 130, 246, 0.12);
 
-  --text-primary: hsl(180, 20%, 98%);
-  --text-secondary: hsl(180, 12%, 82%);
-  --text-muted: hsl(180, 10%, 62%);
-  --text-placeholder: hsl(180, 8%, 40%);
+  --text-primary:     hsl(180, 16%, 96%);
+  --text-secondary:   hsl(180, 10%, 80%);
+  --text-muted:       hsl(180, 8%, 58%);
+  --text-placeholder: hsl(180, 6%, 36%);
 
-  --border: rgba(0, 242, 254, 0.1);
-  --border-strong: rgba(0, 242, 254, 0.2);
-  --input: rgba(18, 32, 36, 0.65);
-  --input-background: hsl(180, 18%, 11%);
-  --input-border: rgba(0, 242, 254, 0.15);
-  --switch-background: hsl(180, 14%, 22%);
+  --border:        rgba(13, 148, 136, 0.12);
+  --border-strong: rgba(13, 148, 136, 0.24);
+  --border-subtle: rgba(13, 148, 136, 0.06);
+  --input:                 transparent;
+  --input-background:      hsl(180, 18%, 10%);
+  --input-border:          rgba(13, 148, 136, 0.18);
+  --input-border-focus:    var(--primary);
+  --switch-background:     hsl(180, 14%, 22%);
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 242, 254, 0.04);
-  --shadow-lg: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 8px 24px -4px rgba(0, 242, 254, 0.08);
-  --shadow-xl: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 12px 36px -6px rgba(0, 242, 254, 0.12);
-  --shadow-primary: 0 8px 30px rgba(0, 242, 254, 0.15);
-  --shadow-secondary: 0 8px 30px rgba(245, 158, 11, 0.15);
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm:  0 2px 6px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-lg:  0 10px 32px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-xl:  0 20px 52px rgba(0, 0, 0, 0.60), 0 8px 22px rgba(0, 0, 0, 0.40);
+  --shadow-2xl: 0 32px 68px rgba(0, 0, 0, 0.65), 0 12px 30px rgba(0, 0, 0, 0.45);
 
-  --glass-bg: rgba(18, 32, 36, 0.65);
-  --glass-border: rgba(0, 242, 254, 0.1);
-  --glass-blur: blur(16px);
+  --shadow-primary:   0 4px 20px rgba(13, 148, 136, 0.25), 0 2px 8px rgba(13, 148, 136, 0.15);
+  --shadow-secondary: 0 4px 20px rgba(202, 138, 4, 0.28), 0 2px 8px rgba(202, 138, 4, 0.18);
+  --shadow-emerald:   0 0 28px rgba(13, 148, 136, 0.25);
+  --shadow-gold:      0 0 32px rgba(202, 138, 4, 0.28);
 
-  --chart-1: hsl(170, 95%, 43%);
-  --chart-2: hsl(43, 96%, 54%);
-  --chart-3: hsl(150, 84%, 43%);
-  --chart-4: hsl(32, 95%, 52%);
-  --chart-5: hsl(355, 90%, 60%);
-  --chart-6: hsl(265, 90%, 65%);
+  --glass-bg:     rgba(15, 28, 28, 0.72);
+  --glass-border: rgba(13, 148, 136, 0.12);
+  --glass-blur:   blur(20px) saturate(180%);
 
-  --sidebar: hsl(180, 18%, 11%);
-  --sidebar-foreground: hsl(180, 20%, 98%);
-  --sidebar-primary: hsl(170, 95%, 43%);
+  --sidebar:                    hsl(180, 18%, 10%);
+  --sidebar-foreground:         hsl(180, 16%, 96%);
+  --sidebar-primary:            var(--primary);
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: hsl(180, 14%, 15%);
-  --sidebar-accent-foreground: hsl(180, 20%, 98%);
-  --sidebar-border: rgba(0, 242, 254, 0.1);
-  --sidebar-ring: hsl(170, 95%, 43%);
+  --sidebar-accent:             hsl(180, 14%, 15%);
+  --sidebar-accent-foreground:  hsl(180, 16%, 96%);
+  --sidebar-border:             rgba(13, 148, 136, 0.12);
+  --sidebar-ring:               var(--primary);
+
+  --chart-1: hsl(170, 90%, 42%);
+  --chart-2: hsl(43, 94%, 52%);
+  --chart-3: hsl(150, 82%, 42%);
+  --chart-4: hsl(32, 94%, 52%);
+  --chart-5: hsl(356, 88%, 58%);
+  --chart-6: hsl(265, 86%, 64%);
 }
 
+/* ─── Tailwind v4 @theme bridge ─────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  --color-background:   var(--background);
+  --color-foreground:   var(--foreground);
+  --color-card:         var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
+  --color-popover:      var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
+  --color-primary:      var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
+  --color-secondary:    var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted:        var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
+  --color-accent:       var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
+  --color-destructive:  var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
+  --color-border:       var(--border);
+  --color-input:        var(--input);
   --color-input-background: var(--input-background);
   --color-switch-background: var(--switch-background);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-chart-6: var(--chart-6);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --color-sidebar: var(--sidebar);
+  --color-ring:         var(--ring);
+  --color-chart-1:      var(--chart-1);
+  --color-chart-2:      var(--chart-2);
+  --color-chart-3:      var(--chart-3);
+  --color-chart-4:      var(--chart-4);
+  --color-chart-5:      var(--chart-5);
+  --color-chart-6:      var(--chart-6);
+  --radius-sm:          var(--radius-sm);
+  --radius-md:          var(--radius-md);
+  --radius-lg:          var(--radius-lg);
+  --radius-xl:          var(--radius-xl);
+  --color-sidebar:      var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-ring:   var(--sidebar-ring);
+  --color-success:      var(--success);
+  --color-error:        var(--error);
+  --color-warning:      var(--warning);
+  --color-info:         var(--info);
 }
 
+/* ─── Base Typography ───────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground;
+    transition: background-color 300ms var(--ease-smooth),
+                color 300ms var(--ease-smooth);
   }
 
   html {
     font-size: var(--font-size);
   }
 
-  /* Responsive Typography optimized for tajawal/cairo font-families */
+  /* Fluid Arabic-optimised headings */
   h1 {
-    font-size: 1.625rem;
-    font-weight: 800;
-    line-height: 1.4;
+    font-size: clamp(1.625rem, 4vw, 2.5rem);
+    font-weight: var(--font-weight-extrabold);
+    line-height: 1.35;
     letter-spacing: -0.01em;
   }
-
-  @media (min-width: 640px) {
-    h1 {
-      font-size: 1.875rem;
-    }
-  }
-
   h2 {
-    font-size: 1.3125rem;
-    font-weight: 700;
-    line-height: 1.45;
+    font-size: clamp(1.3rem, 3vw, 1.75rem);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.4;
+    letter-spacing: -0.005em;
   }
-
-  @media (min-width: 640px) {
-    h2 {
-      font-size: 1.4375rem;
-    }
-  }
-
   h3 {
-    font-size: 1.0625rem;
-    font-weight: 600;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    font-weight: var(--font-weight-semibold);
     line-height: 1.5;
   }
-
-  @media (min-width: 640px) {
-    h3 {
-      font-size: 1.1875rem;
-    }
-  }
-
   h4 {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: clamp(0.9375rem, 1.5vw, 1.0625rem);
+    font-weight: var(--font-weight-semibold);
     line-height: 1.5;
-  }
-
-  @media (min-width: 640px) {
-    h4 {
-      font-size: 1rem;
-    }
   }
 
   label {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     line-height: 1.5;
-  }
-
-  @media (min-width: 640px) {
-    label {
-      font-size: 0.9375rem;
-    }
   }
 
   button {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     line-height: 1.5;
   }
 
-  @media (min-width: 640px) {
-    button {
-      font-size: 0.9375rem;
-    }
-  }
-
-  input, textarea {
+  input, textarea, select {
     font-size: 0.9375rem;
-    font-weight: 400;
-    line-height: 1.7;
-  }
-
-  @media (min-width: 640px) {
-    input, textarea {
-      font-size: 1rem;
-    }
+    font-weight: var(--font-weight-normal);
+    line-height: 1.65;
   }
 }

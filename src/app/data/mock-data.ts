@@ -1,6 +1,6 @@
 // Mock data for La3efo platform - can be replaced with API calls
 
-export type AccountType = "individual" | "business" | "restaurant" | "clinic" | "doctor" | "activity";
+export type AccountType = "individual" | "business" | "restaurant" | "clinic" | "doctor" | "activity" | "admin";
 
 export interface User {
   id: string;
@@ -47,6 +47,7 @@ export interface Question {
   };
   votes: number;
   answers: number;
+  views?: number;
   tags: string[];
   location?: string;
   timestamp: string;

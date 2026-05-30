@@ -78,7 +78,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
           </p>
 
           {/* Error Details (Development only) */}
-          {process.env.NODE_ENV === "development" && error && (
+          {import.meta.env.DEV && error && (
             <details className="mb-6 text-right">
               <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground mb-2">
                 تفاصيل الخطأ (للمطورين)

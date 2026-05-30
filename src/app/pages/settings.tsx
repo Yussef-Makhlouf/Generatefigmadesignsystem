@@ -109,7 +109,7 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto animate-fade-in relative pb-8">
+    <div className="max-w-4xl w-full mx-auto animate-fade-in relative pb-8" >
       {/* Decorative Ambient Auroras */}
       <div className="absolute top-0 right-1/4 w-[350px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" />
       <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
@@ -122,7 +122,7 @@ export function SettingsPage() {
         <p className="text-sm text-text-secondary">إدارة حسابك وتفضيلاتك الرقمية بالكامل</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         {/* Responsive Tabs: icons-only on mobile, icons+labels on sm+ */}
         <TabsList className="w-full justify-start bg-card/45 border border-border/45 mb-6 overflow-x-auto rounded-2xl p-1.5 backdrop-blur-md scrollbar-none flex gap-1">
           <TabsTrigger
@@ -176,7 +176,7 @@ export function SettingsPage() {
         </TabsList>
 
         {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-6">
+        <TabsContent value="profile" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />
@@ -421,7 +421,7 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6">
+        <TabsContent value="notifications" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />
@@ -542,7 +542,7 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Privacy Tab */}
-        <TabsContent value="privacy" className="space-y-6">
+        <TabsContent value="privacy" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />
@@ -624,7 +624,7 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Appearance Tab */}
-        <TabsContent value="appearance" className="space-y-6">
+        <TabsContent value="appearance" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />
@@ -687,7 +687,7 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Security Tab */}
-        <TabsContent value="security" className="space-y-6">
+        <TabsContent value="security" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />
@@ -756,7 +756,7 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Reviews Tab */}
-        <TabsContent value="reviews" className="space-y-6">
+        <TabsContent value="reviews" className="space-y-6" dir="rtl">
           <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
             <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-primary rounded-full" />

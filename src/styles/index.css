@@ -2,7 +2,17 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/* ─── Global Typography Overhaul ─── */
+/* ═══════════════════════════════════════════════════════
+   KHAPEER — Global Premium CSS
+   Arabic-first. Calm. Stable. Production-Ready.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Root Typography ───────────────────────────────── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
   direction: rtl;
@@ -14,7 +24,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+  font-family: 'Tajawal', 'Cairo', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -25,37 +35,37 @@ code, pre, .font-mono {
   text-align: left;
 }
 
-/* Elegant numerals & statistics */
 .numeral, .font-numbers, .vote-number, .reputation-count {
   font-family: 'Outfit', 'Cairo', sans-serif;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-/* ─── Focus Accessible ─── */
+/* ─── Focus Accessible ──────────────────────────────── */
 *:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
 
-/* ─── Custom Scrollbar ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ─── Custom Premium Scrollbar ──────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: var(--radius-full);
+  transition: background 0.2s;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* ─── RTL Icon flip ─── */
+/* ─── RTL icon flip ─────────────────────────────────── */
 [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
 
-/* ─── Frosted Glassmorphism ─── */
+/* ═══════════════════════════════════════════════════════
+   GLASSMORPHISM
+   ═══════════════════════════════════════════════════════ */
 .glass {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -63,77 +73,118 @@ code, pre, .font-mono {
   border: 1px solid var(--glass-border);
 }
 
+/* Card — Elevation 2 (Default Interactive) */
 .premium-glass-card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
-
 .premium-glass-card:hover {
-  border-color: rgba(0, 242, 254, 0.25);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 242, 254, 0.05);
-  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--shadow-emerald);
+  transform: translateY(-3px);
 }
 
-/* Featured gold elements */
+/* Card — Gold featured */
 .premium-gold-card {
   background: var(--card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--secondary);
   box-shadow: var(--shadow-md);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
-
 .premium-gold-card:hover {
   border-color: var(--secondary-hover);
-  box-shadow: var(--shadow-lg), 0 0 25px rgba(245, 158, 11, 0.08);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+  transform: translateY(-3px);
 }
 
-/* ─── Card Elevation ─── */
-.card-sm   { box-shadow: var(--shadow-xs); }
-.card-md   { box-shadow: var(--shadow-md); }
-.card-lg   { box-shadow: var(--shadow-lg); }
+/* Card — Flat surface (no hover lift) */
+.surface-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Elevation helpers ──────────────────────────────── */
+.elevation-1 { box-shadow: var(--shadow-xs); }
+.elevation-2 { box-shadow: var(--shadow-sm); }
+.elevation-3 { box-shadow: var(--shadow-md); }
+.elevation-4 { box-shadow: var(--shadow-lg); }
+.elevation-5 { box-shadow: var(--shadow-xl); }
 
 .card-hover {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-smooth),
+              border-color var(--duration-normal) ease;
 }
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
-/* ─── Solid Brand Utilities (Replacing Gradients) ─── */
+/* ═══════════════════════════════════════════════════════
+   BRAND UTILITIES
+   ═══════════════════════════════════════════════════════ */
 .gradient-primary {
   background: var(--primary);
   color: var(--primary-foreground);
 }
-.gradient-text {
-  color: var(--primary);
+.gradient-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
 }
-.gradient-soft {
-  background: var(--primary-light);
-  color: var(--text-primary);
+.gradient-text   { color: var(--primary); }
+.gradient-soft   { background: var(--primary-light); color: var(--text-primary); }
+
+/* Premium brand gradient (header, hero accents) */
+.brand-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--primary-500) 0%,
+    hsl(168, 88%, 40%) 50%,
+    var(--secondary-600) 100%
+  );
 }
 
-/* ─── Modern Arabesque Geometric Pattern ─── */
+/* ─── Geometric Arabic Background Patterns ──────────── */
 .arabic-geometric-mesh {
   background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
-
 .arabic-geometric-mesh-fine {
-  background-image: radial-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: 16px 16px;
 }
+.pattern-arabic {
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(13, 148, 136, 0.025) 18px, rgba(13, 148, 136, 0.025) 19px),
+    repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(202, 138, 4, 0.02) 18px, rgba(202, 138, 4, 0.02) 19px);
+}
 
-/* ─── Animations & Micro-interactions ─── */
+/* ═══════════════════════════════════════════════════════
+   NAV PROGRESS BAR
+   ═══════════════════════════════════════════════════════ */
+#nav-progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  transform-origin: right;
+  z-index: var(--z-top);
+  pointer-events: none;
+  box-shadow: 0 0 8px var(--primary), 0 0 4px var(--secondary);
+}
+
+/* ═══════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
@@ -144,70 +195,100 @@ code, pre, .font-mono {
   from { opacity: 0; transform: translateX(20px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.94); }
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.3); }
-  70%  { box-shadow: 0 0 0 8px rgba(0, 242, 254, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0); }
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.35); }
+  70%  { box-shadow: 0 0 0 9px rgba(13, 148, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
 }
-@keyframes pulse-gold {
-  0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-  70%  { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-}
-@keyframes bounce-cta {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-4px); }
+@keyframes pulseGold {
+  0%   { box-shadow: 0 0 0 0 rgba(202, 138, 4, 0.4); }
+  70%  { box-shadow: 0 0 0 9px rgba(202, 138, 4, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(202, 138, 4, 0); }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+  50%       { transform: translateY(-5px); }
 }
-@keyframes gold-sweep {
-  0% { background-position: 200% 0; }
+@keyframes goldSweep {
+  0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-
-.animate-fade-in       { animation: fadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in-up    { animation: fadeInUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-slide-in      { animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-scale-in      { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-bounce-cta    { animation: bounce-cta 2s ease-in-out infinite; }
-.animate-float         { animation: float 3s ease-in-out infinite; }
-.animate-pulse-ring    { animation: pulse-ring 2.5s ease-in-out infinite; }
-.animate-pulse-gold    { animation: pulse-gold 2.5s ease-in-out infinite; }
-
-/* ─── Gold Sweep Animation ─── */
-.gold-shimmer-effect {
-  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.15) 30%, rgba(251, 191, 36, 0.3) 50%, rgba(245, 158, 11, 0.15) 70%, transparent);
-  background-size: 200% 100%;
-  animation: gold-sweep 3s infinite linear;
+@keyframes progressBar {
+  0%   { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes countUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes gradientFlow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Stagger children */
-.stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 50ms; }
-.stagger > *:nth-child(3) { animation-delay: 100ms; }
-.stagger > *:nth-child(4) { animation-delay: 150ms; }
-.stagger > *:nth-child(5) { animation-delay: 200ms; }
-.stagger > *:nth-child(6) { animation-delay: 250ms; }
+/* ─── Animation Utility Classes ─────────────────────── */
+.animate-fade-in       { animation: fadeIn 0.35s var(--ease-smooth) both; }
+.animate-fade-in-up    { animation: fadeInUp 0.45s var(--ease-smooth) both; }
+.animate-slide-in      { animation: slideInRight 0.35s var(--ease-smooth) both; }
+.animate-scale-in      { animation: scaleIn 0.30s var(--ease-spring) both; }
+.animate-float         { animation: float 3.5s ease-in-out infinite; }
+.animate-pulse-ring    { animation: pulseRing 2.5s ease-in-out infinite; }
+.animate-pulse-gold    { animation: pulseGold 2.5s ease-in-out infinite; }
+.animate-spin          { animation: spin 1s linear infinite; }
 
-/* ─── Skeleton Shimmer ─── */
-.skeleton {
-  background: linear-gradient(90deg, var(--muted) 25%, var(--card) 50%, var(--muted) 75%);
+/* Stagger children for list animations */
+.stagger > *:nth-child(1) { animation-delay:  0ms; }
+.stagger > *:nth-child(2) { animation-delay: 55ms; }
+.stagger > *:nth-child(3) { animation-delay: 110ms; }
+.stagger > *:nth-child(4) { animation-delay: 165ms; }
+.stagger > *:nth-child(5) { animation-delay: 220ms; }
+.stagger > *:nth-child(6) { animation-delay: 275ms; }
+.stagger > *:nth-child(7) { animation-delay: 330ms; }
+.stagger > *:nth-child(8) { animation-delay: 385ms; }
+
+/* ─── Gold Shimmer ──────────────────────────────────── */
+.gold-shimmer-effect {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(202, 138, 4, 0.14) 30%,
+    rgba(251, 191, 36, 0.28) 50%,
+    rgba(202, 138, 4, 0.14) 70%,
+    transparent
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: goldSweep 3s infinite linear;
+}
+
+/* ─── Skeleton Loading ──────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--muted) 25%,
+    color-mix(in srgb, var(--muted) 70%, var(--card)) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
   border-radius: var(--radius-md);
 }
 
-/* ─── Ripple Effect ─── */
+/* ─── Ripple Effect ─────────────────────────────────── */
 .ripple {
   position: relative;
   overflow: hidden;
@@ -216,58 +297,40 @@ code, pre, .font-mono {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s;
 }
 .ripple:active::after { opacity: 1; }
 
-/* ─── Badge Pulse (unread indicator) ─── */
-.badge-pulse::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: var(--destructive);
-  animation: pulse-ring 2s ease-in-out infinite;
-  z-index: -1;
+/* ─── Premium Input Glow ────────────────────────────── */
+.input-glow:focus-within {
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+  border-radius: var(--radius-lg);
 }
 
-/* ─── Verification Badge Glow ─── */
+/* ─── Verified Glow ─────────────────────────────────── */
 .verified-glow {
-  box-shadow: 0 0 0 2px var(--secondary), 0 0 12px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 0 2px var(--secondary), 0 0 14px rgba(202, 138, 4, 0.38);
 }
 
-/* ─── Vote Count Number ─── */
-.vote-number {
-  font-variant-numeric: tabular-nums;
-  transition: transform 0.15s ease, color 0.15s ease;
-}
-
-/* ─── Tag hover ─── */
+/* ─── Tag Pill ──────────────────────────────────────── */
 .tag-pill {
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-normal) var(--ease-spring);
 }
 .tag-pill:hover {
   background: var(--primary);
   color: var(--primary-foreground);
-  transform: scale(1.05) translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.2);
+  transform: scale(1.06) translateY(-1px);
+  box-shadow: var(--shadow-primary);
 }
 
-/* ─── Input Focus Glow ─── */
-.input-glow:focus-within {
-  box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
-}
-
-/* ─── Active Nav Indicator ─── */
-.nav-indicator {
-  position: relative;
-}
+/* ─── Active Nav Dot Indicator ──────────────────────── */
+.nav-indicator { position: relative; }
 .nav-indicator.active::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
@@ -277,35 +340,33 @@ code, pre, .font-mono {
   box-shadow: 0 0 8px var(--primary);
 }
 
-/* ─── Arabic Geometric Pattern (empty state bg) ─── */
-.pattern-arabic {
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 20px,
-      rgba(0, 242, 254, 0.02) 20px,
-      rgba(0, 242, 254, 0.02) 21px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 20px,
-      rgba(245, 158, 11, 0.02) 20px,
-      rgba(245, 158, 11, 0.02) 21px
-    );
+/* ─── Badge Pulse (unread) ──────────────────────────── */
+.badge-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--destructive);
+  animation: pulseRing 2s ease-in-out infinite;
+  z-index: -1;
 }
 
-/* ─── Prose for answer content ─── */
+/* ─── Vote Count ────────────────────────────────────── */
+.vote-number {
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.15s var(--ease-spring), color 0.15s ease;
+}
+
+/* ─── Prose for answers ─────────────────────────────── */
 .prose-arabic {
-  line-height: 1.95;
+  line-height: 2.0;
   word-break: break-word;
 }
-.prose-arabic p  { margin-bottom: 0.9em; }
-.prose-arabic strong { font-weight: 700; }
+.prose-arabic p       { margin-bottom: 0.9em; }
+.prose-arabic strong  { font-weight: 700; }
 .prose-arabic code {
   background: var(--muted);
-  padding: 0.125em 0.375em;
+  padding: 0.125em 0.4em;
   border-radius: var(--radius-sm);
   font-size: 0.875em;
   direction: ltr;
@@ -323,7 +384,7 @@ code, pre, .font-mono {
   border: 1px solid var(--border);
 }
 
-/* ─── Touch target minimum ─── */
+/* ─── Touch Targets ─────────────────────────────────── */
 .touch-target {
   min-height: 44px;
   min-width: 44px;
@@ -332,74 +393,6 @@ code, pre, .font-mono {
   justify-content: center;
 }
 
-/* ─── Safe Area for Mobile ─── */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* ─── Scrollbar hidden ─── */
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* ─── Responsive Spacing ─── */
-@media (max-width: 640px) {
-  .container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-}
-
-/* ─── Extra Small Breakpoint handled by Tailwind @custom-variant xs ─── */
-/* xs: classes now work natively via Tailwind – no manual CSS needed */
-
-/* ─── Mobile Optimizations ─── */
-@media (max-width: 640px) {
-  /* Reduce motion on mobile for better performance */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-}
-
-/* ─── Smooth scrolling on larger screens only ─── */
-@media (min-width: 1024px) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* ─── Prevent horizontal overflow globally ─── */
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-/* ─── Safe Area Insets (iOS notch + home bar) ─── */
-.safe-area-bottom {
-  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
-}
-
-.safe-area-top {
-  padding-top: env(safe-area-inset-top);
-}
-
-/* ─── Bottom Navigation Safe Area ─── */
-.bottom-nav-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-  height: calc(4rem + env(safe-area-inset-bottom));
-}
-
-/* ─── Touch Target: all interactive ─── */
 @media (max-width: 640px) {
   button:not([data-no-touch]),
   a:not([data-no-touch]),
@@ -408,13 +401,33 @@ html, body {
   }
 }
 
-/* ─── Horizontal Scroll Container ─── */
+/* ─── Safe Area ─────────────────────────────────────── */
+.safe-area-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+.safe-area-top    { padding-top: env(safe-area-inset-top); }
+.bottom-nav-safe  {
+  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(4rem + env(safe-area-inset-bottom));
+}
+
+/* ─── Smooth scroll (desktop only) ─────────────────── */
+@media (min-width: 1024px) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ─── Reduced motion ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Overflow helpers ──────────────────────────────── */
 .overflow-x-scroll-mobile {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-
-/* ─── Mobile Table Wrapper ─── */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -422,13 +435,66 @@ html, body {
   border-radius: var(--radius-lg);
 }
 
-/* ─── Responsive text truncation ─── */
-@media (max-width: 480px) {
-  .truncate-mobile {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+/* ─── Container responsive ──────────────────────────── */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 }
 
+/* ─── Gradient flow background (hero sections) ──────── */
+.gradient-flow {
+  background: linear-gradient(270deg, var(--primary), var(--secondary), var(--primary));
+  background-size: 400% 400%;
+  animation: gradientFlow 8s ease infinite;
+}
+
+/* ─── Modal / Dialog Backdrop ───────────────────────── */
+.backdrop-premium {
+  background: rgba(7, 18, 18, 0.72);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+/* ─── Progress bar (page navigation) ───────────────── */
+.nav-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  z-index: 9999;
+  transform-origin: left;
+  box-shadow: 0 0 10px var(--primary), 0 0 5px rgba(202, 138, 4, 0.4);
+}
+
+/* ─── Floating Label Input ──────────────────────────── */
+.floating-label-wrapper {
+  position: relative;
+}
+.floating-label-wrapper label {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  color: var(--text-placeholder);
+  pointer-events: none;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  transform-origin: right top;
+  background: transparent;
+  padding: 0 0.25rem;
+}
+.floating-label-wrapper input:focus ~ label,
+.floating-label-wrapper input:not(:placeholder-shown) ~ label {
+  top: 0;
+  transform: translateY(-50%) scale(0.8);
+  color: var(--primary);
+  background: var(--card);
+}
+.floating-label-wrapper input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}

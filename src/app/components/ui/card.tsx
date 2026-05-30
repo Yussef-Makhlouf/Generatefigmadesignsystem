@@ -1,19 +1,44 @@
 import * as React from "react";
-
 import { cn } from "./utils";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card"
-      className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border",
-        className,
-      )}
-      {...props}
-    />
-  );
+export interface CardProps extends React.ComponentProps<"div"> {
+  /**
+   * Visual preset variant:
+   * - 'default': standard premium card
+   * - 'glass': premium ambient frosted glass
+   * - 'gold': desert gold accented card for featured items
+   * - 'surface': flat card with minor border
+   */
+  variant?: "default" | "glass" | "gold" | "surface";
+  /**
+   * Enable premium spring hover lift and shadow magnification.
+   */
+  hoverable?: boolean;
 }
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = "default", hoverable = false, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        data-slot="card"
+        className={cn(
+          "flex flex-col gap-6 rounded-2xl border text-card-foreground transition-all duration-280 ease-smooth",
+          // Variants
+          variant === "default" && "bg-card border-neutral-200 dark:border-neutral-800 shadow-sm",
+          variant === "glass" && "premium-glass-card",
+          variant === "gold" && "premium-gold-card",
+          variant === "surface" && "surface-card",
+          // Hover lift
+          hoverable && "card-hover cursor-pointer",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+Card.displayName = "Card";
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -27,26 +52,29 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+CardHeader.displayName = "CardHeader";
 
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <h4
       data-slot="card-title"
-      className={cn("leading-none", className)}
+      className={cn("leading-none font-heading font-bold text-neutral-900 dark:text-neutral-50", className)}
       {...props}
     />
   );
 }
+CardTitle.displayName = "CardTitle";
 
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("text-muted-foreground", className)}
+      className={cn("text-muted-foreground text-sm leading-relaxed", className)}
       {...props}
     />
   );
 }
+CardDescription.displayName = "CardDescription";
 
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -60,6 +88,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+CardAction.displayName = "CardAction";
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -70,6 +99,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+CardContent.displayName = "CardContent";
 
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -80,6 +110,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+CardFooter.displayName = "CardFooter";
 
 export {
   Card,

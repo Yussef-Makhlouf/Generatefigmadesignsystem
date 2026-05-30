@@ -17,33 +17,83 @@ import { TagDetailPage } from "./pages/tags";
 import { SavedPage } from "./pages/saved";
 import { ReputationPage } from "./pages/reputation";
 import { Layout } from "./components/layout";
+import { ProtectedRoute } from "./components/protected-route";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
+      // ── Public routes ───────────────────────────────
       { index: true, element: <HomePage /> },
-      { path: "search", element: <SearchPage /> },
-      { path: "questions/new", element: <NewQuestionPage /> },
-      { path: "questions/:id", element: <QuestionDetailPage /> },
+      { path: "search",        element: <SearchPage /> },
+      { path: "leaderboard",   element: <LeaderboardPage /> },
+      { path: "spaces",        element: <SpacesPage /> },
+      { path: "help",          element: <HelpPage /> },
+      { path: "tags/:tag",     element: <TagDetailPage /> },
       { path: "profile/:username", element: <ProfilePage /> },
-      { path: "notifications", element: <NotificationsPage /> },
-      { path: "leaderboard", element: <LeaderboardPage /> },
-      { path: "spaces", element: <SpacesPage /> },
-      { path: "settings", element: <SettingsPage /> },
-      { path: "help", element: <HelpPage /> },
-      { path: "admin", element: <AdminPage /> },
-      { path: "tags/:tag", element: <TagDetailPage /> },
-      { path: "saved", element: <SavedPage /> },
-      { path: "reputation", element: <ReputationPage /> },
+      { path: "questions/:id", element: <QuestionDetailPage /> },
+
+      // ── Authenticated-user routes ───────────────────
+      {
+        path: "questions/new",
+        element: (
+          <ProtectedRoute require="user">
+            <NewQuestionPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <ProtectedRoute require="user">
+            <NotificationsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "saved",
+        element: (
+          <ProtectedRoute require="user">
+            <SavedPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "reputation",
+        element: (
+          <ProtectedRoute require="user">
+            <ReputationPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute require="user">
+            <SettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      // ── Admin-only routes ───────────────────────────
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute require="admin">
+            <AdminPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      // ── Fallback ────────────────────────────────────
       { path: "*", element: <NotFoundPage /> },
     ],
   },
   {
     path: "/auth",
     children: [
-      { path: "login", element: <LoginPage /> },
+      { path: "login",    element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
     ],
   },
