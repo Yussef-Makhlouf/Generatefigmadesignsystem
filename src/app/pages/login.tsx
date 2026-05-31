@@ -6,7 +6,7 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
 import { Badge } from "../components/ui/badge";
-import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft, Star, Trophy, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft, Star, Trophy, ArrowRight, Quote } from "lucide-react";
 import { motion } from "motion/react";
 import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
@@ -234,29 +234,46 @@ export function LoginPage() {
           </div>
 
           {/* Testimonial component (Featured Expert highlight) */}
-          <Card className="premium-glass-card border border-white/10 p-6 rounded-2xl relative overflow-hidden shadow-lg backdrop-blur-xl">
-            <div className="absolute top-0 left-0 w-24 h-24 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
+          <div className="bg-neutral-900/60 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 rounded-2xl relative overflow-hidden shadow-2xl group hover:border-primary/30 transition-all duration-300">
+            {/* Ambient subtle light spots inside */}
+            <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-secondary/5 blur-2xl pointer-events-none" />
             
-            <div className="flex items-center gap-1 mb-3 text-yellow-500">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-yellow-500 shrink-0" />
-              ))}
+            {/* Editorial quote backdrop */}
+            <Quote className="absolute -top-2 left-4 h-16 w-16 text-primary/10 -rotate-12 pointer-events-none" />
+            
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex items-center gap-0.5 text-amber-500">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-amber-500 shrink-0" />
+                ))}
+              </div>
+              <Badge className="bg-primary/15 text-primary border border-primary/20 text-[10px] rounded-md px-2 py-0.5 font-medium">
+                مساهم متميز
+              </Badge>
             </div>
             
-            <p className="text-neutral-200 text-xs sm:text-sm leading-relaxed italic mb-4">
+            <p className="text-neutral-100 text-sm leading-relaxed font-normal mb-6 relative z-10">
               "ساعدتني منصة خبير في مشاركة مساهماتي التقنية وتطوير مجتمعات المطورين العرب، كما أتاحت لي فرصة التعرف على نخبة من المستشارين والخبراء."
             </p>
 
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-white text-sm border border-white/10 shadow-md">
+            <div className="flex items-center gap-3.5 relative z-10 pt-4 border-t border-white/[0.05]">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30 text-primary-300 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
                 س
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-white">سارة علي</span>
-                <span className="text-[10px] text-neutral-400 font-medium">مهندسة برمجيات · ٢٨٤٠ نقطة سمعة</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-semibold text-white">سارة علي</span>
+                <div className="flex items-center gap-2 text-xs text-neutral-400 font-medium">
+                  <span>مهندسة برمجيات</span>
+                  <span className="w-1 h-1 rounded-full bg-neutral-700" />
+                  <div className="flex items-center gap-1 text-amber-400/90 font-numbers">
+                    <Trophy className="h-3 w-3" />
+                    <span>٢,٨٤٠ نقطة سمعة</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Stats quick strip */}
           <div className="grid grid-cols-3 gap-4 pt-4">

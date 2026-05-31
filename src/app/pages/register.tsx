@@ -259,15 +259,7 @@ export function RegisterPage() {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-secondary/5 blur-3xl pointer-events-none" style={{ animationDelay: "2s" }} />
         <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-25 pointer-events-none" />
 
-        {/* Back button */}
-        <Button
-          variant="ghost"
-          className="absolute top-6 right-6 text-foreground hover:bg-muted rounded-xl"
-          onClick={() => navigate("/")}
-        >
-          <span>الرئيسية</span>
-          <ChevronLeft className="h-4 w-4 mr-1.5 flip-rtl" />
-        </Button>
+     
 
         <div className="w-full max-w-5xl relative z-10 grid md:grid-cols-12 gap-8 items-center py-6">
           {/* Left side - Perks (desktop only) */}
