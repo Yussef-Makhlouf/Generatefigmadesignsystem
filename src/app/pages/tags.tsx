@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router";
+import { useNavigate, useParams, Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { supabase } from "../../lib/supabase";
 import { questionToCardProps } from "../../lib/database.types";
 import type { Question } from "../../lib/database.types";
+import { useAppState } from "../context/AppStateContext";
 
 const TAG_COLORS: Record<string, { color: string; bgColor: string }> = {
   "برمجة":        { color: "text-primary",                          bgColor: "bg-primary-light border-primary/20" },
@@ -37,6 +38,7 @@ const DEFAULT_COLORS = { color: "text-primary", bgColor: "bg-primary-light borde
 export function TagDetailPage() {
   const { tag } = useParams<{ tag: string }>();
   const navigate = useNavigate();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes = {} } = useAppState();
   const [activeTab, setActiveTab] = useState("recent");
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -330,6 +332,10 @@ export function TagDetailPage() {
                     <QuestionCard
                       key={q.id}
                       {...questionToCardProps(q)}
+                      isBookmarked={bookmarkedIds.includes(q.id)}
+                      userVote={userVotes[q.id]}
+                      onVote={(dir) => voteQuestion(q.id, dir)}
+                      onBookmark={() => toggleBookmark(q.id)}
                       onClick={() => navigate(`/questions/${q.id}`)}
                     />
                   ))

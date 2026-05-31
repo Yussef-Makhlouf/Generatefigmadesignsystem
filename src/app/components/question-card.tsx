@@ -24,6 +24,7 @@ interface QuestionCardProps {
   timestamp: string;
   isBookmarked?: boolean;
   views?: number;
+  userVote?: "up" | "down" | null;
   onVote?: (direction: "up" | "down") => void;
   onBookmark?: () => void;
   onShare?: () => void;
@@ -42,6 +43,7 @@ export function QuestionCard({
   timestamp,
   isBookmarked: initialBookmarked = false,
   views = 0,
+  userVote = null,
   onVote,
   onBookmark,
   onShare,
@@ -96,7 +98,7 @@ export function QuestionCard({
         <div className="flex gap-2 sm:gap-4">
           {/* Vote Column */}
           <div className="flex-shrink-0 pt-0.5">
-            <VoteButtons votes={votes} onVote={onVote} />
+            <VoteButtons votes={votes} userVote={userVote} onVote={onVote} />
           </div>
 
           {/* Content */}

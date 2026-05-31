@@ -297,6 +297,7 @@ export function QuestionDetailPage() {
     voteAnswer,
     addAnswer,
     toggleBookmark,
+    userVotes = {},
   } = useAppState();
 
   // ── Per-question data (hook fetches directly from Supabase) ──
@@ -684,6 +685,7 @@ export function QuestionDetailPage() {
                 <div className="shrink-0">
                   <VoteButtons
                     votes={question.votes}
+                    userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     size="md"
                   />
@@ -887,6 +889,7 @@ export function QuestionDetailPage() {
                         <div className="shrink-0">
                           <VoteButtons
                             votes={answer.votes}
+                            userVote={userVotes[answer.id]}
                             onVote={(dir) => voteAnswer(answer.id, dir)}
                           />
                         </div>

@@ -23,8 +23,17 @@ export async function castVote(
   }
 
   if (existingVote) {
-    // If the vote type is already correct, do nothing
+    // If the vote type is already correct, delete/remove the vote (cancel it)
     if (existingVote.vote_type === voteType) {
+      const { error: deleteError } = await supabase
+        .from("votes")
+        .delete()
+        .eq("id", existingVote.id);
+
+      if (deleteError) {
+        console.error("castVote delete vote error:", deleteError);
+        return false;
+      }
       return true;
     }
     // Update the existing vote type

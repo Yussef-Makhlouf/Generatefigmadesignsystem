@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 export function SavedPage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, toggleBookmark } = useAppState();
+  const { questions, bookmarkedIds, toggleBookmark, voteQuestion, userVotes = {} } = useAppState();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFolder, setActiveFolder] = useState("الكل");
@@ -174,6 +174,9 @@ export function SavedPage() {
                     <QuestionCard
                       {...questionToCardProps(item)}
                       isBookmarked={true}
+                      userVote={userVotes[item.id]}
+                      onVote={(dir) => voteQuestion(item.id, dir)}
+                      onBookmark={() => toggleBookmark(item.id)}
                       onClick={() => navigate(`/questions/${item.id}`)}
                     />
                     

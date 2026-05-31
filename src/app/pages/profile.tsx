@@ -67,7 +67,8 @@ export function ProfilePage() {
     toggleBookmark,
     users,
     reviews,
-    addReview
+    addReview,
+    userVotes,
   } = useAppState();
 
   const isOwnProfile = !username || username === "me" || username === currentUser.username;
@@ -829,6 +830,7 @@ export function ProfilePage() {
                   key={question.id}
                   {...question}
                   isBookmarked={bookmarkedIds.includes(question.id)}
+                  userVote={userVotes[question.id]}
                   onVote={(dir) => voteQuestion(question.id, dir)}
                   onBookmark={() => toggleBookmark(question.id)}
                   onClick={() => navigate(`/questions/${question.id}`)}
@@ -862,6 +864,7 @@ export function ProfilePage() {
                     key={question.id}
                     {...question}
                     isBookmarked={bookmarkedIds.includes(question.id)}
+                    userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
                     onClick={() => navigate(`/questions/${question.id}`)}
@@ -891,6 +894,7 @@ export function ProfilePage() {
                     key={question.id}
                     {...question}
                     isBookmarked={bookmarkedIds.includes(question.id)}
+                    userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
                     onClick={() => navigate(`/questions/${question.id}`)}
@@ -974,6 +978,7 @@ export function ProfilePage() {
                     key={question.id}
                     {...question}
                     isBookmarked={bookmarkedIds.includes(question.id)}
+                    userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
                     onClick={() => navigate(`/questions/${question.id}`)}

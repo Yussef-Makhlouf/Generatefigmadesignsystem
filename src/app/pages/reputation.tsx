@@ -34,7 +34,11 @@ import { supabase } from "../../lib/supabase";
 import type { ReputationLog } from "../../lib/database.types";
 
 // ── Map reputation log reason → display info ─────────────────
-function mapLogToEvent(log: ReputationLog) {
+function mapLogToEvent(
+  log: ReputationLog,
+  questions: Array<{ id: string; title?: string }>,
+  answers: Array<{ id: string; content?: string; question_id?: string; questionId?: string }>
+) {
   const positive = log.points >= 0;
   const iconMap: Record<string, any> = {
     answer_accepted: CheckCircle2,
@@ -59,12 +63,31 @@ function mapLogToEvent(log: ReputationLog) {
     downvote: "تصويت سلبي",
     bookmark: "حُفظ سؤالك",
   };
+
+  // Resolve ref_id → human-readable description
+  let description = "";
+  if (log.ref_id) {
+    const refType = log.ref_type ?? reason;
+    if (refType === "question" || refType === "upvote_question" || refType === "question_asked" || refType === "bookmark") {
+      const q = questions.find((q) => q.id === log.ref_id);
+      description = q?.title ? `"${q.title.slice(0, 60)}${q.title.length > 60 ? "…" : ""}"` : "سؤال محذوف";
+    } else if (refType === "answer" || refType === "upvote_answer" || refType === "answer_accepted" || refType === "downvote") {
+      const a = answers.find((a) => a.id === log.ref_id);
+      if (a?.content) {
+        const snippet = a.content.replace(/<[^>]+>/g, "").trim();
+        description = `"${snippet.slice(0, 60)}${snippet.length > 60 ? "…" : ""}"`;
+      } else {
+        description = "إجابة محذوفة";
+      }
+    }
+  }
+
   return {
     id: log.id,
     icon: Icon,
     color,
     title: titleMap[reason] ?? reason,
-    description: log.ref_id ? `ref: ${log.ref_id}` : "",
+    description,
     points: log.points,
     timestamp: new Date(log.created_at).toLocaleDateString("ar-SA"),
   };
@@ -120,7 +143,7 @@ export function ReputationPage() {
     enabled: !!userId && userId !== "1",
   });
 
-  const recentEvents = reputationLogs.slice(0, 10).map(mapLogToEvent);
+  const recentEvents = reputationLogs.slice(0, 10).map((log) => mapLogToEvent(log, questions, answers));
 
   // Build chart data from real logs
   const buildChartData = () => {

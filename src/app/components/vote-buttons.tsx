@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -20,6 +20,10 @@ export function VoteButtons({
 }: VoteButtonsProps) {
   const [votes, setVotes] = useState(initialVotes);
   const [userVote, setUserVote] = useState<"up" | "down" | null>(initialUserVote);
+
+  // Sync with external prop changes (e.g. after DB refetch)
+  useEffect(() => { setVotes(initialVotes); }, [initialVotes]);
+  useEffect(() => { setUserVote(initialUserVote ?? null); }, [initialUserVote]);
 
   const handleVote = (direction: "up" | "down") => {
     let newVotes = votes;

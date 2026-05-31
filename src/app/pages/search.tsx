@@ -35,7 +35,7 @@ const SORT_OPTIONS = [
 
 export function SearchPage() {
   const navigate = useNavigate();
-  const { bookmarkedIds, voteQuestion, toggleBookmark } = useAppState();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes = {} } = useAppState();
   const { categories: backendCategories } = useCategories(10);
 
   // Merge backend cats into the dropdown ("all" is always first)
@@ -246,6 +246,7 @@ export function SearchPage() {
                       key={question.id}
                       {...questionToCardProps(question)}
                       isBookmarked={bookmarkedIds.includes(question.id)}
+                      userVote={userVotes[question.id]}
                       onVote={(dir) => voteQuestion(question.id, dir)}
                       onBookmark={() => toggleBookmark(question.id)}
                       onClick={() => navigate(`/questions/${question.id}`)}

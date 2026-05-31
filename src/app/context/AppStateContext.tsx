@@ -28,6 +28,7 @@ interface AppState {
   bookmarkedIds: string[];
   reviews: any[];
   isQuestionsLoading: boolean;
+  userVotes: { [targetId: string]: "up" | "down" };
 }
 
 interface AppStateContextProps extends AppState {
@@ -310,6 +311,36 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     enabled: !!currentUserId,
   });
 
+  // User votes query
+  const { data: userVotes = [] } = useQuery({
+    queryKey: ["userVotes", currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      const { data, error } = await supabase
+        .from("votes")
+        .select("target_id, vote_type")
+        .eq("user_id", currentUserId);
+      if (error) {
+        console.error("Error fetching user votes:", error);
+        return [];
+      }
+      return data ?? [];
+    },
+    enabled: !!currentUserId,
+  });
+
+  const userVotesMap = React.useMemo(() => {
+    const map: { [targetId: string]: "up" | "down" } = {};
+    if (userVotes && Array.isArray(userVotes)) {
+      userVotes.forEach((v: any) => {
+        if (v && v.target_id && v.vote_type) {
+          map[v.target_id] = v.vote_type as "up" | "down";
+        }
+      });
+    }
+    return map;
+  }, [userVotes]);
+
   // Notifications query
   const { data: notifications = [] } = useQuery<NotificationItem[]>({
     queryKey: ["notifications", currentUserId],
@@ -448,6 +479,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       queryClient.invalidateQueries({ queryKey: ["answers"] });
+      queryClient.invalidateQueries({ queryKey: ["userVotes", currentUserId] });
     },
   });
 
@@ -639,6 +671,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         bookmarkedIds,
         reviews: reviews ?? [],
         isQuestionsLoading,
+        userVotes: userVotesMap,
         addQuestion,
         deleteQuestion,
         addAnswer,

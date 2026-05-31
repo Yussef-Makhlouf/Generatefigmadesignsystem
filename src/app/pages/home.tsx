@@ -30,7 +30,7 @@ function formatArabicNumber(n: number): string {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [], isQuestionsLoading } = useAppState();
+  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [], isQuestionsLoading, userVotes = {} } = useAppState();
   const [filter, setFilter] = useState("recent");
 
   // Map real database profiles of experts/businesses or high reputation users
@@ -346,6 +346,7 @@ export function HomePage() {
                   <QuestionCard
                     {...questionToCardProps(q)}
                     isBookmarked={bookmarkedIds.includes(q.id)}
+                    userVote={userVotes[q.id]}
                     onVote={(dir) => voteQuestion(q.id, dir)}
                     onBookmark={() => toggleBookmark(q.id)}
                     onClick={() => navigate(`/questions/${q.id}`)}
