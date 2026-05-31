@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap, LogOut } from "lucide-react";
+import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap, LogOut, Shield } from "lucide-react";
 import { ReputationBadge } from "./reputation-badge";
 import { useAppState } from "../context/AppStateContext";
 import { useCategories } from "../../lib/hooks/use-categories";
@@ -32,6 +32,7 @@ export function DesktopSidebar() {
   };
 
   const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
+  const isAdmin = currentUser?.accountType === "admin";
   
   const userQuestionsCount = questions.filter(q => q.author_id === currentUser?.id).length;
   const userAnswersCount = answers.filter(a => a.author_id === currentUser?.id).length;
@@ -41,13 +42,18 @@ export function DesktopSidebar() {
       ? location.pathname === "/"
       : location.pathname + location.search === path || location.pathname === path;
 
+  const activeLinks = [...QUICK_LINKS];
+  if (isAdmin) {
+    activeLinks.push({ icon: Shield, label: "لوحة التحكم", path: "/admin" });
+  }
+
   return (
     <aside className="hidden md:flex flex-col w-60 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pb-6 gap-3 pt-4">
 
       {/* Quick Links */}
       <Card className="p-2 shadow-sm border-border/60" style={{ borderRadius: "var(--radius-lg)" }}>
         <nav className="space-y-0.5">
-          {QUICK_LINKS.map((link) => {
+          {activeLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.path);
             return (

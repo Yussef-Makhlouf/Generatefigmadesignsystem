@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  PenSquare, Moon, Sun, Bell, Search, X, Zap, LogOut, ChevronDown, User
+  PenSquare, Moon, Sun, Bell, Search, X, Zap, LogOut, ChevronDown, User, Shield
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 
@@ -258,6 +258,16 @@ export function Header() {
                         <ChevronDown className="h-4 w-4 text-muted-foreground rotate-[-90deg]" />
                         <span>الإعدادات</span>
                       </Link>
+                      {currentUser?.accountType === "admin" && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted/60 transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Shield className="h-4 w-4 text-muted-foreground" />
+                          <span>لوحة التحكم</span>
+                        </Link>
+                      )}
                       <div className="border-t border-border/40 mt-1 pt-1">
                         <button
                           onClick={async () => {

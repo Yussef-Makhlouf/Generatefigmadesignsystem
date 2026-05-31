@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router";
 import { HomePage } from "./pages/home";
 import { LoginPage } from "./pages/login";
 import { RegisterPage } from "./pages/register";
+import { ForgotPasswordPage } from "./pages/forgot-password";
+import { ResetPasswordPage } from "./pages/reset-password";
 import { NewQuestionPage } from "./pages/new-question";
 import { QuestionDetailPage } from "./pages/question-detail";
 import { SearchPage } from "./pages/search";
@@ -95,6 +97,8 @@ export const router = createBrowserRouter([
     children: [
       { path: "login",    element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "reset-password",  element: <ResetPasswordPage /> },
     ],
   },
 ]);

@@ -46,6 +46,30 @@ export function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [showDevMode, setShowDevMode] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+
+  // Check URL params for dev=true on load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("dev") === "true") {
+      setShowDevMode(true);
+    }
+  }, []);
+
+  const handleHeaderClick = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next === 5) {
+        setShowDevMode(true);
+        toast.success("🔓 تم تفعيل وضع المطور السري بنجاح!", { position: "bottom-center" });
+        return 0;
+      } else if (next > 1) {
+        toast.info(`انقر ${5 - next} متبقية لتفعيل وضع المطور`, { position: "bottom-center", duration: 1000 });
+      }
+      return next;
+    });
+  };
 
   const [settings, setSettings] = useState<UserSettings>(() => getDefaultSettings());
 
@@ -423,8 +447,11 @@ export function SettingsPage() {
       <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-primary mb-1.5">
+      <div className="mb-6 sm:mb-8 select-none">
+        <h1 
+          className="text-2xl sm:text-3xl font-extrabold tracking-tight text-primary mb-1.5 cursor-default active:scale-95 transition-transform"
+          onClick={handleHeaderClick}
+        >
           الإعدادات
         </h1>
         <p className="text-sm text-text-secondary">إدارة حسابك وتفضيلاتك الرقمية بالكامل</p>
@@ -1241,6 +1268,80 @@ export function SettingsPage() {
               تسجيل الخروج
             </Button>
           </div>
+
+          {/* Secret Developer Section */}
+          {showDevMode && (
+            <div className="premium-glass-card p-6 border border-primary/30 bg-primary/[0.02] rounded-2xl shadow-lg relative overflow-hidden mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
+              <div className="flex items-start gap-4 mb-5">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <Shield className="h-5 w-5 animate-pulse" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-primary mb-1">لوحة الإشراف والتطوير السرية</h2>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    هذا القسم سري ولا يظهر إلا للمطورين. يمكنك ترقية حسابك إلى مسؤول لتجربة واجهات وميزات المشرفين، أو إلغاء الترقية للعودة لحساب عادي واختبار نظام السرية.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {currentUser?.accountType === "admin" ? (
+                  <Button
+                    variant="destructive"
+                    className="rounded-xl font-bold text-xs"
+                    disabled={isSaving}
+                    onClick={async () => {
+                      setIsSaving(true);
+                      try {
+                        const { updateUserAccountType } = await import("../../lib/services");
+                        const success = await updateUserAccountType(currentUser.id, "individual");
+                        if (success) {
+                          toast.success("تم إلغاء ترقية حسابك إلى مستخدم عادي. ستختفي لوحة التحكم والروابط تماماً.", { position: "bottom-center" });
+                          // Refresh page after a short delay
+                          setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                          toast.error("فشل إلغاء ترقية الحساب.");
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        toast.error("حدث خطأ غير متوقع.");
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                  >
+                    إلغاء الترقية (العودة لعضو مستقل)
+                  </Button>
+                ) : (
+                  <Button
+                    className="rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-md shadow-primary/20"
+                    disabled={isSaving}
+                    onClick={async () => {
+                      setIsSaving(true);
+                      try {
+                        const { updateUserAccountType } = await import("../../lib/services");
+                        const success = await updateUserAccountType(currentUser.id, "admin");
+                        if (success) {
+                          toast.success("تهانينا! تم ترقيتك إلى مسؤول (أدمن). ستظهر لك روابط لوحة التحكم فوراً.", { position: "bottom-center" });
+                          setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                          toast.error("فشل ترقية الحساب.");
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        toast.error("حدث خطأ غير متوقع.");
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                  >
+                    ترقية حسابي فوراً إلى مسؤول (Admin)
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="premium-glass-card p-6 border border-destructive/25 bg-destructive/[0.02] rounded-2xl shadow-md">
             <div className="flex items-start gap-4 mb-5">

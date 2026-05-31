@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Shield, LogIn, Crown, Lock, ChevronLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAppState } from "../context/AppStateContext";
+import { NotFoundPage } from "../pages/not-found";
 
 type RequiredRole = "user" | "admin";
 
@@ -41,6 +42,9 @@ export function ProtectedRoute({
   }
 
   if (!hasAccess) {
+    if (require === "admin") {
+      return <NotFoundPage />;
+    }
     return <AccessDeniedOverlay role={require} />;
   }
 

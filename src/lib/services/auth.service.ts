@@ -112,3 +112,31 @@ export async function updateUserAccountType(
   }
   return true;
 }
+
+// ── Request Password Reset Link ─────────────────────────────
+export async function sendPasswordReset(email: string): Promise<{ success: boolean; error: string | null }> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/auth/reset-password`,
+  });
+
+  if (error) {
+    console.error("sendPasswordReset error:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, error: null };
+}
+
+// ── Complete Password Reset ─────────────────────────────────
+export async function completePasswordReset(password: string): Promise<{ success: boolean; error: string | null }> {
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) {
+    console.error("completePasswordReset error:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, error: null };
+}

@@ -129,9 +129,9 @@ export function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-xs text-neutral-300 font-medium">كلمة المرور</Label>
-                  <button type="button" className="text-[11px] text-secondary hover:underline transition-colors font-medium">
+                  <Link to="/auth/forgot-password" className="text-[11px] text-secondary hover:underline transition-colors font-medium">
                     نسيت كلمة المرور؟
-                  </button>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Input
