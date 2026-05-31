@@ -18,6 +18,9 @@ import { HelpPage } from "./pages/help";
 import { TagDetailPage } from "./pages/tags";
 import { SavedPage } from "./pages/saved";
 import { ReputationPage } from "./pages/reputation";
+import { AboutPage } from "./pages/about";
+import { PrivacyPage } from "./pages/privacy";
+import { TermsPage } from "./pages/terms";
 import { Layout } from "./components/layout";
 import { ProtectedRoute } from "./components/protected-route";
 
@@ -32,6 +35,9 @@ export const router = createBrowserRouter([
       { path: "leaderboard",   element: <LeaderboardPage /> },
       { path: "spaces",        element: <SpacesPage /> },
       { path: "help",          element: <HelpPage /> },
+      { path: "about",         element: <AboutPage /> },
+      { path: "privacy",       element: <PrivacyPage /> },
+      { path: "terms",         element: <TermsPage /> },
       { path: "tags/:tag",     element: <TagDetailPage /> },
       { path: "profile/:username", element: <ProfilePage /> },
       { path: "questions/:id", element: <QuestionDetailPage /> },

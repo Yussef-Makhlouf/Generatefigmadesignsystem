@@ -237,7 +237,7 @@ export function Header() {
                 {userMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-card shadow-xl border border-border/60 rounded-2xl z-50 py-2 animate-in">
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-card shadow-xl border border-border/60 rounded-2xl z-50 py-2 animate-in">
                       <div className="px-4 py-3 border-b border-border/40">
                         <p className="text-sm font-bold text-foreground truncate">{currentUser?.name}</p>
                         <p className="text-xs text-muted-foreground truncate">@{currentUser?.username}</p>
