@@ -26,18 +26,18 @@ interface UploadingImage { file: File; preview: string; uploading: boolean; url?
 const DRAFT_KEY = "khapeer_new_question_draft";
 
 const CATEGORIES = [
-  { id: "tech",       label: "تقنية وبرمجيات",     icon: "💻", color: "from-blue-500/15 to-cyan-500/10 border-blue-500/30 text-blue-400" },
-  { id: "education",  label: "تعليم وأكاديميا",     icon: "🎓", color: "from-emerald-500/15 to-teal-500/10 border-emerald-500/30 text-emerald-400" },
-  { id: "health",     label: "صحة وطب وعيادات",     icon: "🏥", color: "from-red-500/15 to-rose-500/10 border-red-500/30 text-red-400" },
-  { id: "business",   label: "ريادة وأعمال تجارية", icon: "💼", color: "from-amber-500/15 to-orange-500/10 border-amber-500/30 text-amber-400" },
-  { id: "science",    label: "علوم وبحوث",          icon: "🔬", color: "from-violet-500/15 to-purple-500/10 border-violet-500/30 text-violet-400" },
-  { id: "food",       label: "مطاعم ومأكولات",      icon: "🍽️", color: "from-orange-500/15 to-yellow-500/10 border-orange-500/30 text-orange-400" },
-  { id: "activity",   label: "نشاطات وترفيه",       icon: "🎯", color: "from-pink-500/15 to-fuchsia-500/10 border-pink-500/30 text-pink-400" },
-  { id: "travel",     label: "سياحة وسفر",          icon: "✈️", color: "from-sky-500/15 to-indigo-500/10 border-sky-500/30 text-sky-400" },
-  { id: "legal",      label: "قانون وأنظمة",        icon: "⚖️", color: "from-gray-500/15 to-slate-500/10 border-gray-500/30 text-gray-400" },
-  { id: "finance",    label: "مالية واستثمار",       icon: "💰", color: "from-lime-500/15 to-green-500/10 border-lime-500/30 text-lime-400" },
-  { id: "sports",     label: "رياضة ولياقة",        icon: "⚽", color: "from-teal-500/15 to-cyan-500/10 border-teal-500/30 text-teal-400" },
-  { id: "arts",       label: "فنون وإبداع",         icon: "🎨", color: "from-fuchsia-500/15 to-pink-500/10 border-fuchsia-500/30 text-fuchsia-400" },
+  { id: "tech", label: "تقنية وبرمجيات", icon: "💻", color: "from-blue-500/15 to-cyan-500/10 border-blue-500/30 text-blue-400" },
+  { id: "education", label: "تعليم وأكاديميا", icon: "🎓", color: "from-emerald-500/15 to-teal-500/10 border-emerald-500/30 text-emerald-400" },
+  { id: "health", label: "صحة وطب وعيادات", icon: "🏥", color: "from-red-500/15 to-rose-500/10 border-red-500/30 text-red-400" },
+  { id: "business", label: "ريادة وأعمال تجارية", icon: "💼", color: "from-amber-500/15 to-orange-500/10 border-amber-500/30 text-amber-400" },
+  { id: "science", label: "علوم وبحوث", icon: "🔬", color: "from-violet-500/15 to-purple-500/10 border-violet-500/30 text-violet-400" },
+  { id: "food", label: "مطاعم ومأكولات", icon: "🍽️", color: "from-orange-500/15 to-yellow-500/10 border-orange-500/30 text-orange-400" },
+  { id: "activity", label: "نشاطات وترفيه", icon: "🎯", color: "from-pink-500/15 to-fuchsia-500/10 border-pink-500/30 text-pink-400" },
+  { id: "travel", label: "سياحة وسفر", icon: "✈️", color: "from-sky-500/15 to-indigo-500/10 border-sky-500/30 text-sky-400" },
+  { id: "legal", label: "قانون وأنظمة", icon: "⚖️", color: "from-gray-500/15 to-slate-500/10 border-gray-500/30 text-gray-400" },
+  { id: "finance", label: "مالية واستثمار", icon: "💰", color: "from-lime-500/15 to-green-500/10 border-lime-500/30 text-lime-400" },
+  { id: "sports", label: "رياضة ولياقة", icon: "⚽", color: "from-teal-500/15 to-cyan-500/10 border-teal-500/30 text-teal-400" },
+  { id: "arts", label: "فنون وإبداع", icon: "🎨", color: "from-fuchsia-500/15 to-pink-500/10 border-fuchsia-500/30 text-fuchsia-400" },
 ];
 
 const MAX_CATEGORIES = 3;

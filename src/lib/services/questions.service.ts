@@ -173,7 +173,7 @@ export async function uploadQuestionImage(
 export async function getBookmarkedQuestions(userId: string): Promise<Question[]> {
   const { data, error } = await supabase
     .from("bookmarks")
-    .select(`question:questions(*, author:profiles(*), question_tags(tag_id, tags(id, name)), question_attachments(*))`)
+    .select(`question:questions(*, author:profiles!author_id(*), question_tags(tag_id, tags(id, name)), question_attachments(*))`)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) return [];
@@ -205,7 +205,7 @@ export async function toggleBookmark(
 export async function getQuestionsByUser(userId: string): Promise<Question[]> {
   const { data, error } = await supabase
     .from("questions")
-    .select(`*, author:profiles(*), question_tags(tag_id, tags(id, name)), question_attachments(*)`)
+    .select(`*, author:profiles!author_id(*), question_tags(tag_id, tags(id, name)), question_attachments(*)`)
     .eq("author_id", userId)
     .eq("is_deleted", false)
     .order("created_at", { ascending: false });

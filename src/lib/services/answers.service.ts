@@ -7,9 +7,9 @@ export async function getAnswers(questionId: string): Promise<Answer[]> {
     .from("answers")
     .select(`
       *,
-      author:profiles(*),
+      author:profiles!author_id(*),
       answer_attachments(*),
-      comments(*, author:profiles(*))
+      comments(*, author:profiles!author_id(*))
     `)
     .eq("question_id", questionId)
     .eq("is_deleted", false)

@@ -107,11 +107,11 @@ export async function getHotQuestions(limit = 5): Promise<Question[]> {
   since.setDate(since.getDate() - 7); // last 7 days
 
   const { data, error } = await supabase
-    .from("questions")
-    .select(`
-      *,
-      author:profiles(id, name, username, avatar_url, reputation)
-    `)
+      .from("questions")
+      .select(`
+        *,
+        author:profiles!author_id(id, name, username, avatar_url, reputation)
+      `)
     .eq("is_deleted", false)
     .gte("created_at", since.toISOString())
     .order("votes_count", { ascending: false })
@@ -222,7 +222,7 @@ export async function searchQuestions(opts: SearchOptions): Promise<Question[]> 
     .from("questions")
     .select(`
       *,
-      author:profiles(id, name, username, avatar_url, reputation),
+      author:profiles!author_id(id, name, username, avatar_url, reputation),
       question_tags(tag_id, tags(id, name)),
       question_attachments(*)
     `)

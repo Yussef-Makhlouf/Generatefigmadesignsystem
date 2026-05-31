@@ -75,7 +75,7 @@ export function TagDetailPage() {
         .select(`
           question:questions(
             *,
-            author:profiles(id, name, username, avatar_url, reputation),
+            author:profiles!author_id(id, name, username, avatar_url, reputation),
             question_tags(tag_id, tags(id, name)),
             question_attachments(*)
           )
@@ -141,7 +141,7 @@ export function TagDetailPage() {
 
       const { data: answers } = await supabase
         .from("answers")
-        .select("author_id, author:profiles(id, name, username, avatar_url, reputation)")
+        .select("author_id, author:profiles!author_id(id, name, username, avatar_url, reputation)")
         .in("question_id", questionIds)
         .eq("is_deleted", false);
 

@@ -127,7 +127,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from("questions")
         .select(`
           *,
-          author:profiles(*),
+          author:profiles!author_id(*),
           question_tags(tag_id, tags(*)),
           question_attachments(*)
         `)
@@ -196,11 +196,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from("answers")
         .select(`
           *,
-          author:profiles(*),
+          author:profiles!author_id(*),
           answer_attachments(*),
           comments(
             *,
-            author:profiles(*)
+            author:profiles!author_id(*)
           )
         `)
         .eq("is_deleted", false);
@@ -324,7 +324,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from("reviews")
         .select(`
           *,
-          reviewer:profiles(*),
+          reviewer:profiles!reviewer_id(*),
           entity:profiles!entity_id(*),
           review_attachments(*)
         `)

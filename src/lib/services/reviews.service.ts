@@ -7,7 +7,7 @@ export async function getReviews(entityId: string): Promise<Review[]> {
     .from("reviews")
     .select(`
       *,
-      reviewer:profiles(*),
+      reviewer:profiles!reviewer_id(*),
       review_attachments(*)
     `)
     .eq("entity_id", entityId)
@@ -27,7 +27,7 @@ export async function getAllReviews(): Promise<Review[]> {
     .from("reviews")
     .select(`
       *,
-      reviewer:profiles(*),
+      reviewer:profiles!reviewer_id(*),
       entity:profiles!entity_id(*)
     `)
     .eq("is_deleted", false)
