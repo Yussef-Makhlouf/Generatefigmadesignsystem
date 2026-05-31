@@ -7,7 +7,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     .from("profiles")
     .select("*")
     .eq("username", username)
-    .single();
+    .maybeSingle();
   if (error) return null;
   return data as Profile;
 }
@@ -18,7 +18,7 @@ export async function getProfileById(id: string): Promise<Profile | null> {
     .from("profiles")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
   if (error) return null;
   return data as Profile;
 }

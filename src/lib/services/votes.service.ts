@@ -8,21 +8,50 @@ export async function castVote(
   targetType: TargetType,
   voteType: VoteType
 ): Promise<boolean> {
-  const { error } = await supabase
+  // Check if vote already exists for this target by this user
+  const { data: existingVote, error: selectError } = await supabase
     .from("votes")
-    .upsert(
-      {
+    .select("id, vote_type")
+    .eq("user_id", userId)
+    .eq("target_id", targetId)
+    .eq("target_type", targetType)
+    .maybeSingle();
+
+  if (selectError) {
+    console.error("castVote check existing vote error:", selectError);
+    return false;
+  }
+
+  if (existingVote) {
+    // If the vote type is already correct, do nothing
+    if (existingVote.vote_type === voteType) {
+      return true;
+    }
+    // Update the existing vote type
+    const { error: updateError } = await supabase
+      .from("votes")
+      .update({ vote_type: voteType } as any)
+      .eq("id", existingVote.id);
+
+    if (updateError) {
+      console.error("castVote update vote error:", updateError);
+      return false;
+    }
+  } else {
+    // Insert a brand new vote
+    const { error: insertError } = await supabase
+      .from("votes")
+      .insert({
         user_id: userId,
         target_id: targetId,
         target_type: targetType,
         vote_type: voteType,
-      } as any,
-      { onConflict: "user_id,target_id,target_type" }
-    );
+      } as any);
 
-  if (error) {
-    console.error("castVote:", error);
-    return false;
+    if (insertError) {
+      console.error("castVote insert vote error:", insertError);
+      return false;
+    }
   }
   return true;
 }
@@ -59,7 +88,7 @@ export async function getUserVote(
     .eq("user_id", userId)
     .eq("target_id", targetId)
     .eq("target_type", targetType)
-    .single();
+    .maybeSingle();
 
   if (error) return null;
   return data?.vote_type ?? null;

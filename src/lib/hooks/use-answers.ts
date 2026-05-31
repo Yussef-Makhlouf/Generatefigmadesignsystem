@@ -3,6 +3,7 @@ import {
   getAnswers, 
   createAnswer, 
   acceptAnswer,
+  unacceptAnswer,
   uploadAnswerImage,
   addComment
 } from "../services";
@@ -49,6 +50,18 @@ export function useAcceptAnswer() {
     },
   });
 }
+
+export function useUnacceptAnswer() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (answerId: string) => unacceptAnswer(answerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["answers"] });
+    },
+  });
+}
+
 
 export function useAddComment() {
   const queryClient = useQueryClient();

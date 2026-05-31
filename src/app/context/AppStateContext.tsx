@@ -100,7 +100,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from("profiles")
         .select("*")
         .eq("id", currentUserId)
-        .single();
+        .maybeSingle();
       if (!data) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "", email };
       return {
         ...data,
@@ -196,11 +196,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from("answers")
         .select(`
           *,
-          author:profiles!author_id(*),
+          author:profiles!author_id(id, name, username, avatar_url, reputation),
           answer_attachments(*),
           comments(
             *,
-            author:profiles!author_id(*)
+            author:profiles!author_id(id, name, username, avatar_url, reputation)
           )
         `)
         .eq("is_deleted", false);
@@ -231,8 +231,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         const mappedComments = (a.comments ?? []).map((c: any) => ({
           id: c.id,
+          answer_id: c.answer_id,
+          author_id: c.author_id,
           content: c.content,
-          author: c.author?.name ?? "مستخدم",
+          created_at: c.created_at,
+          updated_at: c.updated_at ?? c.created_at,
+          author: {
+            id: c.author?.id ?? c.author_id ?? "",
+            name: c.author?.name ?? "مستخدم",
+            username: c.author?.username ?? "",
+            avatar_url: c.author?.avatar_url ?? null,
+            reputation: c.author?.reputation ?? 0,
+          },
           timestamp: c.created_at,
         }));
 
@@ -509,7 +519,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .from("profiles")
       .select("settings")
       .eq("id", currentUserId)
-      .single();
+      .maybeSingle();
       
     const currentSettings = currentProfile?.settings || {};
     const newSettings = {

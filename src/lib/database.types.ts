@@ -148,6 +148,15 @@ export type Answer = {
 };
 
 // ── Comments ─────────────────────────────────────────────────
+/** Inline author shape embedded in comments (subset of Profile) */
+export type CommentAuthor = {
+  id: string;
+  name: string;
+  username: string;
+  avatar_url: string | null;
+  reputation: number;
+};
+
 export type Comment = {
   id: string;
   answer_id: string;
@@ -155,8 +164,8 @@ export type Comment = {
   content: string;
   created_at: string;
   updated_at: string; // ✅ ADDED: aligned with schema v2.0
-  // Joined
-  author: string;
+  // Joined — full profile so the UI can show avatar + reputation
+  author: CommentAuthor;
   // UI Compatibility fields
   timestamp: string;
   // Attachment fields (optional, populated when comments include attachments)

@@ -51,7 +51,7 @@ export async function getUserSettings(userId: string): Promise<UserSettings> {
     .from("profiles")
     .select("settings")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
   if (error || !data?.settings) return getDefaultSettings();
 

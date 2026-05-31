@@ -51,7 +51,7 @@ export function TagDetailPage() {
         .from("tags")
         .select("id, name, usage_count")
         .eq("name", tagName)
-        .single();
+        .maybeSingle();
       return data;
     },
     enabled: !!tagName,
@@ -66,7 +66,7 @@ export function TagDetailPage() {
         .from("tags")
         .select("id")
         .eq("name", tagName)
-        .single();
+        .maybeSingle();
 
       if (!tagRow) return [];
 
@@ -124,7 +124,7 @@ export function TagDetailPage() {
         .from("tags")
         .select("id")
         .eq("name", tagName)
-        .single();
+        .maybeSingle();
 
       if (!tagRow) return [];
 
@@ -174,7 +174,7 @@ export function TagDetailPage() {
         .from("tags")
         .select("id")
         .eq("name", tagName)
-        .single();
+        .maybeSingle();
       if (!tagRow) return [];
 
       const { data: qtRows } = await supabase

@@ -4,3 +4,4 @@ export * from "./use-auth";
 export * from "./use-stats";
 export * from "./use-leaderboard";
 export * from "./use-search";
+export * from "./use-question-detail";

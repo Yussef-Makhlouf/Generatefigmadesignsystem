@@ -6,6 +6,7 @@ import { MessageSquare, Bookmark, Share2, MapPin, Eye } from "lucide-react";
 import { VoteButtons } from "./vote-buttons";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { formatTimestamp } from "../lib/utils";
 
 interface QuestionCardProps {
   id: string;
@@ -47,6 +48,15 @@ export function QuestionCard({
   onClick,
 }: QuestionCardProps) {
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
+
+  const displayTimestamp = (() => {
+    try {
+      const d = new Date(timestamp);
+      return isNaN(d.getTime()) ? timestamp : formatTimestamp(d);
+    } catch {
+      return timestamp;
+    }
+  })();
 
   useEffect(() => {
     setBookmarked(initialBookmarked);
@@ -144,7 +154,7 @@ export function QuestionCard({
                 <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground min-w-0">
                   <span className="font-medium text-foreground truncate max-w-[80px] sm:max-w-none">{author.name}</span>
                   <span className="hidden xs:inline">·</span>
-                  <span className="hidden xs:inline truncate">{timestamp}</span>
+                  <span className="hidden xs:inline truncate">{displayTimestamp}</span>
                   {location && (
                     <>
                       <span className="hidden md:inline">·</span>

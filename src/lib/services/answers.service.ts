@@ -1,5 +1,5 @@
 import { supabase } from "../supabase";
-import type { Answer, CreateAnswerInput, Profile } from "../database.types";
+import type { Answer, CreateAnswerInput } from "../database.types";
 
 // ── Fetch answers for a question ──────────────────────────────
 export async function getAnswers(questionId: string): Promise<Answer[]> {
@@ -7,9 +7,12 @@ export async function getAnswers(questionId: string): Promise<Answer[]> {
     .from("answers")
     .select(`
       *,
-      author:profiles!author_id(*),
+      author:profiles!author_id(id, name, username, avatar_url, reputation),
       answer_attachments(*),
-      comments(*, author:profiles!author_id(*))
+      comments(
+        *,
+        author:profiles!author_id(id, name, username, avatar_url, reputation)
+      )
     `)
     .eq("question_id", questionId)
     .eq("is_deleted", false)
@@ -46,7 +49,7 @@ export async function createAnswer(
 
   const answerId = (answer as any).id;
 
-  // Insert attachments
+  // Insert image attachments
   if (input.images?.length) {
     const imageRows = input.images.map((url, i) => ({
       answer_id: answerId,
@@ -57,6 +60,7 @@ export async function createAnswer(
     await supabase.from("answer_attachments").insert(imageRows as any);
   }
 
+  // Insert link attachments
   if (input.links?.length) {
     const linkRows = input.links.map((l, i) => ({
       answer_id: answerId,
@@ -68,6 +72,7 @@ export async function createAnswer(
     await supabase.from("answer_attachments").insert(linkRows as any);
   }
 
+  // Insert location attachment
   if (input.locationDetail) {
     await supabase.from("answer_attachments").insert({
       answer_id: answerId,
@@ -96,6 +101,20 @@ export async function acceptAnswer(answerId: string): Promise<boolean> {
   return true;
 }
 
+// ── Unaccept answer ────────────────────────────────────────────
+export async function unacceptAnswer(answerId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("answers")
+    .update({ is_accepted: false })
+    .eq("id", answerId);
+
+  if (error) {
+    console.error("unacceptAnswer:", error);
+    return false;
+  }
+  return true;
+}
+
 // ── Add comment to answer ─────────────────────────────────────
 export async function addComment(
   answerId: string,
@@ -117,7 +136,7 @@ export async function addComment(
   return true;
 }
 
-// ── Upload answer image ────────────────────────────────────────
+// ── Upload answer image to Supabase Storage ───────────────────
 export async function uploadAnswerImage(
   answerId: string,
   file: File

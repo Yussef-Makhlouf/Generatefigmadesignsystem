@@ -35,7 +35,7 @@ export async function signUp(
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   return { user: profile as Profile, error: null };
 }
@@ -72,7 +72,7 @@ export async function signIn(
     .from("profiles")
     .select("*")
     .eq("id", user?.id)
-    .single();
+    .maybeSingle();
 
   return { user: profile as Profile, error: null };
 }
@@ -91,7 +91,7 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   return profile as Profile;
 }

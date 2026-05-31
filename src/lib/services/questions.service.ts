@@ -43,7 +43,12 @@ export async function getQuestions(options?: {
 export async function getQuestionById(id: string): Promise<Question | null> {
   const { data, error } = await supabase
     .from("questions")
-    .select("*")
+    .select(`
+      *,
+      author:profiles!author_id(id, name, username, avatar_url, reputation),
+      question_tags(tag_id, tags(*)),
+      question_attachments(*)
+    `)
     .eq("id", id)
     .eq("is_deleted", false)
     .single();
@@ -53,8 +58,57 @@ export async function getQuestionById(id: string): Promise<Question | null> {
   // Increment view count (fire and forget)
   supabase.from("questions").update({ views_count: ((data as any).views_count ?? 0) + 1 } as any).eq("id", id).then(() => {});
 
-  return data as unknown as Question;
+  // Map to UI-compatible Question shape (same transform as the bulk query)
+  const q = data as any;
+  const tagNames = (q.question_tags ?? []).map((qt: any) => qt.tags?.name).filter(Boolean);
+  const images = (q.question_attachments ?? [])
+    .filter((att: any) => att.type === "image")
+    .map((att: any) => att.url);
+  const links = (q.question_attachments ?? [])
+    .filter((att: any) => att.type === "link")
+    .map((att: any) => ({ title: att.title ?? "", url: att.url ?? "" }));
+  const locAtt = (q.question_attachments ?? []).find((att: any) => att.type === "location");
+  const locationDetail = locAtt ? {
+    name: locAtt.title ?? "",
+    address: locAtt.address ?? undefined,
+    lat: locAtt.lat ? parseFloat(locAtt.lat) : undefined,
+    lng: locAtt.lng ? parseFloat(locAtt.lng) : undefined,
+  } : undefined;
+
+  return {
+    ...q,
+    id: q.id,
+    author_id: q.author_id,
+    title: q.title,
+    description: q.content,
+    content: q.content,
+    category: q.category,
+    location: q.location,
+    votes: q.votes_count,
+    votes_count: q.votes_count,
+    answers: q.answers_count,
+    answers_count: q.answers_count,
+    views: q.views_count,
+    views_count: q.views_count,
+    tags: tagNames,
+    images,
+    links,
+    locationDetail,
+    author: {
+      id: q.author?.id,
+      name: q.author?.name ?? "مستخدم",
+      username: q.author?.username ?? "",
+      avatar: q.author?.avatar_url ?? undefined,
+      avatar_url: q.author?.avatar_url ?? undefined,
+      reputation: q.author?.reputation ?? 0,
+    },
+    timestamp: q.created_at,
+    is_deleted: q.is_deleted,
+    created_at: q.created_at,
+    updated_at: q.updated_at,
+  } as unknown as Question;
 }
+
 
 // ── Create a new question with tags & attachments ────────────
 export async function createQuestion(
@@ -190,7 +244,7 @@ export async function toggleBookmark(
     .select("question_id")
     .eq("user_id", userId)
     .eq("question_id", questionId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     await supabase.from("bookmarks").delete().eq("user_id", userId).eq("question_id", questionId);
