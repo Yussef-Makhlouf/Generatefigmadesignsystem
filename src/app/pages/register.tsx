@@ -254,7 +254,7 @@ export function RegisterPage() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-y-auto bg-background pb-[calc(2rem+env(safe-area-inset-bottom))]">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-secondary/5 blur-3xl pointer-events-none" style={{ animationDelay: "2s" }} />
         <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-25 pointer-events-none" />
@@ -318,7 +318,7 @@ export function RegisterPage() {
                         <div
                           key={item.type}
                           onClick={() => setAccountType(item.type)}
-                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between h-40 select-none ${
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between h-auto min-h-[9.5rem] py-3.5 select-none ${
                             isSelected
                               ? `bg-primary/5 ${item.color} shadow-sm`
                               : "border-border bg-muted/30 hover:border-muted-foreground/30 hover:bg-muted/50"

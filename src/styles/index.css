@@ -401,6 +401,23 @@ code, pre, .font-mono {
   }
 }
 
+/* ─── Bottom Nav Theme Button Responsive ────────────────── */
+@media (max-width: 380px) {
+  .bottom-nav .flex.items-center.justify-around {
+    gap: 0;
+  }
+  .bottom-nav .min-w-\[44px\] {
+    min-width: 36px;
+  }
+  .bottom-nav .text-\[9px\] {
+    font-size: 8px;
+  }
+  .bottom-nav .h-5 {
+    height: 1rem;
+    width: 1rem;
+  }
+}
+
 /* ─── Safe Area ─────────────────────────────────────── */
 .safe-area-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .safe-area-top    { padding-top: env(safe-area-inset-top); }

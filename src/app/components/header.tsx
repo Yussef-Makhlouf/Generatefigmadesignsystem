@@ -134,9 +134,10 @@ export function Header() {
             <Button
               size="icon"
               variant="ghost"
-              className="rounded-full h-10 w-10 hidden xs:flex text-muted-foreground hover:bg-muted/60 transition-colors"
+              className="rounded-full h-10 w-10 text-muted-foreground hover:bg-muted/60 transition-colors "
               onClick={() => setIsDark(!isDark)}
               aria-label={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
+
             >
               <AnimatePresence mode="wait">
                 {isDark ? (
@@ -221,7 +222,7 @@ export function Header() {
 
             {/* User Profile Avatar OR Sign-in/Sign-up Buttons */}
             {currentUser && currentUser.id !== "1" && currentUser.username !== "guest" ? (
-              <div className="relative">
+              <div className="relative " >
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex-shrink-0 mr-1 sm:mr-2 relative group"
@@ -237,7 +238,7 @@ export function Header() {
                 {userMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                    <div className="absolute top-full right-0 mt-2 w-56 bg-card shadow-xl border border-border/60 rounded-2xl z-50 py-2 animate-in">
+                    <div className="absolute top-full ltr:right-0 rtl:left-0 mt-2 w-56 bg-card shadow-xl border border-border/60 rounded-2xl z-50 py-2 animate-in">
                       <div className="px-4 py-3 border-b border-border/40">
                         <p className="text-sm font-bold text-foreground truncate">{currentUser?.name}</p>
                         <p className="text-xs text-muted-foreground truncate">@{currentUser?.username}</p>
@@ -316,8 +317,14 @@ export function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex flex-col p-4 safe-area-top safe-area-bottom"
+            className="fixed inset-0 z-50 flex flex-col p-4 safe-area-top safe-area-bottom cursor-pointer"
             style={{ background: "rgba(7, 18, 18, 0.92)", backdropFilter: "blur(16px)" }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSearchOpen(false);
+                setSearchQuery("");
+              }
+            }}
             role="dialog"
             aria-modal="true"
             aria-label="البحث"
@@ -326,7 +333,7 @@ export function Header() {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="flex items-center gap-3 mb-6"
+              className="flex items-center gap-3 mb-6 cursor-default"
             >
               <form onSubmit={handleSearch} className="flex-1">
                 <div className="relative">
@@ -356,6 +363,7 @@ export function Header() {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.12, duration: 0.3 }}
+              className="cursor-default"
             >
               <p className="text-xs text-white/40 mb-3 px-1 font-medium tracking-wide uppercase">عمليات بحث شائعة</p>
               <div className="flex flex-wrap gap-2 stagger">

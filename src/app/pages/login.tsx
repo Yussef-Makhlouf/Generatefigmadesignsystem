@@ -72,13 +72,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row relative overflow-hidden bg-neutral-950 text-white font-sans">
+    <div className="min-h-screen md:h-screen w-full flex flex-col md:flex-row relative overflow-y-auto md:overflow-hidden bg-neutral-950 text-white font-sans">
       
       {/* Dynamic Ambient Background (Universal) */}
       <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-20 pointer-events-none z-0" />
       
       {/* ── LEFT SIDE: Elegant Auth Form Panel ── */}
-      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 md:p-16 z-10 relative bg-neutral-950/70 backdrop-blur-md">
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 md:p-16 z-10 relative bg-neutral-950/70 backdrop-blur-md min-h-screen md:min-h-0 pb-[calc(2rem+env(safe-area-inset-bottom))]">
         
         {/* Top bar header */}
         <div className="flex items-center justify-between w-full mb-8">

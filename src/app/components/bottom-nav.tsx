@@ -1,7 +1,8 @@
-import { Home, Search, Bell, User, Globe } from "lucide-react";
+import { Home, Search, Bell, User, Globe, Sun, Moon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { motion } from "motion/react";
 import { useAppState } from "../context/AppStateContext";
+import { useState, useEffect } from "react";
 
 const NAV_ITEMS = [
   { icon: Home,   label: "الرئيسية",  path: "/" },
@@ -15,6 +16,15 @@ export function BottomNav() {
   const { pathname } = useLocation();
   const { notifications } = useAppState();
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem("khapeer_theme");
+    return saved ? saved === "dark" : true;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("khapeer_theme", isDark ? "dark" : "light");
+  }, [isDark]);
 
   return (
     <nav
@@ -24,7 +34,7 @@ export function BottomNav() {
     >
       {/* Safe area padding for iOS home indicator */}
       <div
-        className="flex items-center justify-around px-1 sm:px-2"
+        className="flex items-center justify-around px-1 sm:px-2 relative"
         style={{ height: "calc(3.5rem + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {NAV_ITEMS.map((item) => {
@@ -83,6 +93,26 @@ export function BottomNav() {
             </Link>
           );
         })}
+
+        {/* Theme Toggle Button - Mobile Only */}
+        {/* <button
+          onClick={() => setIsDark(!isDark)}
+          className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 relative"
+          aria-label={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
+        >
+          <div className="relative flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center">
+            <div className="relative">
+              {isDark ? (
+                <Sun className="h-5 w-5 text-secondary transition-all duration-300" />
+              ) : (
+                <Moon className="h-5 w-5 text-muted-foreground transition-all duration-300" />
+              )}
+            </div>
+            <span className="text-[9px] leading-none font-medium text-muted-foreground">
+              {isDark ? "فاتح" : "داكن"}
+            </span>
+          </div>
+        </button> */}
       </div>
     </nav>
   );
