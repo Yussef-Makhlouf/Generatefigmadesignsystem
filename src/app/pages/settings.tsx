@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../components/ui/card";
 import { Label } from "../components/ui/label";
@@ -28,11 +28,16 @@ import {
   Upload,
   Trash2,
   Star,
-  MessageSquare
+  MessageSquare,
+  Compass,
+  Camera,
+  Loader2,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "../context/AppStateContext";
-import { signOut, getUserSettings, saveUserSettings, getDefaultSettings } from "../../lib/services";
+import { signOut, getUserSettings, saveUserSettings, getDefaultSettings, uploadAvatar, uploadCoverImage, uploadLicenseDocument } from "../../lib/services";
+import { supabase } from "../../lib/supabase";
 import type { UserSettings } from "../../lib/services/settings.service";
 
 export function SettingsPage() {
@@ -61,19 +66,231 @@ export function SettingsPage() {
   };
 
   // Profile settings
-  const [name, setName] = useState(currentUser.name);
-  const [username, setUsername] = useState(currentUser.username);
-  const [email, setEmail] = useState("mohammad@example.com");
-  const [bio, setBio] = useState(currentUser.bio || "مطور برمجيات مهتم بالتقنية والتعليم");
-  const [location, setLocation] = useState(currentUser.location || "الرياض، السعودية");
-  const [occupation, setOccupation] = useState("مهندس برمجيات");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+  const [occupation, setOccupation] = useState("");
   const [website, setWebsite] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
+  const [licenseDocumentUrl, setLicenseDocumentUrl] = useState("");
+
+  // Upload/Detection states
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  // Synchronize state when currentUser resolves
+  useEffect(() => {
+    if (!currentUser || currentUser.username === "guest" || currentUser.id === "1") return;
+
+    setName(currentUser.name || "");
+    setUsername(currentUser.username || "");
+    setEmail(currentUser.email || "");
+    setBio(currentUser.bio || "");
+    setLocation(currentUser.location || "");
+
+    const userSettings = currentUser.settings || {};
+    setOccupation(userSettings.occupation || "");
+    setWebsite(userSettings.website || "");
+    setCoverUrl(userSettings.cover_url || "");
+    setLicenseDocumentUrl(userSettings.license_document_url || "");
+
+    // Business/Professional settings
+    setBusinessCategory(currentUser.businessCategory || "");
+    setBusinessLicense(currentUser.businessLicense || "");
+    setBusinessAddress(currentUser.businessAddress || "");
+    setOperatingHours(currentUser.operatingHours || "");
+
+    // Privacy settings
+    if (userSettings.privacy) {
+      setProfileVisibility(userSettings.privacy.profileVisibility || "public");
+      setShowEmail(userSettings.privacy.showEmail || false);
+      setShowLocation(userSettings.privacy.showLocation || true);
+      setAllowMessages(userSettings.privacy.allowMessages || true);
+    }
+
+    // Appearance settings
+    if (userSettings.appearance) {
+      setTheme(userSettings.appearance.theme || "system");
+      setLanguage(userSettings.appearance.language || "ar");
+    }
+
+    // Notification settings
+    if (userSettings.notifications) {
+      setEmailNotifications(userSettings.notifications.email !== false);
+      setNewAnswers(userSettings.notifications.newAnswers !== false);
+      setNewComments(userSettings.notifications.newComments !== false);
+      setMentions(userSettings.notifications.mentions !== false);
+      setWeeklyDigest(!!userSettings.notifications.weeklyDigest);
+      setMarketingEmails(!!userSettings.notifications.marketingEmails);
+    }
+
+    setSettingsLoaded(true);
+  }, [currentUser]);
+
+  // Real-time GPS reverse geocoder
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("متصفحك لا يدعم تحديد الموقع الجغرافي تلقائياً.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    toast.info("جاري تحديد موقعك الجغرافي...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const displayName = data.display_name;
+            const address = data.address || {};
+            const city = address.city || address.town || address.village || address.suburb || address.state || "";
+            const country = address.country || "";
+            const formatted = city && country ? `${city}، ${country}` : displayName;
+            setLocation(formatted);
+            toast.success("تم تحديد موقعك بنجاح!");
+          } else {
+            setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            toast.success("تم تحديد الإحداثيات بنجاح!");
+          }
+        } catch (error) {
+          console.error(error);
+          setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          toast.success("تم تحديد الإحداثيات بنجاح!");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error(error);
+        toast.error("فشل تحديد الموقع. يرجى تفعيل إذن الوصول للموقع الجغرافي في المتصفح.");
+        setIsDetectingLocation(false);
+      }
+    );
+  };
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("حجم الصورة الشخصية كبير جداً. يجب أن يكون أقل من 3 ميجابايت.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const url = await uploadAvatar(currentUser.id, file);
+      if (url) {
+        await updateProfile(
+          name || currentUser.name,
+          username || currentUser.username,
+          bio || currentUser.bio,
+          location || currentUser.location,
+          url,
+          occupation,
+          website,
+          coverUrl,
+          {
+            businessCategory,
+            businessLicense,
+            businessAddress,
+            operatingHours,
+          }
+        );
+        toast.success("تم رفع وتحديث الصورة الشخصية بنجاح!");
+      } else {
+        toast.error("فشل رفع الصورة الشخصية.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ أثناء رفع الصورة الشخصية.");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("حجم صورة الغلاف كبير جداً. يجب أن يكون أقل من 5 ميجابايت.");
+      return;
+    }
+
+    setIsUploadingCover(true);
+    try {
+      const url = await uploadCoverImage(currentUser.id, file);
+      if (url) {
+        setCoverUrl(url);
+        await updateProfile(
+          name || currentUser.name,
+          username || currentUser.username,
+          bio || currentUser.bio,
+          location || currentUser.location,
+          currentUser.avatar || "",
+          occupation,
+          website,
+          url,
+          {
+            businessCategory,
+            businessLicense,
+            businessAddress,
+            operatingHours,
+          }
+        );
+        toast.success("تم رفع وتحديث صورة الغلاف بنجاح!");
+      } else {
+        toast.error("فشل رفع صورة الغلاف.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ أثناء رفع صورة الغلاف.");
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
+
+  const handleLicenseFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("حجم الملف كبير جداً. يجب أن يكون أقل من 5 ميجابايت.");
+      return;
+    }
+
+    setIsUploadingDocument(true);
+    try {
+      const url = await uploadLicenseDocument(currentUser.id, file);
+      if (url) {
+        setLicenseDocumentUrl(url);
+        toast.success("تم رفع مستند الترخيص بنجاح! سيتم حفظه عند الضغط على حفظ التغييرات.");
+      } else {
+        toast.error("فشل رفع المستند.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ أثناء رفع المستند.");
+    } finally {
+      setIsUploadingDocument(false);
+    }
+  };
 
   // Business/Professional settings
-  const [businessCategory, setBusinessCategory] = useState(currentUser.businessCategory || "");
-  const [businessLicense, setBusinessLicense] = useState(currentUser.businessLicense || "");
-  const [businessAddress, setBusinessAddress] = useState(currentUser.businessAddress || "");
-  const [operatingHours, setOperatingHours] = useState(currentUser.operatingHours || "");
+  const [businessCategory, setBusinessCategory] = useState("");
+  const [businessLicense, setBusinessLicense] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
+  const [operatingHours, setOperatingHours] = useState("");
 
   // Privacy settings
   const [profileVisibility, setProfileVisibility] = useState<"public" | "members" | "private">("public");
@@ -153,18 +370,44 @@ export function SettingsPage() {
     }
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
+    if (!currentUser?.id) return;
     setIsSaving(true);
-    setTimeout(() => {
-      updateProfile(name, bio, location, currentUser.avatar || "", [], {
-        businessCategory,
-        businessLicense,
-        businessAddress,
-        operatingHours,
-      });
-      setIsSaving(false);
+    try {
+      // Check if email changed
+      if (email !== currentUser.email) {
+        const { error } = await supabase.auth.updateUser({ email });
+        if (error) {
+          toast.error("فشل تحديث البريد الإلكتروني: " + error.message);
+        } else {
+          toast.info("تم إرسال رابط تأكيد إلى البريد الإلكتروني الجديد.");
+        }
+      }
+
+      await updateProfile(
+        name,
+        username,
+        bio,
+        location,
+        currentUser.avatar || "",
+        occupation,
+        website,
+        coverUrl,
+        {
+          businessCategory,
+          businessLicense,
+          businessAddress,
+          operatingHours,
+          licenseDocumentUrl,
+        }
+      );
       toast.success("تم حفظ التغييرات بنجاح");
-    }, 1000);
+    } catch (error) {
+      console.error(error);
+      toast.error("فشل حفظ التغييرات");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -248,23 +491,149 @@ export function SettingsPage() {
               المعلومات الشخصية
             </h2>
 
-            {/* Avatar */}
-            <div className="flex items-center gap-5 mb-8 bg-muted/20 p-4 rounded-2xl border border-border/25">
-              <Avatar className="h-20 w-20 border-2 border-primary/20 shadow-md">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-2xl font-bold bg-primary text-white">
-                  {name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button variant="outline" size="sm" className="rounded-xl border-border/60 hover:border-primary/40 bg-card hover:bg-muted transition-all duration-200">
-                  <Upload className="h-4 w-4 ml-2" />
-                  تحميل صورة
-                </Button>
-                <Button variant="ghost" size="sm" className="rounded-xl text-destructive hover:bg-destructive/5 transition-all duration-200">
-                  <Trash2 className="h-4 w-4 ml-2" />
-                  حذف
-                </Button>
+            {/* Premium Avatar & Cover Editor Preview */}
+            <div className="relative mb-8 rounded-2xl border border-border/30 overflow-hidden bg-muted/10 group/banner">
+              {/* Cover Banner Preview */}
+              <div className="h-32 sm:h-40 relative bg-primary/10 border-b border-border/30 overflow-hidden flex items-center justify-center">
+                {coverUrl ? (
+                  <img src={coverUrl} alt="Cover Banner" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-center p-4">
+                    <Compass className="h-8 w-8 text-primary/40 mx-auto mb-1.5 animate-pulse" />
+                    <span className="text-xs text-text-muted">لم يتم رفع صورة غلاف بعد</span>
+                  </div>
+                )}
+                
+                {/* Upload Banner Trigger */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                  <label className="cursor-pointer bg-black/60 hover:bg-black/80 text-white rounded-xl px-4 py-2 text-xs font-semibold border border-white/20 transition-all duration-200 flex items-center gap-1.5 shadow-md">
+                    <Upload className="h-3.5 w-3.5" />
+                    <span>تغيير الغلاف</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCoverFileChange}
+                      disabled={isUploadingCover}
+                    />
+                  </label>
+                  {coverUrl && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="rounded-xl h-8 text-[11px] font-bold"
+                      onClick={async () => {
+                        setCoverUrl("");
+                        await updateProfile(
+                          name || currentUser.name,
+                          username || currentUser.username,
+                          bio || currentUser.bio,
+                          location || currentUser.location,
+                          currentUser.avatar || "",
+                          occupation,
+                          website,
+                          "",
+                          {
+                            businessCategory,
+                            businessLicense,
+                            businessAddress,
+                            operatingHours,
+                          }
+                        );
+                        toast.success("تم إزالة صورة الغلاف.");
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 ml-1" />
+                      إزالة
+                    </Button>
+                  )}
+                </div>
+                {isUploadingCover && (
+                  <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                    <span className="text-xs text-text-primary mr-2 font-semibold animate-pulse">جاري رفع الغلاف...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Avatar Editor Overlay */}
+              <div className="p-4 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-10 sm:-mt-14 relative z-10">
+                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-right">
+                  <div className="relative group/avatar">
+                    <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-card shadow-lg ring-1 ring-border/20">
+                      <AvatarImage src={currentUser?.avatar || ""} />
+                      <AvatarFallback className="text-2xl font-bold bg-primary text-white">
+                        {name ? name.charAt(0) : "ي"}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    {/* Hover camera upload overlay for avatar */}
+                    <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center cursor-pointer opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300 border border-white/10">
+                      <Camera className="h-5 w-5 text-white" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarFileChange}
+                        disabled={isUploadingAvatar}
+                      />
+                    </label>
+
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                        <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="pb-1">
+                    <h3 className="text-base sm:text-lg font-bold text-text-primary">{name || "مستخدم"}</h3>
+                    <p className="text-xs text-text-muted">@{username || "username"}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <label className="cursor-pointer bg-card hover:bg-muted text-text-primary border border-border/60 hover:border-primary/40 rounded-xl px-4 py-2 text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm">
+                    <Camera className="h-3.5 w-3.5" />
+                    <span>تغيير الصورة الشخصية</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarFileChange}
+                      disabled={isUploadingAvatar}
+                    />
+                  </label>
+                  {currentUser?.avatar && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-xl text-destructive hover:bg-destructive/5 text-xs font-semibold h-8"
+                      onClick={async () => {
+                        await updateProfile(
+                          name || currentUser.name,
+                          username || currentUser.username,
+                          bio || currentUser.bio,
+                          location || currentUser.location,
+                          "",
+                          occupation,
+                          website,
+                          coverUrl,
+                          {
+                            businessCategory,
+                            businessLicense,
+                            businessAddress,
+                            operatingHours,
+                          }
+                        );
+                        toast.success("تم إزالة الصورة الشخصية.");
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 ml-1.5" />
+                      إزالة
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -319,7 +688,7 @@ export function SettingsPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="location" className="text-text-primary">الموقع</Label>
                   <div className="relative">
@@ -328,8 +697,21 @@ export function SettingsPage() {
                       id="location"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="rounded-xl pr-10 border-border/60 bg-background/30 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 input-glow"
+                      className="rounded-xl pr-10 pl-10 border-border/60 bg-background/30 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 input-glow"
                     />
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isDetectingLocation}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary-hover p-1 rounded-md hover:bg-primary/10 transition-colors disabled:opacity-50"
+                      title="تحديد الموقع الجغرافي تلقائياً"
+                    >
+                      {isDetectingLocation ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      ) : (
+                        <Compass className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -457,14 +839,62 @@ export function SettingsPage() {
                       </Badge>
                     </div>
 
-                    <div 
-                      className="border-2 border-dashed border-border/60 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-all duration-300 bg-background/20"
-                      onClick={() => toast.info("تم تفعيل إرفاق المستند. بانتظار موافقة الإدارة.")}
-                    >
-                      <Upload className="h-8 w-8 text-text-muted mb-2 animate-pulse" />
-                      <span className="text-sm font-semibold text-text-primary mb-1">اسحب مستند الترخيص هنا، أو تصفح الملفات</span>
-                      <span className="text-xs text-text-muted">الحد الأقصى للملف: 5 ميجابايت (PDF, PNG, JPG)</span>
-                    </div>
+                    {licenseDocumentUrl ? (
+                      <div className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-background/30">
+                        <div className="flex items-center gap-3">
+                          {licenseDocumentUrl.match(/\.(jpeg|jpg|gif|png)$/i) || !licenseDocumentUrl.endsWith(".pdf") ? (
+                            <img src={licenseDocumentUrl} alt="License Document" className="h-16 w-16 object-cover rounded-lg border border-border/25" />
+                          ) : (
+                            <div className="h-16 w-16 bg-primary/10 border border-primary/20 text-primary flex items-center justify-center rounded-lg">
+                              <FileText className="h-8 w-8" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm font-semibold text-text-primary">مستند الترخيص المرفق</p>
+                            <a 
+                              href={licenseDocumentUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-xs text-primary hover:underline flex items-center gap-1 mt-1 font-numbers"
+                            >
+                              <Eye className="h-3 w-3" />
+                              <span>عرض المستند</span>
+                            </a>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/5 rounded-xl h-9"
+                          onClick={() => setLicenseDocumentUrl("")}
+                        >
+                          <Trash2 className="h-4 w-4 ml-1" />
+                          <span>إزالة</span>
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="border-2 border-dashed border-border/60 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-all duration-300 bg-background/20 relative">
+                        {isUploadingDocument ? (
+                          <div className="flex flex-col items-center justify-center">
+                            <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+                            <span className="text-sm font-semibold text-text-primary">جاري رفع المستند...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload className="h-8 w-8 text-text-muted mb-2 animate-pulse" />
+                            <span className="text-sm font-semibold text-text-primary mb-1">اضغط لتحميل مستند الترخيص، أو اسحب الملف هنا</span>
+                            <span className="text-xs text-text-muted">الحد الأقصى للملف: 5 ميجابايت (PDF, PNG, JPG)</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={handleLicenseFileChange}
+                          disabled={isUploadingDocument}
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
               )}

@@ -18,6 +18,7 @@ import {
   Calendar,
   Star,
   Zap,
+  Eye,
   Award,
   CheckCircle2,
   Trophy,
@@ -38,7 +39,9 @@ import {
   Compass,
   ThumbsUp,
   Shield,
-  ChevronLeft
+  ChevronLeft,
+  Briefcase,
+  Globe
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
@@ -80,15 +83,17 @@ export function ProfilePage() {
   const [isFollowingLoaded, setIsFollowingLoaded] = useState(false);
 
   useEffect(() => {
-    if (!user?.id || !currentUser?.id) return;
+    if (!user?.id) return;
     getFollowerCount(user.id).then(setFollowersCount);
     getFollowingCount(user.id).then(setFollowingCount);
-      if (currentUser.id !== user.id) {
-        checkFollowing(currentUser.id, user.id).then((status) => {
-          setIsFollowing(status);
-          setIsFollowingLoaded(true);
-        });
+    
+    if (currentUser?.id && currentUser.id !== "1" && currentUser.id !== user.id) {
+      checkFollowing(currentUser.id, user.id).then((status) => {
+        setIsFollowing(status);
+        setIsFollowingLoaded(true);
+      });
     } else {
+      setIsFollowing(false);
       setIsFollowingLoaded(true);
     }
   }, [user?.id, currentUser?.id]);
@@ -127,9 +132,9 @@ export function ProfilePage() {
   }
 
   const isBusiness = user.accountType !== "individual";
-  const userQuestions = questions.filter((q) => q.author.name === user.name);
+  const userQuestions = questions.filter((q) => q.author_id === user.id);
   const userAnswers = questions.filter((q) =>
-    answers.some((a) => a.questionId === q.id && a.author.name === user.name)
+    answers.some((a) => a.questionId === q.id && a.author_id === user.id)
   );
   const savedQuestions = questions.filter((q) => bookmarkedIds.includes(q.id));
 
@@ -236,14 +241,19 @@ export function ProfilePage() {
     <div className="max-w-5xl w-full mx-auto animate-fade-in pb-4">
       {/* Profile Header Card */}
       <div className="premium-glass-card overflow-hidden mb-4 sm:mb-6 rounded-3xl border border-border/30 relative shadow-xl">
-        {/* Banner with solid background overlay instead of gradients */}
-        <div className="h-28 sm:h-36 bg-primary/10 relative overflow-hidden border-b border-primary/20">
-          <div className="absolute inset-0 opacity-20 arabic-geometric-mesh-fine" />
-          <div className="absolute inset-0 bg-background/80" />
-          
-          {/* Subtle Accent Glows (Solid Blur) */}
-          <div className="absolute -top-10 right-10 w-40 h-40 bg-primary/10 rounded-full filter blur-3xl" />
-          <div className="absolute -bottom-10 left-10 w-40 h-40 bg-secondary/10 rounded-full filter blur-3xl" />
+        {/* Banner with custom image or solid background overlay */}
+        <div className="h-28 sm:h-36 relative overflow-hidden border-b border-primary/20 bg-primary/10">
+          {user.settings?.cover_url ? (
+            <img src={user.settings.cover_url} alt="Cover Banner" className="w-full h-full object-cover" />
+          ) : (
+            <>
+              <div className="absolute inset-0 opacity-20 arabic-geometric-mesh-fine" />
+              <div className="absolute inset-0 bg-background/80" />
+              {/* Subtle Accent Glows (Solid Blur) */}
+              <div className="absolute -top-10 right-10 w-40 h-40 bg-primary/10 rounded-full filter blur-3xl" />
+              <div className="absolute -bottom-10 left-10 w-40 h-40 bg-secondary/10 rounded-full filter blur-3xl" />
+            </>
+          )}
         </div>
 
         <div className="px-4 sm:px-8 pb-5 sm:pb-7 relative">
@@ -282,13 +292,17 @@ export function ProfilePage() {
                     className="rounded-xl h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-300 text-white bg-primary hover:bg-primary-95"
                     variant={isFollowing ? "outline" : "default"}
                     onClick={async () => {
-                      if (!currentUser?.id || !user?.id) return;
+                      if (!currentUser?.id || currentUser.id === "1") {
+                        toast.error("يرجى تسجيل الدخول لمتابعة هذا الحساب.");
+                        return;
+                      }
                       if (currentUser.id === user.id) return;
                       const result = await toggleFollow(currentUser.id, user.id);
                       if (result.success) {
                         setIsFollowing(result.isFollowing);
                         setFollowersCount((c) => result.isFollowing ? c + 1 : c - 1);
-                      } else if (result.error === "لا يمكنك متابعة نفسك") {
+                        toast.success(result.isFollowing ? `تتابع الآن ${user.name}` : `ألغيت متابعة ${user.name}`);
+                      } else if (result.error) {
                         toast.error(result.error);
                       }
                     }}
@@ -337,6 +351,25 @@ export function ProfilePage() {
                 <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-lg border border-border/20">
                   <MapPin className="h-3.5 w-3.5 text-primary/70" />
                   <span>{user.location}</span>
+                </div>
+              )}
+              {user.settings?.occupation && (
+                <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-lg border border-border/20">
+                  <Briefcase className="h-3.5 w-3.5 text-primary/70" />
+                  <span>{user.settings.occupation}</span>
+                </div>
+              )}
+              {user.settings?.website && (
+                <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-lg border border-border/20">
+                  <Globe className="h-3.5 w-3.5 text-primary/70" />
+                  <a
+                    href={user.settings.website.startsWith("http") ? user.settings.website : `https://${user.settings.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    {user.settings.website.replace(/^https?:\/\/(www\.)?/, "")}
+                  </a>
                 </div>
               )}
               <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-lg border border-border/20">
@@ -723,6 +756,31 @@ export function ProfilePage() {
                   <span className="text-xs text-muted-foreground font-medium">السيرة والبيان التعريفي</span>
                   <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed mt-1">{user.bio}</p>
                 </div>
+
+                {user.settings?.license_document_url && (
+                  <div className="mt-4 pt-4 border-t border-border/10">
+                    <span className="text-xs text-muted-foreground font-medium">مستند التوثيق المرفق</span>
+                    <div className="mt-2 flex items-center gap-3 p-3 rounded-xl border border-border/25 bg-muted/10 w-fit">
+                      {user.settings.license_document_url.match(/\.(jpeg|jpg|gif|png)$/i) || !user.settings.license_document_url.endsWith(".pdf") ? (
+                        <img src={user.settings.license_document_url} alt="License Document" className="h-12 w-12 object-cover rounded-lg border border-border/20" />
+                      ) : (
+                        <FileText className="h-10 w-10 text-primary" />
+                      )}
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">سند التوثيق / الترخيص</p>
+                        <a 
+                          href={user.settings.license_document_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-[10px] text-primary hover:underline flex items-center gap-1 mt-0.5"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>عرض المستند المرفق</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
 

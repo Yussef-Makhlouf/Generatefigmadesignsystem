@@ -54,12 +54,15 @@ interface AppStateContextProps extends AppState {
   toggleBookmark: (questionId: string) => boolean;
   updateProfile: (
     name: string,
+    username: string,
     bio: string,
     location: string,
     avatar: string,
-    tags?: any[],
+    occupation: string,
+    website: string,
+    coverUrl?: string,
     businessInfo?: any
-  ) => void;
+  ) => Promise<any>;
   addNotification: (type: "like" | "answer" | "system" | "achievement", title: string, content: string) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
@@ -87,18 +90,26 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     queryKey: ["currentUser", currentUserId],
     queryFn: async () => {
       if (!currentUserId) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "", joined: "" };
+      
+      // Fetch user email from Supabase Auth
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const email = authUser?.email ?? "";
+
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", currentUserId)
         .single();
-      if (!data) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "" };
+      if (!data) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "", email };
       return {
         ...data,
+        email,
         avatar: data.avatar_url ?? "",
+        accountType: data.account_type ?? "individual",
         businessCategory: data.business_category ?? "",
         businessLicense: data.business_license ?? "",
         businessAddress: data.business_address ?? "",
+        businessRating: data.business_rating ?? null,
         operatingHours: data.operating_hours ?? "",
         isVerifiedEntity: data.is_verified_entity,
         joined: new Date(data.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" }),
@@ -258,7 +269,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     queryKey: ["users"],
     queryFn: async () => {
       const { data } = await supabase.from("profiles").select("*");
-      return (data ?? []) as any[];
+      return (data ?? []).map((u: any) => ({
+        ...u,
+        avatar: u.avatar_url ?? "",
+        accountType: u.account_type ?? "individual",
+        businessCategory: u.business_category ?? "",
+        businessLicense: u.business_license ?? "",
+        businessAddress: u.business_address ?? "",
+        businessRating: u.business_rating ?? null,
+        operatingHours: u.operating_hours ?? "",
+        isVerifiedEntity: u.is_verified_entity,
+        joined: new Date(u.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" }),
+      })) as any[];
     },
   });
 
@@ -451,20 +473,42 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return !existing;
   };
 
-  const updateProfile = (
+  const updateProfile = async (
     name: string,
+    username: string,
     bio: string,
     location: string,
     avatar: string,
-    tags?: any[],
+    occupation: string,
+    website: string,
+    coverUrl?: string,
     businessInfo?: any
   ) => {
-    if (!currentUserId) return;
+    if (!currentUserId) return null;
+    
+    // Get existing settings to preserve nested items like notifications/privacy
+    const { data: currentProfile } = await supabase
+      .from("profiles")
+      .select("settings")
+      .eq("id", currentUserId)
+      .single();
+      
+    const currentSettings = currentProfile?.settings || {};
+    const newSettings = {
+      ...currentSettings,
+      occupation,
+      website,
+      cover_url: coverUrl,
+      license_document_url: businessInfo?.licenseDocumentUrl !== undefined ? businessInfo.licenseDocumentUrl : currentSettings.license_document_url
+    };
+
     const input: any = {
       name,
+      username,
       bio,
       location,
       avatar_url: avatar,
+      settings: newSettings
     };
     if (businessInfo) {
       if (businessInfo.businessCategory !== undefined) input.business_category = businessInfo.businessCategory;
@@ -472,8 +516,10 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (businessInfo.businessAddress !== undefined) input.business_address = businessInfo.businessAddress;
       if (businessInfo.operatingHours !== undefined) input.operating_hours = businessInfo.operatingHours;
     }
-    apiUpdateProfile(currentUserId, input);
+    const result = await apiUpdateProfile(currentUserId, input);
     queryClient.invalidateQueries({ queryKey: ["currentUser", currentUserId] });
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+    return result;
   };
 
   const addNotification = async (type: "like" | "answer" | "system" | "achievement", title: string, content: string) => {

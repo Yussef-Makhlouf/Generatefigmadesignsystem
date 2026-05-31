@@ -566,6 +566,32 @@ export function AdminPage() {
                             </div>
                           </div>
 
+                          {entity.settings?.license_document_url && (
+                            <div className="border border-strong/10 rounded-lg p-2.5 bg-background/40 flex items-center justify-between gap-3 text-[11px]">
+                              <div className="flex items-center gap-2">
+                                {entity.settings.license_document_url.match(/\.(jpeg|jpg|gif|png)$/i) || !entity.settings.license_document_url.endsWith(".pdf") ? (
+                                  <img src={entity.settings.license_document_url} alt="Document" className="h-10 w-10 object-cover rounded border border-strong/15" />
+                                ) : (
+                                  <div className="h-10 w-10 bg-primary/10 border border-primary/20 text-primary flex items-center justify-center rounded">
+                                    <ShieldCheck className="h-5 w-5" />
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-bold text-foreground">مستند التوثيق المرفوع</span>
+                                  <span className="block text-[10px] text-text-muted">انقر لعرض الترخيص أو السجل التجاري</span>
+                                </div>
+                              </div>
+                              <a
+                                href={entity.settings.license_document_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1 text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 hover:bg-primary hover:text-white rounded-lg transition-colors flex items-center gap-1"
+                              >
+                                <span>عرض</span>
+                              </a>
+                            </div>
+                          )}
+
                           <div className="flex gap-2 justify-end pt-1">
                             <Button
                               size="sm"

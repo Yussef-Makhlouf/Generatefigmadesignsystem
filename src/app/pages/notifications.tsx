@@ -2,10 +2,12 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { EmptyState } from "../components/empty-state";
-import { Bell, MessageSquare, ThumbsUp, CheckCheck, Award } from "lucide-react";
+import { Bell, MessageSquare, ThumbsUp, CheckCheck, Award, User, Star, MessageCircle } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
+import { useNavigate } from "react-router";
 
 export function NotificationsPage() {
+  const navigate = useNavigate();
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useAppState();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -14,12 +16,25 @@ export function NotificationsPage() {
     switch (type) {
       case "answer":
         return MessageSquare;
+      case "comment":
+        return MessageCircle;
       case "like":
         return ThumbsUp;
       case "achievement":
         return Award;
+      case "follow":
+        return User;
+      case "review":
+        return Star;
       default:
         return Bell;
+    }
+  };
+
+  const handleNotificationClick = (id: string, actionUrl?: string) => {
+    markNotificationAsRead(id);
+    if (actionUrl) {
+      navigate(actionUrl);
     }
   };
 
@@ -94,7 +109,7 @@ export function NotificationsPage() {
                         ? "border-primary/25 bg-primary/[0.04] hover:bg-primary/[0.07] shadow-[0_4px_20px_rgba(0,242,254,0.04)]"
                         : "bg-card/45 border-border/45 hover:border-primary/20"
                     }`}
-                    onClick={() => markNotificationAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification.id, notification.action_url)}
                   >
                     {!notification.read && (
                       <div className="absolute top-0 right-0 w-[4px] h-full bg-gradient-to-b from-primary to-primary-hover" />
@@ -154,7 +169,7 @@ export function NotificationsPage() {
                         ? "border-primary/25 bg-primary/[0.04] hover:bg-primary/[0.07] shadow-[0_4px_20px_rgba(0,242,254,0.04)]"
                         : "bg-card/45 border-border/45 hover:border-primary/20"
                     }`}
-                    onClick={() => markNotificationAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification.id, notification.action_url)}
                   >
                     {!notification.read && (
                       <div className="absolute top-0 right-0 w-[4px] h-full bg-gradient-to-b from-primary to-primary-hover" />
@@ -210,7 +225,7 @@ export function NotificationsPage() {
                   <div
                     key={notification.id}
                     className="premium-glass-card p-5 rounded-2xl cursor-pointer bg-card/45 border border-border/45 hover:border-primary/20 transition-all duration-300"
-                    onClick={() => markNotificationAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification.id, notification.action_url)}
                   >
                     <div className="flex gap-4">
                       <div className="flex-shrink-0">

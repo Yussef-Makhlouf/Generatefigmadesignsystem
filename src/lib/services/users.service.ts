@@ -50,6 +50,37 @@ export async function uploadAvatar(userId: string, file: File): Promise<string |
   return data.publicUrl;
 }
 
+// ── Upload cover image ─────────────────────────────────────────
+export async function uploadCoverImage(userId: string, file: File): Promise<string | null> {
+  const ext = file.name.split(".").pop();
+  const path = `covers/${userId}.${ext}`;
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, { upsert: true });
+  if (error) { console.error("uploadCoverImage:", error); return null; }
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// ── Upload license document ───────────────────────────────────
+export async function uploadLicenseDocument(userId: string, file: File): Promise<string | null> {
+  const ext = file.name.split(".").pop();
+  const path = `${userId}/license_${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("business-licenses")
+    .upload(path, file, { upsert: true });
+  if (error) { console.error("uploadLicenseDocument upload:", error); return null; }
+  
+  // Generate a signed URL valid for 10 years (315,360,000 seconds)
+  const { data, error: signError } = await supabase.storage
+    .from("business-licenses")
+    .createSignedUrl(path, 315360000);
+  if (signError || !data) { console.error("uploadLicenseDocument signing:", signError); return null; }
+  
+  return data.signedUrl;
+}
+
+
 // ── Leaderboard ──────────────────────────────────────────────
 export async function getLeaderboard(limit = 20): Promise<Profile[]> {
   const { data, error } = await supabase

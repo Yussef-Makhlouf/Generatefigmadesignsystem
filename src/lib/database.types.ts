@@ -14,7 +14,8 @@ export type AccountType =
 export type VoteType = "up" | "down";
 export type TargetType = "question" | "answer";
 export type AttachmentType = "image" | "link" | "location";
-export type NotificationType = "like" | "answer" | "system" | "achievement";
+export type NotificationType = "like" | "answer" | "comment" | "follow" | "review" | "system" | "achievement";
+export type NotificationPriority = "low" | "normal" | "high" | "urgent";
 export type VerifiedType = "photo" | "location";
 
 // ── Profiles ────────────────────────────────────────────────
@@ -93,6 +94,7 @@ export type QuestionAttachment = {
   lng: number | null;
   sort_order: number;
   created_at: string;
+  updated_at: string; // ✅ ADDED: aligned with schema v2.0
 };
 
 export type AnswerAttachment = {
@@ -106,6 +108,7 @@ export type AnswerAttachment = {
   lng: number | null;
   sort_order: number;
   created_at: string;
+  updated_at: string; // ✅ ADDED: aligned with schema v2.0
 };
 
 // ── Tags ─────────────────────────────────────────────────────
@@ -151,6 +154,7 @@ export type Comment = {
   author_id: string;
   content: string;
   created_at: string;
+  updated_at: string; // ✅ ADDED: aligned with schema v2.0
   // Joined
   author: string;
   // UI Compatibility fields
@@ -188,6 +192,7 @@ export type Review = {
   visit_date: string | null;
   is_deleted: boolean;
   created_at: string;
+  updated_at: string; // ✅ ADDED: aligned with schema v2.0
   // Joined
   reviewer?: Profile;
   entity?: Profile;
@@ -210,6 +215,9 @@ export type Notification = {
   type: NotificationType;
   title: string;
   content: string;
+  notification_data: Record<string, unknown>; // ✅ ADDED: schema v2.0
+  action_url: string | null;                  // ✅ ADDED: schema v2.0
+  priority: NotificationPriority;              // ✅ ADDED: schema v2.0
   is_read: boolean;
   created_at: string;
 };
@@ -222,6 +230,9 @@ export type NotificationItem = {
   content: string;
   timestamp: string;
   read: boolean;
+  action_url?: string;           // ✅ ADDED: for notification click navigation
+  priority?: NotificationPriority; // ✅ ADDED: for visual priority indicators
+  data?: Record<string, unknown>; // ✅ ADDED: for dynamic notification rendering
 };
 
 /** Convert a DB Notification row → UI NotificationItem */
@@ -233,6 +244,9 @@ export function notificationToItem(n: Notification): NotificationItem {
     content: n.content,
     timestamp: n.created_at,
     read: n.is_read,
+    action_url: n.action_url ?? undefined,
+    priority: n.priority,
+    data: n.notification_data,
   };
 }
 
@@ -263,6 +277,15 @@ export type ReputationLog = {
   ref_id: string | null;
   ref_type: string | null;
   created_at: string;
+};
+
+// ── Reputation Daily Limits ──────────────────────────────────
+// ✅ ADDED: aligned with schema v2.0 — daily reputation cap tracking
+export type ReputationDailyLimit = {
+  id: string;
+  user_id: string;
+  date: string;
+  points_earned: number;
 };
 
 // ── Question → QuestionCard Mapper ──────────────────────────
@@ -359,6 +382,8 @@ export type Database = {
       reputation_logs: { Row: ReputationLog; Insert: Partial<ReputationLog>; Update: never; Relationships: [] };
       spaces: { Row: Space; Insert: Partial<Space>; Update: Partial<Space>; Relationships: [] };
       follows: { Row: Follow; Insert: Partial<Follow>; Update: Partial<Follow>; Relationships: [] };
+      // ✅ ADDED: schema v2.0
+      reputation_daily_limits: { Row: ReputationDailyLimit; Insert: Partial<ReputationDailyLimit>; Update: Partial<ReputationDailyLimit>; Relationships: [] };
     };
     Views: {
       [_ in never]: never;
@@ -370,6 +395,29 @@ export type Database = {
           p_following_id: string;
         };
         Returns: boolean;
+      };
+      // ✅ ADDED: schema v2.0 RPCs
+      increment_tag_usage: {
+        Args: { tag_id_param: string };
+        Returns: void;
+      };
+      award_reputation: {
+        Args: {
+          p_user_id: string;
+          p_points: number;
+          p_reason: string;
+          p_ref_id?: string;
+          p_ref_type?: string;
+        };
+        Returns: void;
+      };
+      check_daily_rep_limit: {
+        Args: {
+          p_user_id: string;
+          p_points: number;
+          p_max?: number;
+        };
+        Returns: number;
       };
     };
     Enums: {

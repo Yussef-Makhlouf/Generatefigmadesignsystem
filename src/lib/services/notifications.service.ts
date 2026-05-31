@@ -1,5 +1,5 @@
 import { supabase } from "../supabase";
-import type { Notification } from "../database.types";
+import type { Notification, NotificationType, NotificationPriority } from "../database.types";
 
 // ── Fetch notifications for user ───────────────────────────────
 export async function getNotifications(
@@ -59,11 +59,17 @@ export async function markAllNotificationsRead(userId: string): Promise<boolean>
 }
 
 // ── Create notification ───────────────────────────────────────
+// ✅ ENHANCED: supports notification_data, action_url, and priority (schema v2.0)
 export async function createNotification(
   userId: string,
-  type: "like" | "answer" | "system" | "achievement",
+  type: NotificationType,
   title: string,
-  content: string
+  content: string,
+  options?: {
+    notification_data?: Record<string, unknown>;
+    action_url?: string;
+    priority?: NotificationPriority;
+  }
 ): Promise<boolean> {
   const { error } = await supabase
     .from("notifications")
@@ -72,6 +78,9 @@ export async function createNotification(
       type,
       title,
       content,
+      notification_data: options?.notification_data ?? {},
+      action_url: options?.action_url ?? null,
+      priority: options?.priority ?? "normal",
     });
 
   if (error) {
