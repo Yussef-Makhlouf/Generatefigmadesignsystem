@@ -32,12 +32,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "../context/AppStateContext";
-import { signOut } from "../../lib/services";
+import { signOut, getUserSettings, saveUserSettings, getDefaultSettings } from "../../lib/services";
+import type { UserSettings } from "../../lib/services/settings.service";
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { currentUser, updateProfile, reviews, deleteReview } = useAppState();
   const [activeTab, setActiveTab] = useState("profile");
+  const [isSaving, setIsSaving] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  const [settings, setSettings] = useState<UserSettings>(() => getDefaultSettings());
 
   const handleSignOut = async () => {
     try {
@@ -54,7 +59,6 @@ export function SettingsPage() {
       });
     }
   };
-  const [isSaving, setIsSaving] = useState(false);
 
   // Profile settings
   const [name, setName] = useState(currentUser.name);
@@ -71,23 +75,83 @@ export function SettingsPage() {
   const [businessAddress, setBusinessAddress] = useState(currentUser.businessAddress || "");
   const [operatingHours, setOperatingHours] = useState(currentUser.operatingHours || "");
 
-  // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [newAnswers, setNewAnswers] = useState(true);
-  const [newComments, setNewComments] = useState(true);
-  const [mentions, setMentions] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-
   // Privacy settings
-  const [profileVisibility, setProfileVisibility] = useState("public");
-  const [showEmail, setShowEmail] = useState(false);
-  const [showLocation, setShowLocation] = useState(true);
-  const [allowMessages, setAllowMessages] = useState(true);
+  const [profileVisibility, setProfileVisibility] = useState<"public" | "members" | "private">("public");
+  const [showEmail, setShowEmail] = useState<boolean>(false);
+  const [showLocation, setShowLocation] = useState<boolean>(true);
+  const [allowMessages, setAllowMessages] = useState<boolean>(true);
 
   // Appearance settings
-  const [theme, setTheme] = useState("system");
-  const [language, setLanguage] = useState("ar");
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [language, setLanguage] = useState<"ar" | "en">("ar");
+
+  // Notification settings
+  const [emailNotifications, setEmailNotifications] = useState<boolean>(true);
+  const [newAnswers, setNewAnswers] = useState<boolean>(true);
+  const [newComments, setNewComments] = useState<boolean>(true);
+  const [mentions, setMentions] = useState<boolean>(true);
+  const [weeklyDigest, setWeeklyDigest] = useState<boolean>(false);
+  const [marketingEmails, setMarketingEmails] = useState<boolean>(false);
+
+  const handleSaveNotifications = async () => {
+    if (!currentUser?.id) return;
+    setIsSaving(true);
+    try {
+      await saveUserSettings(currentUser.id, {
+        notifications: {
+          email: emailNotifications,
+          newAnswers,
+          newComments,
+          mentions,
+          weeklyDigest,
+          marketingEmails,
+        },
+      });
+      toast.success("تم تحديث إعدادات الإشعارات");
+    } catch {
+      toast.error("فشل حفظ الإعدادات");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSavePrivacy = async () => {
+    if (!currentUser?.id) return;
+    setIsSaving(true);
+    try {
+      await saveUserSettings(currentUser.id, {
+        privacy: {
+          profileVisibility: profileVisibility as "public" | "members" | "private",
+          showEmail,
+          showLocation,
+          allowMessages,
+        },
+      });
+      toast.success("تم تحديث إعدادات الخصوصية");
+    } catch {
+      toast.error("فشل حفظ الإعدادات");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAppearance = async () => {
+    if (!currentUser?.id) return;
+    setIsSaving(true);
+    try {
+      await saveUserSettings(currentUser.id, {
+        appearance: {
+          theme: theme as "light" | "dark" | "system",
+          language: language as "ar" | "en",
+        },
+      });
+      toast.success("تم تحديث إعدادات المظهر");
+    } catch {
+      toast.error("فشل حفظ الإعدادات");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleSaveProfile = () => {
     setIsSaving(true);
@@ -100,22 +164,6 @@ export function SettingsPage() {
       });
       setIsSaving(false);
       toast.success("تم حفظ التغييرات بنجاح");
-    }, 1000);
-  };
-
-  const handleSaveNotifications = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success("تم تحديث إعدادات الإشعارات");
-    }, 1000);
-  };
-
-  const handleSavePrivacy = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success("تم تحديث إعدادات الخصوصية");
     }, 1000);
   };
 
@@ -569,7 +617,7 @@ export function SettingsPage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-text-primary font-bold mb-1 block">ظهور الملف الشخصي</Label>
-                <Select value={profileVisibility} onValueChange={setProfileVisibility}>
+                <Select value={profileVisibility} onValueChange={(v) => setProfileVisibility(v as "public" | "members" | "private")}>
                   <SelectTrigger className="rounded-xl border-border/60 bg-background/30 focus:border-primary transition-all duration-300 input-glow">
                     <SelectValue />
                   </SelectTrigger>
@@ -651,7 +699,7 @@ export function SettingsPage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-text-primary font-bold mb-1 block">السمة البصرية</Label>
-                <Select value={theme} onValueChange={setTheme}>
+                <Select value={theme} onValueChange={(v) => setTheme(v as "light" | "dark" | "system")}>
                   <SelectTrigger className="rounded-xl border-border/60 bg-background/30 focus:border-primary transition-all duration-300 input-glow">
                     <SelectValue />
                   </SelectTrigger>
@@ -670,7 +718,7 @@ export function SettingsPage() {
 
               <div className="space-y-2">
                 <Label className="text-text-primary font-bold mb-1 block">لغة المنصة</Label>
-                <Select value={language} onValueChange={setLanguage}>
+                <Select value={language} onValueChange={(v) => setLanguage(v as "ar" | "en")}>
                   <SelectTrigger className="rounded-xl border-border/60 bg-background/30 focus:border-primary transition-all duration-300 input-glow">
                     <SelectValue />
                   </SelectTrigger>
@@ -684,13 +732,7 @@ export function SettingsPage() {
 
             <Button
               className="mt-8 rounded-xl bg-primary hover:bg-primary-hover hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 text-white font-medium"
-              onClick={() => {
-                setIsSaving(true);
-                setTimeout(() => {
-                  setIsSaving(false);
-                  toast.success("تم تحديث إعدادات المظهر");
-                }, 1000);
-              }}
+              onClick={handleSaveAppearance}
               disabled={isSaving}
             >
               {isSaving ? (

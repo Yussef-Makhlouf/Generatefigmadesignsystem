@@ -1,10 +1,12 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
-import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap } from "lucide-react";
+import { Button } from "./ui/button";
+import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap, LogOut } from "lucide-react";
 import { ReputationBadge } from "./reputation-badge";
 import { useAppState } from "../context/AppStateContext";
 import { useCategories } from "../../lib/hooks/use-categories";
+import { signOut } from "../../lib/services";
 
 
 
@@ -22,6 +24,12 @@ export function DesktopSidebar() {
   const location = useLocation();
   const { currentUser, questions, answers } = useAppState();
   const { categories, isLoading: categoriesLoading } = useCategories(6);
+  const navigate = useNavigate();
+
+  const handleSidebarLogout = async () => {
+    await signOut();
+    window.location.href = "/";
+  };
 
   const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
   
@@ -140,6 +148,15 @@ export function DesktopSidebar() {
               <div className="h-full w-1/2 gradient-primary rounded-full" />
             </div>
           </div>
+          
+          <Button
+            variant="ghost"
+            className="w-full mt-3 rounded-xl text-destructive hover:bg-destructive/10 transition-all duration-200 text-xs font-semibold gap-2 h-9"
+            onClick={handleSidebarLogout}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            تسجيل الخروج
+          </Button>
         </Card>
       ) : (
         <Card 

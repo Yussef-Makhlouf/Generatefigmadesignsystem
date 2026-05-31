@@ -440,7 +440,66 @@ CREATE TRIGGER entity_verified_trigger
   FOR EACH ROW EXECUTE FUNCTION public.on_entity_verified();
 
 -- ============================================================
+-- 16. FOLLOWS TABLE (User following relationships)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.follows (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  follower_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (follower_id, following_id),
+  CHECK (follower_id != following_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_follows_follower ON public.follows(follower_id);
+CREATE INDEX IF NOT EXISTS idx_follows_following ON public.follows(following_id);
+
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Follows are publicly readable" ON public.follows FOR SELECT USING (TRUE);
+CREATE POLICY "Authenticated users can create follows" ON public.follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+CREATE POLICY "Users can delete own follows" ON public.follows FOR DELETE USING (auth.uid() = follower_id);
+
+-- Function to safely toggle follow (prevents self-follow)
+CREATE OR REPLACE FUNCTION public.toggle_follow(
+  p_follower_id UUID,
+  p_following_id UUID
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF p_follower_id = p_following_id THEN
+    RETURN FALSE;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM public.follows WHERE follower_id = p_follower_id AND following_id = p_following_id) THEN
+    DELETE FROM public.follows WHERE follower_id = p_follower_id AND following_id = p_following_id;
+    RETURN FALSE; -- Unfollowed
+  ELSE
+    INSERT INTO public.follows (follower_id, following_id) VALUES (p_follower_id, p_following_id);
+    RETURN TRUE; -- Followed
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to check self-follow before insert (RLS helper)
+CREATE OR REPLACE FUNCTION public.check_not_self_follow()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.follower_id = NEW.following_id THEN
+    RAISE EXCEPTION 'لا يمكنك متابعة نفسك';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prevent_self_follow BEFORE INSERT ON public.follows
+  FOR EACH ROW EXECUTE FUNCTION public.check_not_self_follow();
+
+-- ============================================================
 -- ROW LEVEL SECURITY (RLS)
+-- ============================================================
+-- Note: follows table RLS was already enabled above (line 457)
+
 -- ============================================================
 ALTER TABLE public.profiles        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions       ENABLE ROW LEVEL SECURITY;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
+import { isFollowing as checkFollowing, toggleFollow, getFollowerCount, getFollowingCount } from "../../lib/services";
 
 const BADGES = [
   { icon: Trophy, label: "متصدر", color: "border-[hsla(43,96%,45%,0.3)] bg-[hsla(43,96%,45%,0.08)] text-[hsl(43,96%,54%)] dark:text-[hsl(43,96%,60%)] shadow-[0_0_10px_rgba(245,158,11,0.08)]" },
@@ -74,6 +75,23 @@ export function ProfilePage() {
     user && user.accountType !== "individual" ? "reviews" : "questions"
   );
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowingLoaded, setIsFollowingLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id || !currentUser?.id) return;
+    getFollowerCount(user.id).then(setFollowersCount);
+    getFollowingCount(user.id).then(setFollowingCount);
+      if (currentUser.id !== user.id) {
+        checkFollowing(currentUser.id, user.id).then((status) => {
+          setIsFollowing(status);
+          setIsFollowingLoaded(true);
+        });
+    } else {
+      setIsFollowingLoaded(true);
+    }
+  }, [user?.id, currentUser?.id]);
 
   // Write Review Modal States
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -261,9 +279,19 @@ export function ProfilePage() {
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Button
-                    className="rounded-xl h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-300 text-white bg-primary hover:bg-primary/95"
+                    className="rounded-xl h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-300 text-white bg-primary hover:bg-primary-95"
                     variant={isFollowing ? "outline" : "default"}
-                    onClick={() => setIsFollowing(!isFollowing)}
+                    onClick={async () => {
+                      if (!currentUser?.id || !user?.id) return;
+                      if (currentUser.id === user.id) return;
+                      const result = await toggleFollow(currentUser.id, user.id);
+                      if (result.success) {
+                        setIsFollowing(result.isFollowing);
+                        setFollowersCount((c) => result.isFollowing ? c + 1 : c - 1);
+                      } else if (result.error === "لا يمكنك متابعة نفسك") {
+                        toast.error(result.error);
+                      }
+                    }}
                   >
                     <UserPlus className="h-4 w-4 ml-1.5" />
                     {isFollowing ? "متابَع" : "متابعة"}
@@ -412,7 +440,7 @@ export function ProfilePage() {
                 { label: "تقييمات الزوار", value: receivedReviews.length, color: "text-primary", glow: "hover:shadow-[0_0_15px_rgba(0,242,254,0.15)] hover:border-primary/30" },
                 { label: "معدل التقييم", value: user.businessRating || "5.0", color: "text-secondary", glow: "hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:border-secondary/30" },
                 { label: "إجابات الخبير", value: userAnswers.length, color: "text-emerald-500", glow: "hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-success/30" },
-                { label: "المتابعين", value: isOwnProfile ? 18 : 8, color: "text-foreground", glow: "hover:shadow-[0_0_15px_rgba(255,255,255,0.08)] hover:border-foreground/20" },
+                { label: "المتابعين", value: followersCount, color: "text-foreground", glow: "hover:shadow-[0_0_15px_rgba(255,255,255,0.08)] hover:border-foreground/20" },
               ].map((stat) => (
                 <div
                   key={stat.label}
@@ -431,7 +459,7 @@ export function ProfilePage() {
                 { label: "أسئلة", value: userQuestions.length, color: "text-primary", glow: "hover:shadow-[0_0_15px_rgba(0,242,254,0.15)] hover:border-primary/30" },
                 { label: "إجابات", value: userAnswers.length, color: "text-secondary", glow: "hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:border-secondary/30" },
                 { label: "تقييماتي للأماكن", value: writtenReviews.length, color: "text-emerald-500", glow: "hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-success/30" },
-                { label: "متابعين", value: isOwnProfile ? 12 : 5, color: "text-foreground", glow: "hover:shadow-[0_0_15px_rgba(255,255,255,0.08)] hover:border-foreground/20" },
+                { label: "متابعين", value: followersCount, color: "text-foreground", glow: "hover:shadow-[0_0_15px_rgba(255,255,255,0.08)] hover:border-foreground/20" },
               ].map((stat) => (
                 <div
                   key={stat.label}

@@ -51,7 +51,20 @@ export async function signIn(
   });
 
   if (error) {
-    return { user: null, error: error.message };
+    let message = error.message;
+    if (
+      message.includes("email_not_confirmed") ||
+      message.includes("Email not confirmed")
+    ) {
+      message =
+        "يرجى تأكيد بريدك الإلكتروني أولاً ثم حاول تسجيل الدخول مجدداً.";
+    } else if (
+      message.includes("Invalid login credentials") ||
+      message.includes("invalid_credentials")
+    ) {
+      message = "بيانات تسجيل الدخول غير صحيحة. تحقق من البريد الإلكتروني وكلمة المرور.";
+    }
+    return { user: null, error: message };
   }
 
   const user = data.user;

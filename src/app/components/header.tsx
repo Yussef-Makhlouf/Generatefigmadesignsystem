@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  PenSquare, Moon, Sun, Bell, Search, X, Zap,
+  PenSquare, Moon, Sun, Bell, Search, X, Zap, LogOut, ChevronDown, User
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 
@@ -17,6 +17,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { notifications, currentUser } = useAppState();
   const notifCount = notifications.filter((n) => !n.read).length;
@@ -60,17 +61,15 @@ export function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 safe-area-top transition-all duration-300 ${
-          scrolled
+        className={`sticky top-0 z-40 safe-area-top transition-all duration-300 ${scrolled
             ? "glass shadow-md border-b border-border/60"
             : "bg-background/80 backdrop-blur-xl border-b border-transparent"
-        }`}
+          }`}
       >
         {/* Top accent line — only visible on scroll */}
         <div
-          className={`absolute top-0 inset-x-0 h-[1px] transition-opacity duration-300 ${
-            scrolled ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute top-0 inset-x-0 h-[1px] transition-opacity duration-300 ${scrolled ? "opacity-100" : "opacity-0"
+            }`}
           style={{
             background: "linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent)",
           }}
@@ -130,7 +129,7 @@ export function Header() {
 
           {/* ── Action cluster (Social Media Style) ──────── */}
           <div className="flex items-center gap-2 sm:gap-3">
-            
+
             {/* Theme toggle */}
             <Button
               size="icon"
@@ -222,15 +221,61 @@ export function Header() {
 
             {/* User Profile Avatar OR Sign-in/Sign-up Buttons */}
             {currentUser && currentUser.id !== "1" && currentUser.username !== "guest" ? (
-              <Link to="/profile/me" className="flex-shrink-0 mr-1 sm:mr-2 relative group" aria-label="ملفي الشخصي">
-                <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Avatar className="relative h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-transparent group-hover:ring-primary/40 transition-all duration-300 cursor-pointer shadow-sm">
-                  <AvatarImage src={currentUser?.avatar || ""} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-bold text-xs sm:text-sm">
-                    {avatarLetter}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex-shrink-0 mr-1 sm:mr-2 relative group"
+                  aria-label="قائمة المستخدم"
+                >
+                  <Avatar className="relative h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-transparent group-hover:ring-primary/40 transition-all duration-300 cursor-pointer shadow-sm">
+                    <AvatarImage src={currentUser?.avatar || ""} />
+                    <AvatarFallback className="bg-primary text-white font-bold text-xs sm:text-sm">
+                      {avatarLetter}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+                {userMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-card shadow-xl border border-border/60 rounded-2xl z-50 py-2 animate-in">
+                      <div className="px-4 py-3 border-b border-border/40">
+                        <p className="text-sm font-bold text-foreground truncate">{currentUser?.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">@{currentUser?.username}</p>
+                      </div>
+                      <Link
+                        to="/profile/me"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted/60 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>ملفي الشخصي</span>
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted/60 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <ChevronDown className="h-4 w-4 text-muted-foreground rotate-[-90deg]" />
+                        <span>الإعدادات</span>
+                      </Link>
+                      <div className="border-t border-border/40 mt-1 pt-1">
+                        <button
+                          onClick={async () => {
+                            setUserMenuOpen(false);
+                            const { signOut } = await import("../../lib/services");
+                            await signOut();
+                            window.location.href = "/";
+                          }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span>تسجيل الخروج</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Button

@@ -98,11 +98,28 @@ export function RegisterPage() {
           friendlyError = "هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.";
         } else if (error.includes("Password should be")) {
           friendlyError = "كلمة المرور ضعيفة جداً. يجب أن تتكون من ٦ أحرف على الأقل.";
+        } else if (
+          error.includes("over_email_send_rate_limit") ||
+          error.includes("Email rate limit exceeded") ||
+          error.includes("For security purposes")
+        ) {
+          // Supabase free tier: ~4 confirmation emails/hour
+          friendlyError = "تم تجاوز حد إرسال البريد الإلكتروني. يرجى الانتظار بضع دقائق ثم المحاولة مجدداً.";
+        } else if (
+          error.includes("email_not_confirmed") ||
+          error.includes("Email not confirmed")
+        ) {
+          friendlyError = "يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد وانقر على رابط التفعيل.";
+        } else if (
+          error.includes("signup_disabled") ||
+          error.includes("Signups not allowed")
+        ) {
+          friendlyError = "التسجيل مغلق حالياً لهذه النسخة. يرجى تفعيل خيار التسجيل (Allow Signups) من لوحة تحكم Supabase في مشروعك (Authentication -> Providers -> Email -> Allow Signups).";
         }
         
         toast.error(`فشل إنشاء الحساب: ${friendlyError}`, {
           position: "bottom-center",
-          duration: 3500,
+          duration: 4500,
         });
         setIsLoading(false);
         return;

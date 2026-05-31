@@ -47,6 +47,7 @@ export type Profile = {
   businessAddress?: string;
   operatingHours?: string;
   isVerifiedEntity?: boolean;
+  joined?: string;
 };
 
 // ── Questions ────────────────────────────────────────────────
@@ -245,6 +246,14 @@ export type Space = {
   created_at: string;
 };
 
+// ── Follows ────────────────────────────────────────────────────
+export type Follow = {
+  id: string;
+  follower_id: string;
+  following_id: string;
+  created_at: string;
+};
+
 // ── Reputation Logs ──────────────────────────────────────────
 export type ReputationLog = {
   id: string;
@@ -349,12 +358,19 @@ export type Database = {
       question_tags: { Row: { question_id: string; tag_id: string }; Insert: { question_id: string; tag_id: string }; Update: never; Relationships: [] };
       reputation_logs: { Row: ReputationLog; Insert: Partial<ReputationLog>; Update: never; Relationships: [] };
       spaces: { Row: Space; Insert: Partial<Space>; Update: Partial<Space>; Relationships: [] };
+      follows: { Row: Follow; Insert: Partial<Follow>; Update: Partial<Follow>; Relationships: [] };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      toggle_follow: {
+        Args: {
+          p_follower_id: string;
+          p_following_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

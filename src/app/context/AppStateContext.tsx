@@ -86,7 +86,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser", currentUserId],
     queryFn: async () => {
-      if (!currentUserId) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "" };
+      if (!currentUserId) return { id: "1", name: "زائر", username: "guest", reputation: 0, accountType: "individual", avatar: "", joined: "" };
       const { data } = await supabase
         .from("profiles")
         .select("*")
@@ -101,6 +101,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         businessAddress: data.business_address ?? "",
         operatingHours: data.operating_hours ?? "",
         isVerifiedEntity: data.is_verified_entity,
+        joined: new Date(data.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" }),
       };
     },
     enabled: !!currentUserId,

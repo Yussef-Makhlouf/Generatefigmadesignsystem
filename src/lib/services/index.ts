@@ -7,3 +7,5 @@ export * from "./notifications.service";
 export * from "./auth.service";
 export * from "./spaces.service";
 export * from "./stats.service";
+export * from "./follows.service";
+export * from "./settings.service";
