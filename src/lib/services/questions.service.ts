@@ -31,7 +31,7 @@ export async function getQuestions(options?: {
     query = query.ilike("title", `%${options.search}%`);
   }
   if (options?.category) {
-    query = query.eq("category", options.category);
+    query = query.ilike("category", `%${options.category}%`);
   }
 
   const { data, error } = await query;
@@ -86,7 +86,7 @@ export async function createQuestion(
         .from("tags")
         .select("id")
         .eq("name", tagName)
-        .single();
+        .maybeSingle();
 
       let tagId: string | undefined;
       if (existingTag) {

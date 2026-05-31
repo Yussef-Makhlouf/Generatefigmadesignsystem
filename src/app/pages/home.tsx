@@ -12,6 +12,7 @@ import {
   MessageSquare, Users, TrendingUp, PenSquare, Hash, Loader2,
 } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
+import { QuestionListSkeleton } from "../components/question-skeleton";
 import { questionToCardProps } from "../../lib/database.types";
 import { motion } from "motion/react";
 import { usePlatformStats, useTrendingTags, useHotQuestions, useTopContributors } from "../../lib/hooks/use-stats";
@@ -29,7 +30,7 @@ function formatArabicNumber(n: number): string {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [] } = useAppState();
+  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [], isQuestionsLoading } = useAppState();
   const [filter, setFilter] = useState("recent");
 
   // Map real database profiles of experts/businesses or high reputation users
@@ -50,8 +51,8 @@ export function HomePage() {
   // ── Real backend data ─────────────────────────────────────
   const { data: stats } = usePlatformStats();
   const { data: trendingTags = [] } = useTrendingTags(10);
-  const { data: hotQuestions = [] } = useHotQuestions(5);
-  const { data: topContributors = [] } = useTopContributors(3);
+  const { data: hotQuestions = [], isLoading: hotLoading } = useHotQuestions(5);
+  const { data: topContributors = [], isLoading: contributorsLoading } = useTopContributors(3);
 
   const PLATFORM_STATS = [
     {
@@ -160,7 +161,17 @@ export function HomePage() {
         </motion.div>
 
         {/* Bento Cell 2: Live Daily Challenge (1/3 width on desktop) */}
-        {hotQuestions[0] ? (
+        {/* Bento Cell 2: Hot Today or empty hint */}
+        {hotLoading ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex items-center justify-center min-h-[260px] sm:min-h-[280px]"
+          >
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </motion.div>
+        ) : hotQuestions[0] ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -208,13 +219,24 @@ export function HomePage() {
             </div>
           </motion.div>
         ) : (
+          // Loaded but no hot questions yet — show a friendly CTA
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-            className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex items-center justify-center min-h-[260px] sm:min-h-[280px]"
+            className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col items-center justify-center min-h-[260px] sm:min-h-[280px] gap-3"
           >
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="h-12 w-12 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-secondary" />
+            </div>
+            <p className="text-sm font-bold text-foreground text-center">لا توجد أسئلة رائجة بعد</p>
+            <p className="text-xs text-muted-foreground text-center">كن أول من يطرح سؤالاً!</p>
+            <Button
+              className="rounded-xl h-9 text-xs px-5 bg-secondary border-0 text-white font-semibold"
+              onClick={() => navigate("/questions/new")}
+            >
+              اطرح سؤالاً الآن
+            </Button>
           </motion.div>
         )}
         
@@ -289,31 +311,58 @@ export function HomePage() {
 
           {/* Questions */}
           <div className="space-y-2 sm:space-y-3 stagger">
-            {(filteredQuestions.length > 0 ? filteredQuestions : questions).map((q) => (
-              <motion.div
-                key={q.id}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-              >
-                <QuestionCard
-                  {...questionToCardProps(q)}
-                  isBookmarked={bookmarkedIds.includes(q.id)}
-                  onVote={(dir) => voteQuestion(q.id, dir)}
-                  onBookmark={() => toggleBookmark(q.id)}
-                  onClick={() => navigate(`/questions/${q.id}`)}
-                />
-              </motion.div>
-            ))}
+            {isQuestionsLoading ? (
+              <QuestionListSkeleton count={3} />
+            ) : filteredQuestions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center bg-card rounded-2xl border border-border/40 py-12">
+                <div className="p-3 bg-primary/5 rounded-full mb-4 text-primary">
+                  <MessageSquare className="h-8 w-8 stroke-[1.5]" />
+                </div>
+                <h3 className="font-semibold text-lg mb-1">لا توجد أسئلة بعد</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                  {filter === "unanswered"
+                    ? "كل الأسئلة الحالية تمت الإجابة عليها. رائع!"
+                    : filter === "foryou"
+                    ? "لم نجد أسئلة مخصصة لك حالياً. جرب تصفح الأقسام الأخرى."
+                    : "كن أول من يطرح سؤالاً في هذا القسم ويشارك المعرفة!"}
+                </p>
+                <Button
+                  onClick={() => navigate("/questions/new")}
+                  className="rounded-xl bg-primary hover:bg-primary/95 text-white gap-2 font-medium"
+                >
+                  <PenSquare className="h-4 w-4" />
+                  اطرح سؤالاً الآن
+                </Button>
+              </div>
+            ) : (
+              filteredQuestions.map((q) => (
+                <motion.div
+                  key={q.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <QuestionCard
+                    {...questionToCardProps(q)}
+                    isBookmarked={bookmarkedIds.includes(q.id)}
+                    onVote={(dir) => voteQuestion(q.id, dir)}
+                    onBookmark={() => toggleBookmark(q.id)}
+                    onClick={() => navigate(`/questions/${q.id}`)}
+                  />
+                </motion.div>
+              ))
+            )}
           </div>
 
           {/* Load More */}
-          <div className="pt-2 text-center pb-20 sm:pb-24 md:pb-4">
-            <Button variant="outline" className="rounded-xl px-6 sm:px-8 h-10 sm:h-11 border-border/60 hover:border-primary/40 hover:text-primary transition-all text-sm">
-              تحميل المزيد
-            </Button>
-          </div>
+          {!isQuestionsLoading && filteredQuestions.length > 0 && (
+            <div className="pt-2 text-center pb-20 sm:pb-24 md:pb-4">
+              <Button variant="outline" className="rounded-xl px-6 sm:px-8 h-10 sm:h-11 border-border/60 hover:border-primary/40 hover:text-primary transition-all text-sm">
+                تحميل المزيد
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* ── Right Panel (Desktop) ── */}

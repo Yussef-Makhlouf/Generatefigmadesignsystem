@@ -819,8 +819,22 @@ CREATE POLICY "Reviews are publicly readable"
 CREATE POLICY "Tags are publicly readable"
   ON public.tags FOR SELECT USING (TRUE);
 
+CREATE POLICY "Authenticated users can create tags"
+  ON public.tags FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
 CREATE POLICY "Question tags are publicly readable"
   ON public.question_tags FOR SELECT USING (TRUE);
+
+CREATE POLICY "Authenticated users can link tags to questions"
+  ON public.question_tags FOR INSERT
+  WITH CHECK (
+    auth.uid() IS NOT NULL AND
+    EXISTS (
+      SELECT 1 FROM public.questions
+      WHERE id = question_id AND author_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Spaces are publicly readable"
   ON public.spaces FOR SELECT USING (TRUE);

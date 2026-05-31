@@ -27,6 +27,7 @@ interface AppState {
   notifications: NotificationItem[];
   bookmarkedIds: string[];
   reviews: any[];
+  isQuestionsLoading: boolean;
 }
 
 interface AppStateContextProps extends AppState {
@@ -119,7 +120,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   // Questions query
-  const { data: questions = [] } = useQuery({
+  const { data: questions = [], isLoading: isQuestionsLoading } = useQuery({
     queryKey: ["questions"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -183,7 +184,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         };
       }) as Question[];
     },
-    staleTime: 60000,
+    staleTime: 0,   // always re-fetch after invalidation so new questions appear immediately
+    refetchOnWindowFocus: true,
   });
 
   // Answers query
@@ -400,7 +402,14 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const createQuestionMutation = useMutation({
     mutationFn: ({ authorId, input }: { authorId: string; input: CreateQuestionInput }) =>
       createQuestion(authorId, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["questions"] }),
+    onSuccess: () => {
+      // Invalidate all question-related queries so the feed refreshes immediately
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["platformStats"] });
+      queryClient.invalidateQueries({ queryKey: ["hotQuestions"] });
+      queryClient.invalidateQueries({ queryKey: ["trendingTags"] });
+    },
   });
 
   const deleteQuestionMutation = useMutation({
@@ -435,7 +444,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Action handlers
   const addQuestion = async (title: string, description: string, tags: string[], location?: string, images?: string[], links?: any[], locationDetail?: any) => {
     if (!currentUserId) return null;
-    const input: CreateQuestionInput = { title, content: description, category: location ?? undefined, location: undefined, tags, images, links, locationDetail };
+    const input: CreateQuestionInput = {
+      title,
+      content: description,
+      category: location ?? undefined,
+      location: locationDetail?.name ?? undefined,
+      tags,
+      images,
+      links,
+      locationDetail: (locationDetail?.lat || locationDetail?.lng) ? locationDetail : undefined,
+    };
     const result = await createQuestionMutation.mutateAsync({ authorId: currentUserId, input });
     return result?.id ?? null;
   };
@@ -610,6 +628,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         notifications,
         bookmarkedIds,
         reviews: reviews ?? [],
+        isQuestionsLoading,
         addQuestion,
         deleteQuestion,
         addAnswer,

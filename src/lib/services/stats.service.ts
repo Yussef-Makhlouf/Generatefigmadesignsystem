@@ -9,19 +9,28 @@ export interface CategoryStat {
 
 // Map category names → Tailwind colour class (extends automatically for new values)
 const CATEGORY_COLORS: Record<string, string> = {
-  "تقنية":         "bg-blue-500",
-  "تعليم":         "bg-green-500",
-  "برمجة":         "bg-indigo-500",
-  "ذكاء اصطناعي":  "bg-purple-500",
-  "تصميم":         "bg-pink-500",
-  "صحة":           "bg-red-500",
-  "أعمال":         "bg-amber-500",
-  "علوم":          "bg-teal-500",
-  "tech":          "bg-blue-500",
-  "education":     "bg-green-500",
-  "health":        "bg-red-500",
-  "business":      "bg-amber-500",
-  "science":       "bg-teal-500",
+  // Arabic labels
+  "تقنية":          "bg-blue-500",
+  "تعليم":          "bg-green-500",
+  "برمجة":          "bg-indigo-500",
+  "ذكاء اصطناعي":   "bg-purple-500",
+  "تصميم":          "bg-pink-500",
+  "صحة":            "bg-red-500",
+  "أعمال":          "bg-amber-500",
+  "علوم":           "bg-teal-500",
+  // English IDs used by the wizard
+  "tech":           "bg-blue-500",
+  "education":      "bg-green-500",
+  "health":         "bg-red-500",
+  "business":       "bg-amber-500",
+  "science":        "bg-teal-500",
+  "food":           "bg-orange-500",
+  "activity":       "bg-pink-500",
+  "travel":         "bg-sky-500",
+  "legal":          "bg-gray-500",
+  "finance":        "bg-lime-500",
+  "sports":         "bg-cyan-500",
+  "arts":           "bg-fuchsia-500",
 };
 
 export function getCategoryColor(name: string): string {
@@ -29,7 +38,7 @@ export function getCategoryColor(name: string): string {
 }
 
 export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]> {
-  // Fetch all non-deleted questions' category field (head=false so we get rows)
+  // Fetch all non-deleted questions' category field
   const { data, error } = await supabase
     .from("questions")
     .select("category")
@@ -41,12 +50,16 @@ export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]
     return [];
   }
 
-  // Aggregate in-memory (Supabase JS client doesn't support GROUP BY directly)
+  // Aggregate in-memory — split comma-joined multi-category values
   const countMap = new Map<string, number>();
   for (const row of data as { category: string | null }[]) {
     const cat = row.category;
     if (!cat) continue;
-    countMap.set(cat, (countMap.get(cat) ?? 0) + 1);
+    // Support comma-joined categories stored by the wizard (e.g. "finance,travel")
+    const parts = cat.split(",").map((s) => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      countMap.set(part, (countMap.get(part) ?? 0) + 1);
+    }
   }
 
   return Array.from(countMap.entries())
@@ -54,6 +67,7 @@ export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]
     .slice(0, limit)
     .map(([name, count]) => ({ name, count }));
 }
+
 
 // ── Platform Statistics ──────────────────────────────────────
 export interface PlatformStats {
@@ -220,7 +234,7 @@ export async function searchQuestions(opts: SearchOptions): Promise<Question[]> 
   }
 
   if (opts.category && opts.category !== "all") {
-    q = q.eq("category", opts.category);
+    q = q.ilike("category", `%${opts.category}%`);
   }
 
   if (opts.location && opts.location !== "all") {
