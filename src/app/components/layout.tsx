@@ -26,6 +26,8 @@ export function Layout() {
     pathname.startsWith("/questions/") ||
     pathname.startsWith("/profile/");
 
+  const isQuestionDetail = pathname.startsWith("/questions/") && pathname !== "/questions/new";
+
   return (
     <>
       {/* ── Scroll to top on every route change ────────── */}
@@ -85,7 +87,7 @@ export function Layout() {
           </div>
 
           <BottomNav />
-          <FloatingActionButton />
+          {!isQuestionDetail && <FloatingActionButton />}
         </div>
       </div>
     </>

@@ -342,6 +342,31 @@ export function QuestionDetailPage() {
   const [commLinkTitle, setCommLinkTitle] = useState("");
   const [commLinkUrl, setCommLinkUrl] = useState("");
 
+  // ── Intersection Observer to hide sticky CTA when write card is visible ──
+  const writeCardRef = useRef<HTMLDivElement>(null);
+  const [isWriteCardVisible, setIsWriteCardVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsWriteCardVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05, rootMargin: "0px 0px 50px 0px" }
+    );
+
+    const currentCard = writeCardRef.current;
+    if (currentCard) {
+      observer.observe(currentCard);
+    }
+
+    return () => {
+      if (currentCard) {
+        observer.unobserve(currentCard);
+      }
+    };
+  }, []);
+
   const bookmarked = question ? bookmarkedIds.includes(question.id) : false;
 
   // ── Handlers ─────────────────────────────────────────────────
@@ -1183,12 +1208,13 @@ export function QuestionDetailPage() {
           </div>
 
           {/* Write Answer Card */}
-          <Card className="p-5 sm:p-6 premium-glass-card relative overflow-hidden border border-border/30" style={{ borderRadius: "var(--radius-lg)" }}>
-            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-primary/5 blur-xl pointer-events-none" />
-            <h3 className="font-bold mb-3.5 flex items-center gap-2 relative z-10 font-heading text-foreground">
-              <PenSquare className="h-5 w-5 text-primary" />
-              صغ إجابتك النموذجية الموثقة
-            </h3>
+          <div ref={writeCardRef}>
+            <Card className="p-5 sm:p-6 premium-glass-card relative overflow-hidden border border-border/30" style={{ borderRadius: "var(--radius-lg)" }}>
+              <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-primary/5 blur-xl pointer-events-none" />
+              <h3 className="font-bold mb-3.5 flex items-center gap-2 relative z-10 font-heading text-foreground">
+                <PenSquare className="h-5 w-5 text-primary" />
+                صغ إجابتك النموذجية الموثقة
+              </h3>
 
             {!currentUserId ? (
               /* Auth gate */
@@ -1410,6 +1436,7 @@ export function QuestionDetailPage() {
               </>
             )}
           </Card>
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -1467,25 +1494,27 @@ export function QuestionDetailPage() {
       </div>
 
       {/* Mobile sticky CTA */}
-      <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-3 md:hidden z-30">
-        {currentUserId ? (
-          <Button
-            className="w-full rounded-xl h-11 bg-primary hover:bg-primary-hover text-white"
-            onClick={() => document.getElementById("answer-box")?.focus()}
-          >
-            <PenSquare className="h-4 w-4 ml-2" />
-            اكتب إجابة موثقة
-          </Button>
-        ) : (
-          <Button
-            className="w-full rounded-xl h-11 bg-primary hover:bg-primary-hover text-white"
-            onClick={() => navigate("/login")}
-          >
-            <LogIn className="h-4 w-4 ml-2" />
-            سجّل دخولك للإجابة
-          </Button>
-        )}
-      </div>
+      {!isWriteCardVisible && (
+        <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-3 md:hidden z-30">
+          {currentUserId ? (
+            <Button
+              className="w-full rounded-xl h-11 bg-primary hover:bg-primary-hover text-white"
+              onClick={() => document.getElementById("answer-box")?.focus()}
+            >
+              <PenSquare className="h-4 w-4 ml-2" />
+              اكتب إجابة موثقة
+            </Button>
+          ) : (
+            <Button
+              className="w-full rounded-xl h-11 bg-primary hover:bg-primary-hover text-white"
+              onClick={() => navigate("/login")}
+            >
+              <LogIn className="h-4 w-4 ml-2" />
+              سجّل دخولك للإجابة
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
