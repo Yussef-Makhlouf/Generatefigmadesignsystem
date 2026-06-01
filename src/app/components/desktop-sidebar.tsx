@@ -7,6 +7,8 @@ import { ReputationBadge } from "./reputation-badge";
 import { useAppState } from "../context/AppStateContext";
 import { useCategories } from "../../lib/hooks/use-categories";
 import { signOut } from "../../lib/services";
+import { cn } from "./ui/utils";
+
 
 
 
@@ -20,7 +22,7 @@ const QUICK_LINKS = [
   { icon: Settings,   label: "الإعدادات",    path: "/settings" },
 ];
 
-export function DesktopSidebar() {
+export function DesktopSidebar({ className }: { className?: string }) {
   const location = useLocation();
   const { currentUser, questions, answers } = useAppState();
   const { categories, isLoading: categoriesLoading } = useCategories(6);
@@ -48,7 +50,7 @@ export function DesktopSidebar() {
   }
 
   return (
-    <aside className="hidden md:flex flex-col w-60 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pb-6 gap-3 pt-4">
+    <aside className={cn("hidden md:flex flex-col w-60 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pb-6 gap-3 pt-4", className)}>
 
       {/* Quick Links */}
       <Card className="p-2 shadow-sm border-border/60" style={{ borderRadius: "var(--radius-lg)" }}>

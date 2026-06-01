@@ -59,7 +59,9 @@ export function Layout() {
           >
             <div className="flex gap-0 md:gap-5 lg:gap-6">
               {/* Desktop sidebar */}
-              {!isFullWidth && !hideSidebar && <DesktopSidebar />}
+              {!isFullWidth && (
+                <DesktopSidebar className={hideSidebar ? "md:hidden" : ""} />
+              )}
 
               {/* Page content */}
               <main
@@ -67,20 +69,17 @@ export function Layout() {
                   isFullWidth ? "" : "py-4 sm:py-5 md:py-6"
                 } pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6`}
               >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={pathname}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{
-                      duration: 0.26,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                  >
-                    <Outlet />
-                  </motion.div>
-                </AnimatePresence>
+                <motion.div
+                  key={pathname}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.26,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <Outlet />
+                </motion.div>
               </main>
             </div>
           </div>
