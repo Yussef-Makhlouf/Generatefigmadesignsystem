@@ -801,31 +801,40 @@ ALTER TABLE public.notification_types   ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 -- PUBLIC READ POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Profiles are publicly readable" ON public.profiles;
 CREATE POLICY "Profiles are publicly readable"
   ON public.profiles FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Questions are publicly readable" ON public.questions;
 CREATE POLICY "Questions are publicly readable"
   ON public.questions FOR SELECT USING (is_deleted = FALSE);
 
+DROP POLICY IF EXISTS "Answers are publicly readable" ON public.answers;
 CREATE POLICY "Answers are publicly readable"
   ON public.answers FOR SELECT USING (is_deleted = FALSE);
 
+DROP POLICY IF EXISTS "Comments are publicly readable" ON public.comments;
 CREATE POLICY "Comments are publicly readable"
   ON public.comments FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Reviews are publicly readable" ON public.reviews;
 CREATE POLICY "Reviews are publicly readable"
   ON public.reviews FOR SELECT USING (is_deleted = FALSE);
 
+DROP POLICY IF EXISTS "Tags are publicly readable" ON public.tags;
 CREATE POLICY "Tags are publicly readable"
   ON public.tags FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Authenticated users can create tags" ON public.tags;
 CREATE POLICY "Authenticated users can create tags"
   ON public.tags FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "Question tags are publicly readable" ON public.question_tags;
 CREATE POLICY "Question tags are publicly readable"
   ON public.question_tags FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Authenticated users can link tags to questions" ON public.question_tags;
 CREATE POLICY "Authenticated users can link tags to questions"
   ON public.question_tags FOR INSERT
   WITH CHECK (
@@ -836,31 +845,43 @@ CREATE POLICY "Authenticated users can link tags to questions"
     )
   );
 
+DROP POLICY IF EXISTS "Spaces are publicly readable" ON public.spaces;
 CREATE POLICY "Spaces are publicly readable"
   ON public.spaces FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Question attachments are publicly readable" ON public.question_attachments;
 CREATE POLICY "Question attachments are publicly readable"
   ON public.question_attachments FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Answer attachments are publicly readable" ON public.answer_attachments;
 CREATE POLICY "Answer attachments are publicly readable"
   ON public.answer_attachments FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Review attachments are publicly readable" ON public.review_attachments;
 CREATE POLICY "Review attachments are publicly readable"  -- ✅ ADDED
   ON public.review_attachments FOR SELECT USING (TRUE);
 
 -- جداول الأنواع المرجعية قابلة للقراءة للجميع
+DROP POLICY IF EXISTS "Account types are publicly readable" ON public.account_types;
 CREATE POLICY "Account types are publicly readable"
   ON public.account_types FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Vote types are publicly readable" ON public.vote_types;
 CREATE POLICY "Vote types are publicly readable"
   ON public.vote_types FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Attachment types are publicly readable" ON public.attachment_types;
 CREATE POLICY "Attachment types are publicly readable"
   ON public.attachment_types FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Notification types are publicly readable" ON public.notification_types;
 CREATE POLICY "Notification types are publicly readable"
   ON public.notification_types FOR SELECT USING (TRUE);
 
 -- ============================================================
 -- PROFILES POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
@@ -868,10 +889,12 @@ CREATE POLICY "Users can update own profile"
 -- ============================================================
 -- QUESTIONS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can create questions" ON public.questions;
 CREATE POLICY "Authenticated users can create questions"
   ON public.questions FOR INSERT
   WITH CHECK (auth.uid() = author_id);
 
+DROP POLICY IF EXISTS "Authors can update own questions" ON public.questions;
 CREATE POLICY "Authors can update own questions"
   ON public.questions FOR UPDATE
   USING (auth.uid() = author_id);
@@ -879,19 +902,21 @@ CREATE POLICY "Authors can update own questions"
 -- ============================================================
 -- QUESTION ATTACHMENTS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authors can add question attachments" ON public.question_attachments;
 CREATE POLICY "Authors can add question attachments"
   ON public.question_attachments FOR INSERT
   WITH CHECK (
     auth.uid() = (SELECT author_id FROM public.questions WHERE id = question_id)
   );
 
--- ✅ ADDED: أصحاب الأسئلة يستطيعون تعديل وحذف مرفقاتهم
+DROP POLICY IF EXISTS "Authors can update own question attachments" ON public.question_attachments;
 CREATE POLICY "Authors can update own question attachments"
   ON public.question_attachments FOR UPDATE
   USING (
     auth.uid() = (SELECT author_id FROM public.questions WHERE id = question_id)
   );
 
+DROP POLICY IF EXISTS "Authors can delete own question attachments" ON public.question_attachments;
 CREATE POLICY "Authors can delete own question attachments"
   ON public.question_attachments FOR DELETE
   USING (
@@ -901,10 +926,12 @@ CREATE POLICY "Authors can delete own question attachments"
 -- ============================================================
 -- ANSWERS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can create answers" ON public.answers;
 CREATE POLICY "Authenticated users can create answers"
   ON public.answers FOR INSERT
   WITH CHECK (auth.uid() = author_id);
 
+DROP POLICY IF EXISTS "Authors can update own answers" ON public.answers;
 CREATE POLICY "Authors can update own answers"
   ON public.answers FOR UPDATE
   USING (auth.uid() = author_id);
@@ -912,19 +939,21 @@ CREATE POLICY "Authors can update own answers"
 -- ============================================================
 -- ANSWER ATTACHMENTS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authors can add answer attachments" ON public.answer_attachments;
 CREATE POLICY "Authors can add answer attachments"
   ON public.answer_attachments FOR INSERT
   WITH CHECK (
     auth.uid() = (SELECT author_id FROM public.answers WHERE id = answer_id)
   );
 
--- ✅ ADDED: أصحاب الإجابات يستطيعون تعديل وحذف مرفقاتهم
+DROP POLICY IF EXISTS "Authors can update own answer attachments" ON public.answer_attachments;
 CREATE POLICY "Authors can update own answer attachments"
   ON public.answer_attachments FOR UPDATE
   USING (
     auth.uid() = (SELECT author_id FROM public.answers WHERE id = answer_id)
   );
 
+DROP POLICY IF EXISTS "Authors can delete own answer attachments" ON public.answer_attachments;
 CREATE POLICY "Authors can delete own answer attachments"
   ON public.answer_attachments FOR DELETE
   USING (
@@ -934,15 +963,17 @@ CREATE POLICY "Authors can delete own answer attachments"
 -- ============================================================
 -- COMMENTS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can create comments" ON public.comments;
 CREATE POLICY "Authenticated users can create comments"
   ON public.comments FOR INSERT
   WITH CHECK (auth.uid() = author_id);
 
--- ✅ ADDED: أصحاب التعليقات يستطيعون تعديلها وحذفها
+DROP POLICY IF EXISTS "Authors can update own comments" ON public.comments;
 CREATE POLICY "Authors can update own comments"
   ON public.comments FOR UPDATE
   USING (auth.uid() = author_id);
 
+DROP POLICY IF EXISTS "Authors can delete own comments" ON public.comments;
 CREATE POLICY "Authors can delete own comments"
   ON public.comments FOR DELETE
   USING (auth.uid() = author_id);
@@ -950,20 +981,22 @@ CREATE POLICY "Authors can delete own comments"
 -- ============================================================
 -- VOTES POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can vote" ON public.votes;
 CREATE POLICY "Authenticated users can vote"
   ON public.votes FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can see own votes" ON public.votes;
 CREATE POLICY "Users can see own votes"
   ON public.votes FOR SELECT
   USING (auth.uid() = user_id);
 
--- ✅ ADDED: المستخدمون يستطيعون تعديل أصواتهم (من up إلى down والعكس)
+DROP POLICY IF EXISTS "Users can update own votes" ON public.votes;
 CREATE POLICY "Users can update own votes"
   ON public.votes FOR UPDATE
   USING (auth.uid() = user_id);
 
--- ✅ ADDED: المستخدمون يستطيعون إلغاء أصواتهم
+DROP POLICY IF EXISTS "Users can delete own votes" ON public.votes;
 CREATE POLICY "Users can delete own votes"
   ON public.votes FOR DELETE
   USING (auth.uid() = user_id);
@@ -971,6 +1004,7 @@ CREATE POLICY "Users can delete own votes"
 -- ============================================================
 -- BOOKMARKS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can manage bookmarks" ON public.bookmarks;
 CREATE POLICY "Authenticated users can manage bookmarks"
   ON public.bookmarks FOR ALL
   USING (auth.uid() = user_id);
@@ -978,10 +1012,12 @@ CREATE POLICY "Authenticated users can manage bookmarks"
 -- ============================================================
 -- REVIEWS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Authenticated users can create reviews" ON public.reviews;
 CREATE POLICY "Authenticated users can create reviews"
   ON public.reviews FOR INSERT
   WITH CHECK (auth.uid() = reviewer_id);
 
+DROP POLICY IF EXISTS "Users can update own reviews" ON public.reviews;
 CREATE POLICY "Users can update own reviews"
   ON public.reviews FOR UPDATE
   USING (auth.uid() = reviewer_id);
@@ -989,12 +1025,14 @@ CREATE POLICY "Users can update own reviews"
 -- ============================================================
 -- REVIEW ATTACHMENTS POLICIES (✅ ADDED: completely missing before)
 -- ============================================================
+DROP POLICY IF EXISTS "Reviewers can add review attachments" ON public.review_attachments;
 CREATE POLICY "Reviewers can add review attachments"
   ON public.review_attachments FOR INSERT
   WITH CHECK (
     auth.uid() = (SELECT reviewer_id FROM public.reviews WHERE id = review_id)
   );
 
+DROP POLICY IF EXISTS "Reviewers can delete own review attachments" ON public.review_attachments;
 CREATE POLICY "Reviewers can delete own review attachments"
   ON public.review_attachments FOR DELETE
   USING (
@@ -1004,6 +1042,7 @@ CREATE POLICY "Reviewers can delete own review attachments"
 -- ============================================================
 -- NOTIFICATIONS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Users see own notifications" ON public.notifications;
 CREATE POLICY "Users see own notifications"
   ON public.notifications FOR ALL
   USING (auth.uid() = user_id);
@@ -1011,6 +1050,7 @@ CREATE POLICY "Users see own notifications"
 -- ============================================================
 -- REPUTATION LOGS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Users see own reputation logs" ON public.reputation_logs;
 CREATE POLICY "Users see own reputation logs"
   ON public.reputation_logs FOR SELECT
   USING (auth.uid() = user_id);
@@ -1018,13 +1058,16 @@ CREATE POLICY "Users see own reputation logs"
 -- ============================================================
 -- FOLLOWS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Follows are publicly readable" ON public.follows;
 CREATE POLICY "Follows are publicly readable"
   ON public.follows FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Authenticated users can create follows" ON public.follows;
 CREATE POLICY "Authenticated users can create follows"
   ON public.follows FOR INSERT
   WITH CHECK (auth.uid() = follower_id);
 
+DROP POLICY IF EXISTS "Users can delete own follows" ON public.follows;
 CREATE POLICY "Users can delete own follows"
   ON public.follows FOR DELETE
   USING (auth.uid() = follower_id);
@@ -1032,6 +1075,7 @@ CREATE POLICY "Users can delete own follows"
 -- ============================================================
 -- REPUTATION DAILY LIMITS POLICIES
 -- ============================================================
+DROP POLICY IF EXISTS "Users see own daily limits" ON public.reputation_daily_limits;
 CREATE POLICY "Users see own daily limits"
   ON public.reputation_daily_limits FOR SELECT
   USING (auth.uid() = user_id);
@@ -1041,6 +1085,7 @@ CREATE POLICY "Users see own daily limits"
 -- ✅ FIXED: استخدام EXISTS بدلاً من sub-SELECT لأداء أفضل وأمان أعلى
 -- ✅ FIXED: نتأكد من أن auth.uid() IS NOT NULL قبل فحص صلاحية الأدمن
 -- ============================================================
+DROP POLICY IF EXISTS "Admins can update all profiles" ON public.profiles;
 CREATE POLICY "Admins can update all profiles"
   ON public.profiles FOR UPDATE
   USING (
@@ -1051,6 +1096,7 @@ CREATE POLICY "Admins can update all profiles"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can soft-delete questions" ON public.questions;
 CREATE POLICY "Admins can soft-delete questions"
   ON public.questions FOR UPDATE
   USING (
@@ -1061,7 +1107,7 @@ CREATE POLICY "Admins can soft-delete questions"
     )
   );
 
--- ✅ ADDED: حذف فعلي للأسئلة من قبل الأدمن
+DROP POLICY IF EXISTS "Admins can hard-delete questions" ON public.questions;
 CREATE POLICY "Admins can hard-delete questions"
   ON public.questions FOR DELETE
   USING (
@@ -1072,6 +1118,7 @@ CREATE POLICY "Admins can hard-delete questions"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can soft-delete reviews" ON public.reviews;
 CREATE POLICY "Admins can soft-delete reviews"
   ON public.reviews FOR UPDATE
   USING (
@@ -1082,7 +1129,7 @@ CREATE POLICY "Admins can soft-delete reviews"
     )
   );
 
--- ✅ ADDED: حذف فعلي للمراجعات من قبل الأدمن
+DROP POLICY IF EXISTS "Admins can hard-delete reviews" ON public.reviews;
 CREATE POLICY "Admins can hard-delete reviews"
   ON public.reviews FOR DELETE
   USING (
@@ -1093,7 +1140,7 @@ CREATE POLICY "Admins can hard-delete reviews"
     )
   );
 
--- ✅ ADDED: صلاحيات الأدمن على التعليقات والإجابات
+DROP POLICY IF EXISTS "Admins can delete comments" ON public.comments;
 CREATE POLICY "Admins can delete comments"
   ON public.comments FOR DELETE
   USING (
@@ -1104,6 +1151,7 @@ CREATE POLICY "Admins can delete comments"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can soft-delete answers" ON public.answers;
 CREATE POLICY "Admins can soft-delete answers"
   ON public.answers FOR UPDATE
   USING (
@@ -1114,7 +1162,7 @@ CREATE POLICY "Admins can soft-delete answers"
     )
   );
 
--- صلاحيات إدارة الـ Spaces للأدمن فقط
+DROP POLICY IF EXISTS "Admins can manage spaces" ON public.spaces;
 CREATE POLICY "Admins can manage spaces"
   ON public.spaces FOR ALL
   USING (
