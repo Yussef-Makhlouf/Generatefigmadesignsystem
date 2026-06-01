@@ -5,3 +5,5 @@ export * from "./use-stats";
 export * from "./use-leaderboard";
 export * from "./use-search";
 export * from "./use-question-detail";
+export * from "./use-locations";
+export * from "./use-autocomplete";

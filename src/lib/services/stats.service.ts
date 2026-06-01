@@ -332,3 +332,93 @@ export async function searchQuestions(opts: SearchOptions): Promise<Question[]> 
     };
   })) as unknown as Question[];
 }
+
+// ── Autocomplete Suggestions ──────────────────────────────────
+export interface AutocompleteSuggestion {
+  type: "question" | "tag" | "user";
+  id: string;
+  title: string;
+  subtitle?: string;
+  avatar_url?: string;
+  metadata?: string;
+}
+
+/**
+ * Executes high-performance parallel searches across questions, tags, and profiles
+ * tables and aggregates them into a unified list of live suggestions.
+ */
+export async function getAutocompleteSuggestions(query: string): Promise<AutocompleteSuggestion[]> {
+  if (!query || !query.trim()) return [];
+  const safe = query.trim().replace(/[%_\\]/g, "\\$&");
+
+  try {
+    const [questionsRes, tagsRes, profilesRes] = await Promise.all([
+      supabase
+        .from("questions")
+        .select("id, title, answers_count")
+        .eq("is_deleted", false)
+        .ilike("title", `%${safe}%`)
+        .order("created_at", { ascending: false })
+        .limit(3),
+      supabase
+        .from("tags")
+        .select("id, name, usage_count")
+        .ilike("name", `%${safe}%`)
+        .order("usage_count", { ascending: false })
+        .limit(3),
+      supabase
+        .from("profiles")
+        .select("id, name, username, avatar_url, reputation")
+        .or(`name.ilike.%${safe}%,username.ilike.%${safe}%`)
+        .order("reputation", { ascending: false })
+        .limit(3),
+    ]);
+
+    const suggestions: AutocompleteSuggestion[] = [];
+
+    // 1. Add questions
+    if (questionsRes.data) {
+      for (const q of questionsRes.data) {
+        suggestions.push({
+          type: "question",
+          id: q.id,
+          title: q.title,
+          subtitle: `${(q.answers_count ?? 0).toLocaleString("ar-SA")} إجابة`,
+        });
+      }
+    }
+
+    // 2. Add tags
+    if (tagsRes.data) {
+      for (const t of tagsRes.data) {
+        suggestions.push({
+          type: "tag",
+          id: t.id,
+          title: t.name,
+          subtitle: `${(t.usage_count ?? 0).toLocaleString("ar-SA")} سؤال`,
+          metadata: t.name,
+        });
+      }
+    }
+
+    // 3. Add profiles
+    if (profilesRes.data) {
+      for (const p of profilesRes.data) {
+        suggestions.push({
+          type: "user",
+          id: p.id,
+          title: p.name || `@${p.username}`,
+          subtitle: `${(p.reputation ?? 0).toLocaleString("ar-SA")} نقطة سمعة`,
+          avatar_url: p.avatar_url || undefined,
+          metadata: p.username,
+        });
+      }
+    }
+
+    return suggestions;
+  } catch (error) {
+    console.error("getAutocompleteSuggestions error:", error);
+    return [];
+  }
+}
+
