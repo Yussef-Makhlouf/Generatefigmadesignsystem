@@ -943,125 +943,190 @@ export function SettingsPage() {
         </TabsContent>
 
         {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6" dir="rtl">
-          <div className="premium-glass-card p-6 border border-border/45 rounded-2xl">
-            <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-primary rounded-full" />
+        <TabsContent value="notifications" className="space-y-4" dir="rtl">
+          <div className="premium-glass-card p-4 sm:p-5 border border-border/45 rounded-2xl">
+            <h2 className="text-base font-bold text-text-primary mb-5 flex items-center gap-2">
+              <span className="w-1 h-4 bg-primary rounded-full" />
               تفضيلات الإشعارات
             </h2>
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-text-primary font-bold">إشعارات البريد الإلكتروني</Label>
-                  <p className="text-xs text-text-muted leading-relaxed">
+              {/* Email Notifications */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/[0.04] border border-primary/15 transition-colors duration-200">
+                <div className="flex-1 min-w-0">
+                  <Label className="text-text-primary font-semibold text-sm block mb-0.5">
+                    إشعارات البريد الإلكتروني
+                  </Label>
+                  <p className="text-xs text-text-muted leading-snug">
                     استلام تفاصيل التفاعل عبر بريدك الإلكتروني المسجل
                   </p>
                 </div>
-                <Switch
-                  checked={emailNotifications}
-                  onCheckedChange={setEmailNotifications}
-                />
+                <div className="flex-shrink-0">
+                  <Switch
+                    id="emailNotifications"
+                    checked={emailNotifications}
+                    onCheckedChange={setEmailNotifications}
+                  />
+                </div>
               </div>
 
               <Separator className="bg-border/30" />
 
-              <div className="space-y-5">
-                <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
+              {/* Activity Notifications */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs text-text-primary flex items-center gap-2 px-0.5">
                   <span className="w-1 h-3 bg-secondary rounded-full" />
                   إشعارات النشاط
                 </h3>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/10 border border-border/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-text-primary">إجابات جديدة</Label>
-                    <p className="text-xs text-text-muted">
-                      عند إجابة أحد الخبراء على سؤالك المطروح
-                    </p>
-                  </div>
-                  <Switch
-                    checked={newAnswers}
-                    onCheckedChange={setNewAnswers}
-                  />
-                </div>
+                <div className="space-y-1.5">
+                  {/* New Answers */}
+                  <label
+                    htmlFor="newAnswers"
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/10 border border-border/20 cursor-pointer hover:bg-muted/20 hover:border-primary/20 transition-all duration-200 group"
+                  >
+                    <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary group-hover:bg-primary/15 transition-colors duration-200">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary">إجابات جديدة</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        عند إجابة أحد الخبراء على سؤالك المطروح
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Switch
+                        id="newAnswers"
+                        checked={newAnswers}
+                        onCheckedChange={setNewAnswers}
+                      />
+                    </div>
+                  </label>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/10 border border-border/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-text-primary">تعليقات جديدة</Label>
-                    <p className="text-xs text-text-muted">
-                      عند كتابة تعليق على إجاباتك أو منشوراتك
-                    </p>
-                  </div>
-                  <Switch
-                    checked={newComments}
-                    onCheckedChange={setNewComments}
-                  />
-                </div>
+                  {/* New Comments */}
+                  <label
+                    htmlFor="newComments"
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/10 border border-border/20 cursor-pointer hover:bg-muted/20 hover:border-primary/20 transition-all duration-200 group"
+                  >
+                    <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-secondary/10 border border-secondary/15 flex items-center justify-center text-secondary group-hover:bg-secondary/15 transition-colors duration-200">
+                      <Bell className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary">تعليقات جديدة</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        عند كتابة تعليق على إجاباتك أو منشوراتك
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Switch
+                        id="newComments"
+                        checked={newComments}
+                        onCheckedChange={setNewComments}
+                      />
+                    </div>
+                  </label>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/10 border border-border/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-text-primary">الإشارات</Label>
-                    <p className="text-xs text-text-muted">
-                      عند ذكر اسمك أو الإشارة إليك في نقاش
-                    </p>
-                  </div>
-                  <Switch
-                    checked={mentions}
-                    onCheckedChange={setMentions}
-                  />
+                  {/* Mentions */}
+                  <label
+                    htmlFor="mentions"
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/10 border border-border/20 cursor-pointer hover:bg-muted/20 hover:border-primary/20 transition-all duration-200 group"
+                  >
+                    <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-muted/30 border border-border/25 flex items-center justify-center text-text-secondary group-hover:bg-muted/50 transition-colors duration-200">
+                      <User className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary">الإشارات</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        عند ذكر اسمك أو الإشارة إليك في نقاش
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Switch
+                        id="mentions"
+                        checked={mentions}
+                        onCheckedChange={setMentions}
+                      />
+                    </div>
+                  </label>
                 </div>
               </div>
 
               <Separator className="bg-border/30" />
 
-              <div className="space-y-5">
-                <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
+              {/* Newsletter Notifications */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs text-text-primary flex items-center gap-2 px-0.5">
                   <span className="w-1 h-3 bg-primary rounded-full" />
                   النشرات الإخبارية
                 </h3>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/10 border border-border/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-text-primary">ملخص أسبوعي</Label>
-                    <p className="text-xs text-text-muted">
-                      ملخص دوري لأبرز الأسئلة والتفاعلات المتميزة
-                    </p>
-                  </div>
-                  <Switch
-                    checked={weeklyDigest}
-                    onCheckedChange={setWeeklyDigest}
-                  />
-                </div>
+                <div className="space-y-1.5">
+                  {/* Weekly Digest */}
+                  <label
+                    htmlFor="weeklyDigest"
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/10 border border-border/20 cursor-pointer hover:bg-muted/20 hover:border-primary/20 transition-all duration-200 group"
+                  >
+                    <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-muted/30 border border-border/25 flex items-center justify-center text-text-secondary group-hover:bg-muted/50 transition-colors duration-200">
+                      <Star className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary">ملخص أسبوعي</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        ملخص دوري لأبرز الأسئلة والتفاعلات المتميزة
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Switch
+                        id="weeklyDigest"
+                        checked={weeklyDigest}
+                        onCheckedChange={setWeeklyDigest}
+                      />
+                    </div>
+                  </label>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/10 border border-border/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-text-primary">رسائل تسويقية</Label>
-                    <p className="text-xs text-text-muted">
-                      متابعة آخر التحديثات، الخصائص والعروض في منصة خبير
-                    </p>
-                  </div>
-                  <Switch
-                    checked={marketingEmails}
-                    onCheckedChange={setMarketingEmails}
-                  />
+                  {/* Marketing Emails */}
+                  <label
+                    htmlFor="marketingEmails"
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/10 border border-border/20 cursor-pointer hover:bg-muted/20 hover:border-primary/20 transition-all duration-200 group"
+                  >
+                    <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-muted/30 border border-border/25 flex items-center justify-center text-text-secondary group-hover:bg-muted/50 transition-colors duration-200">
+                      <Mail className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary">رسائل تسويقية</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        متابعة آخر التحديثات، الخصائص والعروض في منصة خبير
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Switch
+                        id="marketingEmails"
+                        checked={marketingEmails}
+                        onCheckedChange={setMarketingEmails}
+                      />
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
 
-            <Button
-              className="mt-8 rounded-xl bg-primary hover:bg-primary-hover hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 text-white font-medium"
-              onClick={handleSaveNotifications}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin ml-2" />
-              ) : (
-                <Check className="h-4 w-4 ml-2" />
-              )}
-              حفظ التغييرات
-            </Button>
+            <div className="mt-8 flex justify-start">
+              <Button
+                className="w-full sm:w-auto rounded-xl bg-primary hover:bg-primary-hover hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 text-white font-medium px-8"
+                onClick={handleSaveNotifications}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin me-2" />
+                ) : (
+                  <Check className="h-4 w-4 me-2" />
+                )}
+                حفظ التغييرات
+              </Button>
+            </div>
           </div>
         </TabsContent>
+
 
         {/* Privacy Tab */}
         <TabsContent value="privacy" className="space-y-6" dir="rtl">

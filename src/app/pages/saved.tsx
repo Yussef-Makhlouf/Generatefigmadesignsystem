@@ -77,10 +77,41 @@ export function SavedPage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-4 gap-6 relative z-10">
-        {/* Sidebar: Folders list */}
-        <aside className="md:col-span-1">
-          <Card className="p-4 premium-glass-card relative overflow-hidden animate-fade-in-up">
+      {/* Folders — horizontal strip on mobile, sidebar on md+ */}
+      <div className="relative z-10 mb-4 md:mb-0">
+        {/* Mobile: horizontal scrollable pills */}
+        <div className="md:hidden flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {folders.map((folder) => {
+            const count =
+              folder === "الكل"
+                ? savedItems.length
+                : savedItems.filter((i) => i.folder === folder).length;
+            if (folder !== "الكل" && count === 0) return null;
+            return (
+              <button
+                key={folder}
+                onClick={() => setActiveFolder(folder)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all duration-200 border ${
+                  activeFolder === folder
+                    ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                    : "bg-card/60 border-border/60 text-text-secondary hover:border-primary/30 hover:text-primary"
+                }`}
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+                <span>{folder}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                  activeFolder === folder ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                }`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-4 gap-5 relative z-10">
+        {/* Desktop Sidebar: Folders list */}
+        <aside className="hidden md:block md:col-span-1">
+          <Card className="p-4 premium-glass-card relative overflow-hidden animate-fade-in-up sticky top-24">
             <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-[0.03] pointer-events-none" />
             <div className="flex items-center justify-between mb-4 relative z-10">
               <h3 className="font-bold text-sm text-foreground">مجلدات الحفظ</h3>
@@ -90,7 +121,7 @@ export function SavedPage() {
                 className="h-8 w-8 p-0 rounded-xl hover:bg-primary/5 hover:text-primary transition-colors"
                 onClick={() => toast.info("إنشاء مجلد جديد قريباً")}
               >
-                <Plus className="h-4.5 w-4.5" />
+                <Plus className="h-4 w-4" />
               </Button>
             </div>
             

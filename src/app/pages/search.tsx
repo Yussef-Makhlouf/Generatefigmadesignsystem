@@ -135,21 +135,19 @@ export function SearchPage() {
   );
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Background Mesh Overlay */}
-      <div className="absolute inset-0 arabic-geometric-mesh-fine pointer-events-none opacity-45 z-0" />
-      <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] rounded-full bg-primary/5 blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[20%] left-[-15%] w-[400px] h-[400px] rounded-full bg-secondary/5 blur-[150px] pointer-events-none z-0" />
+    <div className="max-w-5xl w-full mx-auto animate-fade-in pb-4">
+      {/* Ambient glows */}
+      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute bottom-[20%] left-[-10%] w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[100px] pointer-events-none -z-10" />
 
-      <div className="container relative mx-auto px-4 py-8 max-w-5xl animate-fade-in pb-24 md:pb-8 z-10">
-        {/* Search Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl font-extrabold mb-4 font-heading tracking-tight flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-primary-light border border-primary/20 text-primary shrink-0">
-              <SearchIcon className="h-6 w-6" />
-            </span>
-            <span>البحث المعرفي</span>
-          </h1>
+      {/* Search Header */}
+      <div className="mb-5 sm:mb-7">
+        <h1 className="text-2xl sm:text-3xl font-extrabold mb-4 font-heading tracking-tight flex items-center gap-2">
+          <span className="p-1.5 sm:p-2 rounded-xl bg-primary-light border border-primary/20 text-primary shrink-0">
+            <SearchIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+          </span>
+          <span>البحث المعرفي</span>
+        </h1>
 
           <div className="flex gap-3">
             <div className="flex-1 relative">
@@ -265,6 +263,5 @@ export function SearchPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

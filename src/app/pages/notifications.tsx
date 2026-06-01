@@ -66,7 +66,7 @@ export function NotificationsPage() {
       <div className="absolute bottom-1/4 left-1/4 w-[250px] h-[250px] bg-secondary/5 rounded-full blur-[80px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
             الإشعارات
@@ -82,9 +82,9 @@ export function NotificationsPage() {
           <Button
             variant="outline"
             onClick={() => markAllNotificationsAsRead()}
-            className="rounded-xl border-primary/20 hover:border-primary/50 bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-300 font-medium"
+            className="w-full sm:w-auto rounded-xl border-primary/20 hover:border-primary/50 bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-300 font-medium"
           >
-            <CheckCheck className="h-4 w-4 ml-2" />
+            <CheckCheck className="h-4 w-4 me-2" />
             تحديد الكل كمقروء
           </Button>
         )}
