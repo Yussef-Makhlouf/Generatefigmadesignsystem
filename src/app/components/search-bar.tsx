@@ -14,14 +14,16 @@ interface SearchBarProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
   className?: string;
+  defaultValue?: string;
 }
 
 export function SearchBar({
   placeholder = "ابحث عن سؤال، موضوع، أو مستخدم...",
   onSearch,
   className = "",
+  defaultValue = "",
 }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
 
@@ -36,6 +38,7 @@ export function SearchBar({
 
   const handleInputChange = (value: string) => {
     setQuery(value);
+    onSearch?.(value); // ← fire on every keystroke so parent always has live value
     if (value.trim()) {
       setResults(mockResults);
     } else {

@@ -7,6 +7,22 @@ export interface CategoryStat {
   count: number;
 }
 
+// Map English wizard IDs → Arabic display labels shown in the UI
+export const CATEGORY_LABELS: Record<string, string> = {
+  "tech":       "تقنية وبرمجيات",
+  "education":  "تعليم وأكاديميا",
+  "health":     "صحة وطب وعيادات",
+  "business":   "ريادة وأعمال تجارية",
+  "science":    "علوم وبحوث",
+  "food":       "مطاعم ومأكولات",
+  "activity":   "نشاطات وترفيه",
+  "travel":     "سياحة وسفر",
+  "legal":      "قانون وأنظمة",
+  "finance":    "مالية واستثمار",
+  "sports":     "رياضة ولياقة",
+  "arts":       "فنون وإبداع",
+};
+
 // Map category names → Tailwind colour class (extends automatically for new values)
 const CATEGORY_COLORS: Record<string, string> = {
   // Arabic labels
@@ -51,6 +67,7 @@ export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]
   }
 
   // Aggregate in-memory — split comma-joined multi-category values
+  // Normalise raw IDs → Arabic display labels so the UI shows readable names
   const countMap = new Map<string, number>();
   for (const row of data as { category: string | null }[]) {
     const cat = row.category;
@@ -58,7 +75,9 @@ export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]
     // Support comma-joined categories stored by the wizard (e.g. "finance,travel")
     const parts = cat.split(",").map((s) => s.trim()).filter(Boolean);
     for (const part of parts) {
-      countMap.set(part, (countMap.get(part) ?? 0) + 1);
+      // Normalise: if stored as English ID, resolve to Arabic label
+      const displayName = CATEGORY_LABELS[part] ?? part;
+      countMap.set(displayName, (countMap.get(displayName) ?? 0) + 1);
     }
   }
 
@@ -203,6 +222,33 @@ export async function getLeaderboardByPeriod(
     }));
 }
 
+// ── Distinct Locations ───────────────────────────────────────
+/**
+ * Returns all unique, non-null location values from the questions table,
+ * sorted alphabetically.  Used to populate the location filter dropdown.
+ */
+export async function getDistinctLocations(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("questions")
+    .select("location")
+    .eq("is_deleted", false)
+    .not("location", "is", null)
+    .neq("location", "");
+
+  if (error) {
+    console.error("getDistinctLocations error:", error.message);
+    return [];
+  }
+
+  // Deduplicate and sort alphabetically
+  const seen = new Set<string>();
+  for (const row of (data ?? []) as { location: string | null }[]) {
+    if (row.location) seen.add(row.location.trim());
+  }
+
+  return Array.from(seen).sort((a, b) => a.localeCompare(b, "ar"));
+}
+
 // ── Backend full-text search ─────────────────────────────────
 export interface SearchOptions {
   query: string;
@@ -228,27 +274,33 @@ export async function searchQuestions(opts: SearchOptions): Promise<Question[]> 
     `)
     .eq("is_deleted", false);
 
-  // Full-text search on title + content
-  if (opts.query) {
-    q = q.or(`title.ilike.%${opts.query}%,content.ilike.%${opts.query}%`);
+  // Full-text search on title + content + category (label)
+  if (opts.query && opts.query.trim()) {
+    const safe = opts.query.trim().replace(/[%_\\]/g, "\\$&");
+    q = q.or(`title.ilike.%${safe}%,content.ilike.%${safe}%,category.ilike.%${safe}%`);
   }
 
   if (opts.category && opts.category !== "all") {
-    q = q.ilike("category", `%${opts.category}%`);
+    const LABEL_TO_ID: Record<string, string> = Object.fromEntries(
+      Object.entries(CATEGORY_LABELS).map(([id, label]) => [label, id])
+    );
+    const categoryId = LABEL_TO_ID[opts.category] ?? opts.category;
+    q = q.ilike("category", `%${categoryId}%`);
   }
 
   if (opts.location && opts.location !== "all") {
-    q = q.eq("location", opts.location);
+    q = q.ilike("location", `%${opts.location}%`);
   }
 
-  if (opts.unansweredOnly) {
+  // Handle unanswered filter — deduplicate when sortBy also implies unanswered
+  const needsUnansweredFilter = opts.unansweredOnly || opts.sortBy === "unanswered";
+  if (needsUnansweredFilter) {
     q = q.eq("answers_count", 0);
   }
 
+  // Ordering
   if (opts.sortBy === "votes") {
     q = q.order("votes_count", { ascending: false });
-  } else if (opts.sortBy === "unanswered") {
-    q = q.eq("answers_count", 0).order("created_at", { ascending: false });
   } else {
     q = q.order("created_at", { ascending: false });
   }
@@ -256,7 +308,10 @@ export async function searchQuestions(opts: SearchOptions): Promise<Question[]> 
   q = q.range(offset, offset + limit - 1);
 
   const { data, error } = await q;
-  if (error) { console.error("searchQuestions:", error); return []; }
+  if (error) {
+    console.error("searchQuestions error:", error.message, error.details);
+    return [];
+  }
 
   return ((data ?? []).map((item: any) => {
     const tagNames = (item.question_tags ?? []).map((qt: any) => qt.tags?.name).filter(Boolean);
