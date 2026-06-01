@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -22,7 +22,10 @@ import {
   Utensils,
   Stethoscope,
   Compass,
-  Star
+  Star,
+  MapPin,
+  Search,
+  PenLine
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
@@ -33,6 +36,86 @@ const availableInterests = [
   "برمجة", "تقنية", "تصميم", "أعمال", "تعليم",
   "صحة", "علوم", "رياضيات", "فنون", "أمن معلومات",
   "ذكاء اصطناعي", "تسويق", "مطاعم", "أطباء", "سياحة", "سينما"
+];
+
+// Real Arab cities: { label: display name, location: stored value }
+const arabCities = [
+  // المملكة العربية السعودية
+  { label: "الرياض", location: "الرياض، المملكة العربية السعودية" },
+  { label: "جدة", location: "جدة، المملكة العربية السعودية" },
+  { label: "مكة المكرمة", location: "مكة المكرمة، المملكة العربية السعودية" },
+  { label: "المدينة المنورة", location: "المدينة المنورة، المملكة العربية السعودية" },
+  { label: "الدمام", location: "الدمام، المملكة العربية السعودية" },
+  { label: "الخبر", location: "الخبر، المملكة العربية السعودية" },
+  { label: "الظهران", location: "الظهران، المملكة العربية السعودية" },
+  { label: "أبها", location: "أبها، المملكة العربية السعودية" },
+  { label: "تبوك", location: "تبوك، المملكة العربية السعودية" },
+  { label: "بريدة", location: "بريدة، المملكة العربية السعودية" },
+  { label: "القصيم", location: "القصيم، المملكة العربية السعودية" },
+  { label: "حائل", location: "حائل، المملكة العربية السعودية" },
+  { label: "جازان", location: "جازان، المملكة العربية السعودية" },
+  { label: "نجران", location: "نجران، المملكة العربية السعودية" },
+  { label: "الطائف", location: "الطائف، المملكة العربية السعودية" },
+  // الإمارات
+  { label: "دبي", location: "دبي، الإمارات العربية المتحدة" },
+  { label: "أبوظبي", location: "أبوظبي، الإمارات العربية المتحدة" },
+  { label: "الشارقة", location: "الشارقة، الإمارات العربية المتحدة" },
+  { label: "عجمان", location: "عجمان، الإمارات العربية المتحدة" },
+  { label: "رأس الخيمة", location: "رأس الخيمة، الإمارات العربية المتحدة" },
+  // مصر
+  { label: "القاهرة", location: "القاهرة، مصر" },
+  { label: "الإسكندرية", location: "الإسكندرية، مصر" },
+  { label: "الجيزة", location: "الجيزة، مصر" },
+  { label: "شرم الشيخ", location: "شرم الشيخ، مصر" },
+  { label: "الأقصر", location: "الأقصر، مصر" },
+  { label: "أسوان", location: "أسوان، مصر" },
+  // الكويت
+  { label: "الكويت", location: "مدينة الكويت، الكويت" },
+  { label: "السالمية", location: "السالمية، الكويت" },
+  { label: "حولي", location: "حولي، الكويت" },
+  // قطر
+  { label: "الدوحة", location: "الدوحة، قطر" },
+  { label: "الوكرة", location: "الوكرة، قطر" },
+  // البحرين
+  { label: "المنامة", location: "المنامة، البحرين" },
+  { label: "المحرق", location: "المحرق، البحرين" },
+  // عُمان
+  { label: "مسقط", location: "مسقط، سلطنة عُمان" },
+  { label: "صلالة", location: "صلالة، سلطنة عُمان" },
+  { label: "نزوى", location: "نزوى، سلطنة عُمان" },
+  // الأردن
+  { label: "عمّان", location: "عمّان، الأردن" },
+  { label: "الزرقاء", location: "الزرقاء، الأردن" },
+  { label: "إربد", location: "إربد، الأردن" },
+  // لبنان
+  { label: "بيروت", location: "بيروت، لبنان" },
+  { label: "طرابلس", location: "طرابلس، لبنان" },
+  // المغرب
+  { label: "الدار البيضاء", location: "الدار البيضاء، المغرب" },
+  { label: "الرباط", location: "الرباط، المغرب" },
+  { label: "فاس", location: "فاس، المغرب" },
+  { label: "مراكش", location: "مراكش، المغرب" },
+  // تونس
+  { label: "تونس", location: "تونس، تونس" },
+  { label: "صفاقس", location: "صفاقس، تونس" },
+  // الجزائر
+  { label: "الجزائر العاصمة", location: "الجزائر، الجزائر" },
+  { label: "وهران", location: "وهران، الجزائر" },
+  // العراق
+  { label: "بغداد", location: "بغداد، العراق" },
+  { label: "البصرة", location: "البصرة، العراق" },
+  { label: "أربيل", location: "أربيل، العراق" },
+  // اليمن
+  { label: "صنعاء", location: "صنعاء، اليمن" },
+  { label: "عدن", location: "عدن، اليمن" },
+  // سوريا
+  { label: "دمشق", location: "دمشق، سوريا" },
+  { label: "حلب", location: "حلب، سوريا" },
+  // السودان
+  { label: "الخرطوم", location: "الخرطوم، السودان" },
+  // ليبيا
+  { label: "طرابلس", location: "طرابلس، ليبيا" },
+  { label: "بنغازي", location: "بنغازي، ليبيا" },
 ];
 
 const perks = [
@@ -63,9 +146,29 @@ export function RegisterPage() {
   
   // Onboarding fields (step 3)
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("");           // stored location string
+  const [citySearch, setCitySearch] = useState(""); // combobox search text
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [manualCity, setManualCity] = useState(""); // manual entry
+  const [useManualCity, setUseManualCity] = useState(false);
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Click-outside handler for city dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node) &&
+        cityInputRef.current && !cityInputRef.current.contains(e.target as Node)
+      ) {
+        setShowCityDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleNextStep = () => {
     if (step === 1) {
@@ -133,18 +236,8 @@ export function RegisterPage() {
         return;
       }
 
-      // 2. Map city key to display location
-      const cityMap: Record<string, string> = {
-        riyadh: "الرياض، السعودية",
-        jeddah: "جدة، السعودية",
-        dammam: "الدمام، السعودية",
-        mecca: "مكة المكرمة، السعودية",
-        medina: "المدينة المنورة، السعودية",
-        cairo: "القاهرة، مصر",
-        dubai: "دبي، الإمارات",
-        other: "مدينة أخرى",
-      };
-      const userLocation = cityMap[city] || "الرياض، السعودية";
+      // 2. Use the already-resolved location string directly
+      const userLocation = city || "غير محدد";
 
       // 3. Build bio
       const bioText = accountType !== "individual" 
@@ -598,24 +691,144 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* City */}
+            {/* City — Searchable Combobox */}
             <div className="space-y-1.5">
-              <Label className="text-foreground/80 text-xs font-semibold">مدينتك الحالية</Label>
-              <Select value={city} onValueChange={setCity}>
-                <SelectTrigger className="bg-background h-11 rounded-xl">
-                  <SelectValue placeholder="اختر مدينتك" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="riyadh">الرياض</SelectItem>
-                  <SelectItem value="jeddah">جدة</SelectItem>
-                  <SelectItem value="dammam">الدمام</SelectItem>
-                  <SelectItem value="mecca">مكة المكرمة</SelectItem>
-                  <SelectItem value="medina">المدينة المنورة</SelectItem>
-                  <SelectItem value="cairo">القاهرة</SelectItem>
-                  <SelectItem value="dubai">دبي</SelectItem>
-                  <SelectItem value="other">مدينة أخرى</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-foreground/80 text-xs font-semibold flex items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-primary" />
+                مدينتك الحالية
+              </Label>
+
+              {!useManualCity ? (
+                <div className="relative">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <input
+                      ref={cityInputRef}
+                      type="text"
+                      dir="rtl"
+                      placeholder={city ? city.split("،")[0] : "ابحث عن مدينتك..."}
+                      value={citySearch}
+                      onChange={(e) => {
+                        setCitySearch(e.target.value);
+                        setShowCityDropdown(true);
+                        if (!e.target.value) setCity("");
+                      }}
+                      onFocus={() => setShowCityDropdown(true)}
+                      className={`w-full h-11 rounded-xl border bg-background pr-9 pl-3 text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary ${
+                        city ? "border-primary/50 text-foreground" : "border-border text-foreground"
+                      }`}
+                    />
+                    {city && !showCityDropdown && (
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Selected city pill */}
+                  {city && !showCityDropdown && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold rounded-full px-2.5 py-0.5 border border-primary/20">
+                        <MapPin className="h-3 w-3" />
+                        {city}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Dropdown list */}
+                  {showCityDropdown && (
+                    <div
+                      ref={cityDropdownRef}
+                      className="absolute z-50 top-[calc(100%+4px)] right-0 left-0 bg-card border border-border rounded-xl shadow-xl overflow-hidden"
+                    >
+                      <div className="max-h-52 overflow-y-auto">
+                        {arabCities
+                          .filter(c =>
+                            !citySearch ||
+                            c.label.includes(citySearch) ||
+                            c.location.includes(citySearch)
+                          )
+                          .map((c) => (
+                            <button
+                              key={c.location}
+                              type="button"
+                              dir="rtl"
+                              className={`w-full text-right px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2 ${
+                                city === c.location
+                                  ? "bg-primary/10 text-primary font-semibold"
+                                  : "hover:bg-muted text-foreground"
+                              }`}
+                              onClick={() => {
+                                setCity(c.location);
+                                setCitySearch("");
+                                setShowCityDropdown(false);
+                              }}
+                            >
+                              <span>{c.label}</span>
+                              <span className="text-xs text-muted-foreground">{c.location.split("،")[1]?.trim()}</span>
+                            </button>
+                          ))
+                        }
+                        {arabCities.filter(c =>
+                          !citySearch || c.label.includes(citySearch) || c.location.includes(citySearch)
+                        ).length === 0 && (
+                          <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+                            لم يتم إيجاد مدينتك — يمكنك إدخالها يدوياً
+                          </div>
+                        )}
+                      </div>
+                      {/* Manual entry option */}
+                      <div className="border-t border-border">
+                        <button
+                          type="button"
+                          dir="rtl"
+                          className="w-full text-right px-4 py-2.5 text-sm text-secondary font-semibold hover:bg-secondary/5 flex items-center gap-2"
+                          onClick={() => {
+                            setUseManualCity(true);
+                            setShowCityDropdown(false);
+                            setCitySearch("");
+                            setCity("");
+                          }}
+                        >
+                          <PenLine className="h-3.5 w-3.5" />
+                          أدخل مدينتي يدوياً
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Manual city input */
+                <div className="space-y-2">
+                  <div className="relative">
+                    <PenLine className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="text"
+                      dir="rtl"
+                      placeholder="مثال: الزقازيق، مصر"
+                      value={manualCity}
+                      onChange={(e) => {
+                        setManualCity(e.target.value);
+                        setCity(e.target.value.trim());
+                      }}
+                      className="w-full h-11 rounded-xl border border-border bg-background pr-9 pl-3 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUseManualCity(false);
+                      setManualCity("");
+                      setCity("");
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    <Search className="h-3 w-3" />
+                    العودة للبحث من القائمة
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Interests */}
