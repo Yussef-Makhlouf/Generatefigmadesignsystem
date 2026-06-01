@@ -14,6 +14,7 @@ interface QuestionCardProps {
   description: string;
   author: {
     name: string;
+    username?: string;
     avatar?: string;
     reputation: number;
   };
@@ -143,7 +144,7 @@ export function QuestionCard({
             <div className="flex items-center justify-between flex-wrap gap-2">
               {/* Author */}
               <Link
-                to={`/profile/${author.name}`}
+                to={`/profile/${author.username || author.name}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity min-w-0"
               >

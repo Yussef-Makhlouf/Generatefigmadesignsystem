@@ -315,6 +315,7 @@ export function questionToCardProps(q: Question, users?: Profile[]) {
     description: q.content,
     author: {
       name: author?.name ?? "مستخدم",
+      username: author?.username ?? "",
       avatar: author?.avatar_url ?? undefined,
       reputation: author?.reputation ?? 0,
     },

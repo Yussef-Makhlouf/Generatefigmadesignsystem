@@ -71,8 +71,32 @@ export function ProfilePage() {
     userVotes,
   } = useAppState();
 
-  const isOwnProfile = !username || username === "me" || username === currentUser.username;
-  const user = isOwnProfile ? currentUser : users.find((u) => u.username === username);
+  const decodedUsername = (() => {
+    try {
+      return decodeURIComponent(username || "");
+    } catch {
+      return username || "";
+    }
+  })();
+
+  const isOwnProfile =
+    !username ||
+    username === "me" ||
+    username === currentUser.username ||
+    username === currentUser.id ||
+    decodedUsername === currentUser.username ||
+    decodedUsername === currentUser.name;
+
+  const user = isOwnProfile
+    ? currentUser
+    : users.find(
+        (u) =>
+          u.username === username ||
+          u.id === username ||
+          u.username === decodedUsername ||
+          u.name === decodedUsername ||
+          u.name === username
+      );
 
   // Tabs state
   const [activeTab, setActiveTab] = useState(

@@ -175,6 +175,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           locationDetail,
           author: {
             name: authorProfile?.name ?? "مستخدم",
+            username: authorProfile?.username ?? "",
             avatar: authorProfile?.avatar_url ?? undefined,
             reputation: authorProfile?.reputation ?? 0,
           },
@@ -263,6 +264,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           locationDetail,
           author: {
             name: authorProfile?.name ?? "مستخدم",
+            username: authorProfile?.username ?? "",
             avatar: authorProfile?.avatar_url ?? undefined,
             reputation: authorProfile?.reputation ?? 0,
           },
