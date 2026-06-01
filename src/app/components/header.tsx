@@ -168,7 +168,7 @@ export function Header() {
             <Button
               size="icon"
               variant="ghost"
-              className="rounded-full md:hidden h-10 w-10 text-muted-foreground hover:bg-muted/60 transition-colors"
+              className="rounded-full hidden sm:flex md:hidden h-10 w-10 text-muted-foreground hover:bg-muted/60 transition-colors"
               onClick={() => setSearchOpen(true)}
               aria-label="بحث"
             >
@@ -178,7 +178,7 @@ export function Header() {
             {/* Notifications - Visible on all screens for social platform */}
             <Link
               to="/notifications"
-              className="relative flex items-center justify-center h-10 w-10 rounded-full text-muted-foreground hover:bg-muted/60 transition-colors group"
+              className="relative hidden sm:flex items-center justify-center h-10 w-10 rounded-full text-muted-foreground hover:bg-muted/60 transition-colors group"
               aria-label={`الإشعارات${notifCount > 0 ? ` - ${notifCount} غير مقروء` : ""}`}
             >
               <Bell className="h-5 w-5 transition-transform group-hover:rotate-12" />
@@ -292,13 +292,16 @@ export function Header() {
                 <Button
                   asChild
                   variant="ghost"
-                  className="h-9 px-3 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="h-9 px-2.5 sm:px-3 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
-                  <Link to="/auth/login">تسجيل الدخول</Link>
+                  <Link to="/auth/login">
+                    <span className="xs:hidden">دخول</span>
+                    <span className="hidden xs:inline">تسجيل الدخول</span>
+                  </Link>
                 </Button>
                 <Button
                   asChild
-                  className="h-9 px-4 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-hover text-white shadow-sm transition-all hover:scale-105 active:scale-95 border border-primary/20"
+                  className="hidden sm:flex h-9 px-4 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-hover text-white shadow-sm transition-all hover:scale-105 active:scale-95 border border-primary/20"
                 >
                   <Link to="/auth/register">إنشاء حساب</Link>
                 </Button>
