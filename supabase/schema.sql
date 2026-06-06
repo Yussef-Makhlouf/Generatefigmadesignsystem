@@ -23,6 +23,7 @@
 -- ✅ Added COMMENT on settings JSONB documenting expected structure
 -- ✅ Added business_license storage-path guidance via column comment
 -- ✅ Reputation anti-abuse: daily vote cap via reputation_daily_limits table
+-- ✅ Added protect_profile_privileged_columns trigger (blocks self-admin escalation)
 -- ============================================================
 
 -- ============================================================
@@ -450,6 +451,49 @@ CREATE TRIGGER questions_updated_at       BEFORE UPDATE ON public.questions
 DROP TRIGGER IF EXISTS profiles_updated_at        ON public.profiles;
 CREATE TRIGGER profiles_updated_at        BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+-- ✅ ADDED: Block non-admin self-escalation on privileged profile columns
+CREATE OR REPLACE FUNCTION public.protect_profile_privileged_columns()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  caller_is_admin BOOLEAN := FALSE;
+BEGIN
+  IF coalesce(auth.role(), '') = 'service_role' THEN
+    RETURN NEW;
+  END IF;
+
+  IF auth.uid() IS NOT NULL THEN
+    SELECT (account_type = 'admin') INTO caller_is_admin
+    FROM public.profiles
+    WHERE id = auth.uid();
+  END IF;
+
+  IF caller_is_admin THEN
+    RETURN NEW;
+  END IF;
+
+  IF auth.uid() = OLD.id THEN
+    RAISE WARNING 'protect_profile_privileged_columns: reverted privileged columns for self-update on profile %', OLD.id;
+    NEW.account_type := OLD.account_type;
+    NEW.reputation := OLD.reputation;
+    NEW.is_verified_entity := OLD.is_verified_entity;
+    RETURN NEW;
+  END IF;
+
+  RAISE WARNING 'protect_profile_privileged_columns: blocked cross-user update attempt on profile % by %', OLD.id, auth.uid();
+  RETURN OLD;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS protect_profile_privileged_columns ON public.profiles;
+CREATE TRIGGER protect_profile_privileged_columns
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.protect_profile_privileged_columns();
 
 DROP TRIGGER IF EXISTS answers_updated_at         ON public.answers;
 CREATE TRIGGER answers_updated_at         BEFORE UPDATE ON public.answers

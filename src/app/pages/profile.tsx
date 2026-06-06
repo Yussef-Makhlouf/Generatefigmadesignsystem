@@ -43,7 +43,11 @@ import {
   Briefcase,
   Globe
 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useFeedQuestions, useFeedUsers, useFeedReviews } from "../../lib/hooks/use-feed-queries";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
+import { useAnswersByAuthor } from "../../lib/hooks/use-answers";
 import { toast } from "sonner";
 import { isFollowing as checkFollowing, toggleFollow, getFollowerCount, getFollowingCount } from "../../lib/services";
 
@@ -58,18 +62,12 @@ const BADGES = [
 export function ProfilePage() {
   const navigate = useNavigate();
   const { username } = useParams();
-  const {
-    currentUser,
-    questions,
-    answers,
-    bookmarkedIds,
-    voteQuestion,
-    toggleBookmark,
-    users,
-    reviews,
-    addReview,
-    userVotes,
-  } = useAppState();
+  const { currentUser } = useAuthSession();
+  const { data: questions = [] } = useFeedQuestions();
+  const { data: users = [] } = useFeedUsers();
+  const { data: reviews = [] } = useFeedReviews();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes } = useQuestionInteractions();
+  const { addReview } = useAppActions();
 
   const decodedUsername = (() => {
     try {
@@ -136,6 +134,8 @@ export function ProfilePage() {
   const [linkTitle, setLinkTitle] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
 
+  const { data: authorAnswers = [] } = useAnswersByAuthor(user?.id);
+
   if (!user) {
     return (
       <div className="max-w-md w-full mx-auto py-16 text-center animate-fade-in">
@@ -158,9 +158,8 @@ export function ProfilePage() {
 
   const isBusiness = user.accountType !== "individual";
   const userQuestions = questions.filter((q) => q.author_id === user.id);
-  const userAnswers = questions.filter((q) =>
-    answers.some((a) => a.questionId === q.id && a.author_id === user.id)
-  );
+  const answeredQuestionIds = new Set(authorAnswers.map((a) => a.question_id ?? a.questionId));
+  const userAnswers = questions.filter((q) => answeredQuestionIds.has(q.id));
   const savedQuestions = questions.filter((q) => bookmarkedIds.includes(q.id));
 
   // Reviews for this business entity
@@ -360,8 +359,8 @@ export function ProfilePage() {
                 {getAccountLabel()}
               </Badge>
               {isBusiness && user.businessRating && (
-                <Badge className="rounded-full text-[10px] sm:text-xs px-2.5 py-0.5 bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 font-bold flex items-center">
-                  <Star className="h-3 w-3 ml-1 text-yellow-500 fill-yellow-500" />
+                <Badge className="rounded-full text-[10px] sm:text-xs px-2.5 py-0.5 bg-secondary-light border border-secondary/30 text-secondary font-bold flex items-center">
+                  <Star className="h-3 w-3 ml-1 text-secondary fill-secondary" />
                   <span>{user.businessRating}</span>
                   <span className="text-[10px] mr-1 font-normal font-numbers text-muted-foreground">({receivedReviews.length} تقييم)</span>
                 </Badge>
@@ -402,7 +401,7 @@ export function ProfilePage() {
                 <span>انضم في {user.joined}</span>
               </div>
               {!isBusiness && (
-                <div className="flex items-center gap-1.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2.5 py-1 rounded-lg border border-orange-500/20 font-medium">
+                <div className="flex items-center gap-1.5 bg-warning-light text-warning px-2.5 py-1 rounded-lg border border-warning/20 font-medium">
                   <Flame className="h-3.5 w-3.5 fill-current" />
                   <span>سلسلة الحضور مستمرة</span>
                 </div>
@@ -765,7 +764,7 @@ export function ProfilePage() {
                           حساب موثق رسميًا
                         </Badge>
                       ) : (
-                        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-lg text-xs font-bold py-1 animate-pulse">
+                        <Badge className="bg-warning-light text-warning border border-warning/20 rounded-lg text-xs font-bold py-1 animate-pulse">
                           قيد المراجعة والتدقيق
                         </Badge>
                       )}

@@ -32,7 +32,7 @@ export function TrendingTopics() {
             onClick={() => navigate(`/search?q=${topic.label}`)}
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card hover:border-primary hover:bg-primary/5 hover:text-primary transition-all text-sm text-foreground"
           >
-            {topic.hot && <Flame className="h-3 w-3 text-orange-500" />}
+            {topic.hot && <Flame className="h-3 w-3 text-warning" />}
             <span>{topic.label}</span>
             <span className="text-xs text-muted-foreground">{topic.count.toLocaleString("ar-SA")}</span>
           </button>

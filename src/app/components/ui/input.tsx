@@ -21,11 +21,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "placeholder:text-neutral-400 dark:placeholder:text-neutral-500",
           "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
           "selection:bg-primary/20 selection:text-primary",
-          "outline-none transition-all duration-280 ease-smooth",
+          "outline-none transition-all duration-300 ease-smooth",
           // Hover State
-          "hover:border-neutral-300 dark:hover:border-neutral-700",
-          // Focus State
-          "focus:border-primary focus:ring-4 focus:ring-primary/10",
+          "hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-sm",
+          // Focus State — enhanced with ring and subtle lift
+          "focus:border-primary focus:ring-4 focus:ring-primary/10 focus:shadow-md",
           // Disabled state
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           // Invalid state

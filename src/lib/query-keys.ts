@@ -1,0 +1,20 @@
+/** Central React Query keys — keep invalidation consistent across hooks and context */
+export const queryKeys = {
+  session: ["session"] as const,
+  currentUser: (userId: string | null | undefined) => ["currentUser", userId] as const,
+  questions: (options?: unknown) => (options ? ["questions", options] as const : ["questions"] as const),
+  question: (id: string) => ["question", id] as const,
+  answers: (questionId: string) => ["answers", questionId] as const,
+  answersByAuthor: (authorId: string) => ["answers", "author", authorId] as const,
+  answerSnippets: (ids: string[]) => ["answers", "snippets", ...[...ids].sort()] as const,
+  users: ["users"] as const,
+  reviews: ["reviews"] as const,
+  bookmarks: (userId: string | null | undefined) => ["bookmarks", userId] as const,
+  userVotes: (userId: string | null | undefined) => ["userVotes", userId] as const,
+  notifications: (userId: string | null | undefined) => ["notifications", userId] as const,
+  reputationLogs: (userId: string) => ["reputationLogs", userId] as const,
+  categories: ["categories"] as const,
+  platformStats: ["platformStats"] as const,
+  hotQuestions: ["hotQuestions"] as const,
+  trendingTags: ["trendingTags"] as const,
+};

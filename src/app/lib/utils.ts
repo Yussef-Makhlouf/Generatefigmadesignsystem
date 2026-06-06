@@ -21,17 +21,7 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength) + '...';
 };
 
-// Category colors mapping
-export const getCategoryColor = (category: string): string => {
-  const colors: Record<string, string> = {
-    'تقنية': 'bg-blue-500',
-    'تعليم': 'bg-green-500',
-    'صحة': 'bg-red-500',
-    'أعمال': 'bg-purple-500',
-    'علوم': 'bg-teal-500',
-  };
-  return colors[category] || 'bg-gray-500';
-};
+export { getCategoryDotClass as getCategoryColor } from "../../lib/categories";
 
 // Reputation tier calculator
 export const getReputationTier = (points: number) => {

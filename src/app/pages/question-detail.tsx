@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, Link, useParams } from "react-router";
-import { useAppState } from "../context/AppStateContext";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { useQuestionDetail } from "../../lib/hooks/use-question-detail";
 import { useSession } from "../../lib/hooks/use-auth";
 import { acceptAnswer, unacceptAnswer, addComment, uploadAnswerImage } from "../../lib/services/answers.service";
@@ -24,7 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
-import type { AttachmentLink, AttachmentLocation } from "../data/mock-data";
+import type { AttachmentLink, AttachmentLocation } from "../../lib/database.types";
 import type { Answer } from "../../lib/database.types";
 import { supabase } from "../../lib/supabase";
 
@@ -295,10 +296,10 @@ export function QuestionDetailPage() {
     bookmarkedIds,
     voteQuestion,
     voteAnswer,
-    addAnswer,
     toggleBookmark,
-    userVotes = {},
-  } = useAppState();
+    userVotes,
+  } = useQuestionInteractions();
+  const { addAnswer } = useAppActions();
 
   // ── Per-question data (hook fetches directly from Supabase) ──
   const { question, answers: rawAnswers, isLoading, isAnswersLoading } = useQuestionDetail(id ?? "");
@@ -491,7 +492,7 @@ export function QuestionDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["question-detail", question.id] });
       queryClient.invalidateQueries({ queryKey: ["questions"] });
 
-      toast.success("تم نشر إجابتك الموثقة بنجاح! 🎉", { duration: 3000 });
+      toast.success("تم نشر إجابتك الموثقة بنجاح!", { duration: 3000 });
 
       // 4. Reset compose state
       setNewAnswer("");
@@ -1150,7 +1151,12 @@ export function QuestionDetailPage() {
                                         </button>
                                       </div>
                                       <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-numbers">
-                                        {(commentLinks[answer.id] || []).length > 0 && <span>🔗 {(commentLinks[answer.id] || []).length} رابط</span>}
+                                        {(commentLinks[answer.id] || []).length > 0 && (
+                                          <span className="inline-flex items-center gap-1">
+                                            <Link2 className="h-3 w-3" aria-hidden />
+                                            {(commentLinks[answer.id] || []).length} رابط
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
 

@@ -3,12 +3,16 @@ import { Button } from "../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { EmptyState } from "../components/empty-state";
 import { Bell, MessageSquare, ThumbsUp, CheckCheck, Award, User, Star, MessageCircle } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useNotifications } from "../../lib/hooks/use-engagement";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { useNavigate } from "react-router";
 
 export function NotificationsPage() {
   const navigate = useNavigate();
-  const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useAppState();
+  const { currentUserId } = useAuthSession();
+  const { data: notifications = [] } = useNotifications(currentUserId);
+  const { markNotificationAsRead, markAllNotificationsAsRead } = useAppActions();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

@@ -45,21 +45,24 @@ Create in Supabase Dashboard or run `supabase/storage.sql`:
 
 ## Integration Steps
 
-### 1. Replace mock data in `src/app/context/AppStateContext.tsx`
-Replace local state with React Query hooks:
+### 1. Use feed hooks in pages
+Replace any legacy context usage with React Query hooks:
 
 ```tsx
-// Before (mock)
-const { questions } = useAppState();
+// Feed data
+const { data: questions, isLoading } = useFeedQuestions();
 
-// After (Supabase)
-const { questions, isLoading } = useQuestions();
+// Auth
+const { currentUser } = useAuthSession();
+
+// Votes & bookmarks
+const { bookmarkedIds, voteQuestion, toggleBookmark } = useQuestionInteractions();
 ```
 
 ### 2. Update form submissions
 In `new-question.tsx` and `question-detail.tsx`:
-- Use `useCreateQuestion()` mutation instead of `useAppState().addQuestion()`
-- Use `useCreateAnswer()` mutation instead of `useAppState().addAnswer()`
+- Use `useAppActions().addQuestion()` or `useCreateQuestion()` mutation
+- Use `useAppActions().addAnswer()` or `useCreateAnswer()` mutation
 
 ### 3. Add real-time subscriptions
 Add to pages that need live updates:
@@ -70,11 +73,13 @@ useRealtimeQuestions((newQuestion) => {
 ```
 
 ### 4. Environment Variables
-`.env` already configured with:
+Copy `.env.production.example` to `.env` and fill in your project values from **Supabase Dashboard → Settings → API**:
 ```
-VITE_SUPABASE_URL=https://qyjcfzlufwkprmfxmszz.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GpG5nhme_HLUY8Zm6dOiOg_9RJBFR0Y
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_or_publishable_key
 ```
+
+Never commit real credentials to git.
 
 ## Reputation Engine (Automatic)
 The following triggers are already in schema.sql:

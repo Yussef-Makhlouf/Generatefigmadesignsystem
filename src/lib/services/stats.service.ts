@@ -1,5 +1,12 @@
 import { supabase } from "../supabase";
 import type { Question, Tag, Profile } from "../database.types";
+import {
+  CATEGORY_LABELS,
+  getCategoryDotClass,
+  resolveCategoryId,
+} from "../categories";
+
+export { CATEGORY_LABELS };
 
 // ── Category with count shape ────────────────────────────────
 export interface CategoryStat {
@@ -7,50 +14,8 @@ export interface CategoryStat {
   count: number;
 }
 
-// Map English wizard IDs → Arabic display labels shown in the UI
-export const CATEGORY_LABELS: Record<string, string> = {
-  "tech":       "تقنية وبرمجيات",
-  "education":  "تعليم وأكاديميا",
-  "health":     "صحة وطب وعيادات",
-  "business":   "ريادة وأعمال تجارية",
-  "science":    "علوم وبحوث",
-  "food":       "مطاعم ومأكولات",
-  "activity":   "نشاطات وترفيه",
-  "travel":     "سياحة وسفر",
-  "legal":      "قانون وأنظمة",
-  "finance":    "مالية واستثمار",
-  "sports":     "رياضة ولياقة",
-  "arts":       "فنون وإبداع",
-};
-
-// Map category names → Tailwind colour class (extends automatically for new values)
-const CATEGORY_COLORS: Record<string, string> = {
-  // Arabic labels
-  "تقنية":          "bg-blue-500",
-  "تعليم":          "bg-green-500",
-  "برمجة":          "bg-indigo-500",
-  "ذكاء اصطناعي":   "bg-purple-500",
-  "تصميم":          "bg-pink-500",
-  "صحة":            "bg-red-500",
-  "أعمال":          "bg-amber-500",
-  "علوم":           "bg-teal-500",
-  // English IDs used by the wizard
-  "tech":           "bg-blue-500",
-  "education":      "bg-green-500",
-  "health":         "bg-red-500",
-  "business":       "bg-amber-500",
-  "science":        "bg-teal-500",
-  "food":           "bg-orange-500",
-  "activity":       "bg-pink-500",
-  "travel":         "bg-sky-500",
-  "legal":          "bg-gray-500",
-  "finance":        "bg-lime-500",
-  "sports":         "bg-cyan-500",
-  "arts":           "bg-fuchsia-500",
-};
-
 export function getCategoryColor(name: string): string {
-  return CATEGORY_COLORS[name] ?? "bg-gray-500";
+  return getCategoryDotClass(name);
 }
 
 export async function getCategoriesWithCounts(limit = 8): Promise<CategoryStat[]> {

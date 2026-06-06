@@ -36,7 +36,8 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useFeedQuestions, useFeedUsers, useFeedReviews } from "../../lib/hooks/use-feed-queries";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { toast } from "sonner";
 
 const growthData = [
@@ -73,15 +74,10 @@ const dailyActivityData = [
 ];
 
 export function AdminPage() {
-  const {
-    users,
-    questions,
-    reviews,
-    answers,
-    toggleVerifyEntity,
-    deleteReview,
-    deleteQuestion,
-  } = useAppState();
+  const { data: users = [] } = useFeedUsers();
+  const { data: questions = [] } = useFeedQuestions();
+  const { data: reviews = [] } = useFeedReviews();
+  const { toggleVerifyEntity, deleteReview, deleteQuestion } = useAppActions();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,7 +92,7 @@ export function AdminPage() {
     {
       title: "إجمالي الأعضاء والجهات",
       value: users.length.toString(),
-      change: `+${users.filter(u => u.id.startsWith("user_")).length} جديد`,
+      change: `${users.length} مسجل`,
       trend: "up",
       icon: Users,
       color: "text-primary",
@@ -105,7 +101,7 @@ export function AdminPage() {
     {
       title: "الأسئلة والحلول",
       value: questions.length.toString(),
-      change: `+${questions.filter(q => q.timestamp === "الآن").length} نشط`,
+      change: `${questions.length} منشور`,
       trend: "up",
       icon: MessageSquare,
       color: "text-secondary",
@@ -114,7 +110,7 @@ export function AdminPage() {
     {
       title: "تقييمات الأماكن والخدمات",
       value: reviews.length.toString(),
-      change: `+${reviews.filter(r => r.timestamp === "الآن").length} جديد`,
+      change: `${reviews.length} تقييم`,
       trend: "up",
       icon: Star,
       color: "text-amber-500",

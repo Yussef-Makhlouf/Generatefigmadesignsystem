@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAppState } from "../context/AppStateContext";
+import { useFeedQuestions } from "../../lib/hooks/use-feed-queries";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -21,7 +22,8 @@ import { toast } from "sonner";
 
 export function SavedPage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, toggleBookmark, voteQuestion, userVotes = {} } = useAppState();
+  const { data: questions = [] } = useFeedQuestions();
+  const { bookmarkedIds, toggleBookmark, voteQuestion, userVotes } = useQuestionInteractions();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFolder, setActiveFolder] = useState("الكل");

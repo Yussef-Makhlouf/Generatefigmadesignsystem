@@ -26,16 +26,22 @@ const buttonVariants = cva(
         default: [
           "bg-primary text-primary-foreground border border-transparent",
           "hover:bg-primary-hover shadow-[var(--shadow-primary)]",
-          "hover:shadow-[var(--shadow-primary),var(--shadow-emerald)]",
-          "active:bg-primary",
+          "hover:shadow-[var(--shadow-primary-lg),var(--shadow-emerald)]",
+          "active:bg-primary active:scale-[0.97]",
+          "relative overflow-hidden group",
+          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent",
+          "before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:ease-out",
         ].join(" "),
 
         // ── Gold — Desert Gold CTA ─────────────────────
         gold: [
           "bg-secondary text-secondary-foreground border border-transparent",
           "hover:bg-secondary-hover shadow-[var(--shadow-secondary)]",
-          "hover:shadow-[var(--shadow-secondary),var(--shadow-gold)]",
-          "active:bg-secondary",
+          "hover:shadow-[var(--shadow-secondary-lg),var(--shadow-gold)]",
+          "active:bg-secondary active:scale-[0.97]",
+          "relative overflow-hidden group",
+          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent",
+          "before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:ease-out",
         ].join(" "),
 
         // ── Destructive ────────────────────────────────
@@ -48,8 +54,10 @@ const buttonVariants = cva(
         // ── Outline ────────────────────────────────────
         outline: [
           "border border-border bg-transparent text-foreground",
-          "hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
+          "hover:border-primary hover:bg-primary/5 hover:text-primary",
           "dark:hover:bg-primary/10",
+          "transition-all duration-300",
+          "hover:shadow-[var(--shadow-primary)]",
         ].join(" "),
 
         // ── Secondary (surface) ────────────────────────

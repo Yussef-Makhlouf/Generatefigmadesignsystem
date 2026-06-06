@@ -5,21 +5,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Trophy, Medal, Flame, TrendingUp, Award, Star, Loader2 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
 import { useLeaderboard } from "../../lib/hooks/use-leaderboard";
 import type { LeaderboardPeriod } from "../../lib/services/stats.service";
+import { BgPattern } from "../components/bg-pattern";
 
 const rankMedal = (rank: number) => {
   if (rank === 1) return <Trophy className="h-5 w-5 text-secondary animate-float fill-secondary/20" />;
-  if (rank === 2) return <Medal className="h-5 w-5 text-slate-400" />;
-  if (rank === 3) return <Medal className="h-5 w-5 text-amber-700" />;
+  if (rank === 2) return <Medal className="h-5 w-5 text-[var(--rank-silver)]" />;
+  if (rank === 3) return <Medal className="h-5 w-5 text-[var(--rank-bronze)]" />;
   return <span className="numeral font-numbers text-xs font-bold text-muted-foreground w-5 text-center">{rank}</span>;
 };
 
 const rankBg = (rank: number) => {
-  if (rank === 1) return "bg-secondary/5 hover:bg-secondary/10 dark:bg-secondary/5 dark:hover:bg-secondary/10 border-r-4 border-secondary transition-all";
+  if (rank === 1) return "bg-secondary/5 hover:bg-secondary/10 border-r-4 border-secondary transition-all";
   if (rank === 2) return "bg-primary/5 hover:bg-primary/10 border-r-4 border-primary transition-all";
-  if (rank === 3) return "bg-orange-500/5 hover:bg-orange-500/10 border-r-4 border-orange-500 transition-all";
+  if (rank === 3) return "bg-warning/5 hover:bg-warning/10 border-r-4 border-warning transition-all";
   return "hover:bg-muted/30 transition-all";
 };
 
@@ -27,7 +28,7 @@ const RANK_ARABIC = ["١", "٢", "٣"];
 
 export function LeaderboardPage() {
   const navigate = useNavigate();
-  const { currentUser } = useAppState();
+  const { currentUser } = useAuthSession();
   const [period, setPeriod] = useState<LeaderboardPeriod>("weekly");
 
   const { data: leaderboard = [], isLoading } = useLeaderboard(period, 20);
@@ -64,7 +65,8 @@ export function LeaderboardPage() {
   return (
     <div className="max-w-3xl w-full mx-auto animate-fade-in pb-4">
       {/* Header with geometric backgrounds */}
-      <div className="text-center mb-8 relative">
+      <div className="text-center mb-8 relative overflow-hidden rounded-3xl py-6">
+        <BgPattern variant={1} opacity="subtle" />
         <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         
         {/* Golden Trophy Holder */}
@@ -82,7 +84,7 @@ export function LeaderboardPage() {
             value="weekly"
             className="rounded-xl py-2.5 px-4 text-xs sm:text-sm font-semibold transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-primary shadow-sm hover:bg-muted/40 flex-1 flex items-center justify-center gap-1.5"
           >
-            <Flame className="h-4 w-4 text-orange-500 fill-current" />
+            <Flame className="h-4 w-4 text-warning fill-current" />
             هذا الأسبوع
           </TabsTrigger>
           <TabsTrigger
@@ -123,20 +125,20 @@ export function LeaderboardPage() {
                 onClick={() => podium[0] && navigate(`/profile/${podium[0].username}`)}
               >
                 <div className="relative">
-                  <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-4 ring-slate-400/30 group-hover:scale-105 transition-transform duration-300 shadow-md">
+                  <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-4 ring-[color-mix(in_srgb,var(--rank-silver)_30%,transparent)] group-hover:scale-105 transition-transform duration-300 shadow-md">
                     <AvatarImage src={podium[0]?.avatar_url ?? ""} />
-                    <AvatarFallback className="bg-slate-200 text-slate-700 font-heading font-bold">
+                    <AvatarFallback className="rank-avatar--silver font-heading font-bold">
                       {podium[0]?.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -top-1.5 -right-1.5 bg-slate-400 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm">٢</div>
+                  <div className="absolute -top-1.5 -right-1.5 rank-badge--silver rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm">٢</div>
                 </div>
                 <p className="text-xs font-bold text-center truncate w-full text-foreground mt-1">{podium[0]?.name}</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold bg-muted/40 px-2 py-0.5 rounded-full border border-border/10">
                   {podium[0]?.reputation.toLocaleString("ar-SA")}
                 </p>
-                <div className="w-full h-16 sm:h-20 bg-gradient-to-t from-slate-400/20 via-slate-400/5 to-transparent border-t-2 border-slate-400/30 rounded-t-2xl flex items-center justify-center shadow-inner mt-1">
-                  <Medal className="h-7 w-7 text-slate-400" />
+                <div className="w-full h-16 sm:h-20 bg-gradient-to-t from-[color-mix(in_srgb,var(--rank-silver)_20%,transparent)] via-[color-mix(in_srgb,var(--rank-silver)_5%,transparent)] to-transparent border-t-2 border-[color-mix(in_srgb,var(--rank-silver)_30%,transparent)] rounded-t-2xl flex items-center justify-center shadow-inner mt-1">
+                  <Medal className="h-7 w-7 text-[var(--rank-silver)]" />
                 </div>
               </div>
 
@@ -149,7 +151,7 @@ export function LeaderboardPage() {
                 <div className="relative">
                   <Avatar className="h-18 w-18 sm:h-20 sm:w-20 ring-4 ring-secondary shadow-[0_0_20px_rgba(245,158,11,0.25)] group-hover:scale-105 transition-transform duration-300">
                     <AvatarImage src={podium[1]?.avatar_url ?? ""} />
-                    <AvatarFallback className="bg-gradient-to-br from-secondary to-amber-500 text-white font-heading font-extrabold text-lg sm:text-xl">
+                    <AvatarFallback className="bg-gradient-to-br from-secondary to-secondary-hover text-white font-heading font-extrabold text-lg sm:text-xl">
                       {podium[1]?.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -170,20 +172,20 @@ export function LeaderboardPage() {
                 onClick={() => podium[2] && navigate(`/profile/${podium[2].username}`)}
               >
                 <div className="relative">
-                  <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-4 ring-amber-700/30 group-hover:scale-105 transition-transform duration-300 shadow-md">
+                  <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-4 ring-[color-mix(in_srgb,var(--rank-bronze)_30%,transparent)] group-hover:scale-105 transition-transform duration-300 shadow-md">
                     <AvatarImage src={podium[2]?.avatar_url ?? ""} />
-                    <AvatarFallback className="bg-amber-100 text-amber-800 font-heading font-bold">
+                    <AvatarFallback className="rank-avatar--bronze font-heading font-bold">
                       {podium[2]?.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -top-1.5 -right-1.5 bg-amber-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm">٣</div>
+                  <div className="absolute -top-1.5 -right-1.5 rank-badge--bronze rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm">٣</div>
                 </div>
                 <p className="text-xs font-bold text-center truncate w-full text-foreground mt-1">{podium[2]?.name}</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold bg-muted/40 px-2 py-0.5 rounded-full border border-border/10">
                   {podium[2]?.reputation.toLocaleString("ar-SA")}
                 </p>
-                <div className="w-full h-12 sm:h-16 bg-gradient-to-t from-amber-700/20 via-amber-700/5 to-transparent border-t-2 border-amber-700/30 rounded-t-2xl flex items-center justify-center shadow-inner mt-1">
-                  <Medal className="h-6 w-6 text-amber-800" />
+                <div className="w-full h-12 sm:h-16 bg-gradient-to-t from-[color-mix(in_srgb,var(--rank-bronze)_20%,transparent)] via-[color-mix(in_srgb,var(--rank-bronze)_5%,transparent)] to-transparent border-t-2 border-[color-mix(in_srgb,var(--rank-bronze)_30%,transparent)] rounded-t-2xl flex items-center justify-center shadow-inner mt-1">
+                  <Medal className="h-6 w-6 text-[var(--rank-bronze)]" />
                 </div>
               </div>
             </div>

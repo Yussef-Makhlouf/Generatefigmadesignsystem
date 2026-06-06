@@ -96,11 +96,16 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
   return profile as Profile;
 }
 
-// ── Update user account type (admin only) ───────────────────────
+// ── Update user account type (local dev only — production uses DB trigger + RLS) ──
 export async function updateUserAccountType(
   userId: string,
   accountType: AccountType
 ): Promise<boolean> {
+  if (!import.meta.env.DEV) {
+    console.error("updateUserAccountType is disabled outside development builds");
+    return false;
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({ account_type: accountType })

@@ -1,5 +1,6 @@
 import { supabase } from "../supabase";
 import type { Profile, UpdateProfileInput } from "../database.types";
+import { profileSchema } from "../utils/validation";
 
 // ── Fetch a profile by username ───────────────────────────────
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
@@ -28,9 +29,15 @@ export async function updateProfile(
   userId: string,
   input: UpdateProfileInput
 ): Promise<Profile | null> {
+  const parsed = profileSchema.safeParse(input);
+  if (!parsed.success) {
+    console.error("updateProfile validation:", parsed.error.flatten().fieldErrors);
+    return null;
+  }
+
   const { data, error } = await supabase
     .from("profiles")
-    .update({ ...input, updated_at: new Date().toISOString() })
+    .update({ ...parsed.data, updated_at: new Date().toISOString() })
     .eq("id", userId)
     .select()
     .single();
@@ -109,6 +116,20 @@ export async function toggleEntityVerification(
   userId: string,
   currentState: boolean
 ): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return currentState;
+
+  const { data: caller } = await supabase
+    .from("profiles")
+    .select("account_type")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (caller?.account_type !== "admin") {
+    console.error("toggleEntityVerification: caller is not admin");
+    return currentState;
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({ is_verified_entity: !currentState })

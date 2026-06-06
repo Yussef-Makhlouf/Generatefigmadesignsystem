@@ -88,14 +88,22 @@ export function QuestionCard({
 
   return (
     <Card
-      className="group relative overflow-hidden cursor-pointer premium-glass-card animate-fade-in"
+      className="group relative overflow-hidden cursor-pointer premium-glass-card animate-fade-in hover:shadow-card-hover"
       style={{ borderRadius: "var(--radius-lg)" }}
       onClick={onClick}
     >
-      {/* Top accent hover line */}
-      <div className="absolute top-0 inset-x-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Top accent hover line — gradient */}
+      <div className="absolute top-0 inset-x-0 h-0.5 opacity-0 group-hover:opacity-100 transition-all duration-500"
+           style={{ background: "linear-gradient(90deg, var(--primary), var(--secondary))" }} />
 
-      <div className="p-3 sm:p-5">
+      {/* Decorative corner glow — appears on hover */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-700 pointer-events-none blur-3xl"
+           style={{ background: "var(--primary)" }} />
+
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none arabic-geometric-mesh" />
+
+      <div className="p-3 sm:p-5 relative z-10">
         <div className="flex gap-2 sm:gap-4">
           {/* Vote Column */}
           <div className="flex-shrink-0 pt-0.5">
@@ -105,7 +113,7 @@ export function QuestionCard({
           {/* Content */}
           <div className="flex-1 min-w-0">
             {/* Title */}
-            <h3 className="text-sm sm:text-base font-semibold leading-relaxed mb-1.5 group-hover:text-primary transition-colors line-clamp-2">
+            <h3 className="text-sm sm:text-base font-semibold leading-relaxed mb-1.5 group-hover:text-primary transition-all duration-300 line-clamp-2">
               {title}
             </h3>
 
@@ -148,7 +156,7 @@ export function QuestionCard({
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity min-w-0"
               >
-                <Avatar className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0">
+                <Avatar className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0 ring-2 ring-transparent group-hover:ring-primary/20 transition-all duration-300">
                   <AvatarImage src={author.avatar} />
                 <AvatarFallback className="text-[9px] sm:text-[10px] bg-primary text-white font-bold">
                     {author.name.charAt(0)}
@@ -171,9 +179,9 @@ export function QuestionCard({
               {/* Actions */}
               <div className="flex items-center gap-0.5">
                 <div
-                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-medium ${
+                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-300 ${
                     hasAnswers
-                      ? "text-secondary bg-secondary/10"
+                      ? "text-secondary bg-secondary/10 group-hover:bg-secondary/15"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -181,13 +189,15 @@ export function QuestionCard({
                   <span>{answers}</span>
                 </div>
 
-                <div className="hidden md:flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground">
+                <div className="hidden md:flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground transition-all duration-300 group-hover:bg-muted/50">
                   <Eye className="h-3.5 w-3.5" />
                   <span>{displayViews}</span>
                 </div>
 
                 <button
                   onClick={handleBookmark}
+                  aria-label={bookmarked ? "إزالة من المحفوظات" : "حفظ السؤال"}
+                  aria-pressed={bookmarked}
                   className={`p-1 sm:p-1.5 rounded-lg transition-all touch-target ${
                     bookmarked
                       ? "text-primary bg-primary/10"
@@ -199,6 +209,7 @@ export function QuestionCard({
 
                 <button
                   onClick={handleShare}
+                  aria-label="مشاركة السؤال"
                   className="p-1 sm:p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all touch-target hidden xs:flex"
                 >
                   <Share2 className="h-3.5 sm:h-4 w-3.5 sm:w-4" />

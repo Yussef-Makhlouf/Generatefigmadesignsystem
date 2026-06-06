@@ -30,6 +30,22 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3-')) return 'charts';
+            if (id.includes('@supabase')) return 'supabase';
+            if (id.includes('@tanstack/react-query')) return 'query';
+            if (id.includes('@radix-ui') || id.includes('cmdk') || id.includes('vaul')) return 'ui';
+            if (id.includes('motion')) return 'motion';
+            if (id.includes('lucide-react')) return 'icons';
+          }
+        },
+      },
+    },
+  },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],

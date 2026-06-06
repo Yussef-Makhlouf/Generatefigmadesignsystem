@@ -8,7 +8,6 @@ import { Separator } from "../components/ui/separator";
 import { Badge } from "../components/ui/badge";
 import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft, Star, Trophy, ArrowRight, Quote } from "lucide-react";
 import { motion } from "motion/react";
-import { useAppState } from "../context/AppStateContext";
 import { toast } from "sonner";
 import { signIn } from "../../lib/services";
 

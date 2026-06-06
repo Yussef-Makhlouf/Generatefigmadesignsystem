@@ -23,9 +23,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         data-slot="card"
         className={cn(
-          "flex flex-col gap-6 rounded-2xl border text-card-foreground transition-all duration-280 ease-smooth",
+          "flex flex-col gap-6 rounded-2xl border text-card-foreground transition-all duration-280 ease-smooth relative overflow-hidden",
           // Variants
-          variant === "default" && "bg-card border-neutral-200 dark:border-neutral-800 shadow-sm",
+          variant === "default" && "bg-card border-neutral-200 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-primary/20",
           variant === "glass" && "premium-glass-card",
           variant === "gold" && "premium-gold-card",
           variant === "surface" && "surface-card",
@@ -34,7 +34,15 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           className
         )}
         {...props}
-      />
+      >
+        {/* Decorative corner accent */}
+        <div className="absolute top-0 right-0 w-20 h-20 opacity-0 transition-opacity duration-500 pointer-events-none"
+             style={{
+               background: "radial-gradient(circle at top right, var(--primary-light) 0%, transparent 70%)"
+             }}
+        />
+        {props.children}
+      </div>
     );
   }
 );

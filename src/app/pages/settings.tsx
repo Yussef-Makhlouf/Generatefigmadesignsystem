@@ -35,14 +35,18 @@ import {
   FileText
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useFeedReviews } from "../../lib/hooks/use-feed-queries";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { signOut, getUserSettings, saveUserSettings, getDefaultSettings, uploadAvatar, uploadCoverImage, uploadLicenseDocument } from "../../lib/services";
 import { supabase } from "../../lib/supabase";
 import type { UserSettings } from "../../lib/services/settings.service";
 
 export function SettingsPage() {
   const navigate = useNavigate();
-  const { currentUser, updateProfile, reviews, deleteReview } = useAppState();
+  const { currentUser } = useAuthSession();
+  const { data: reviews = [] } = useFeedReviews();
+  const { updateProfile, deleteReview } = useAppActions();
   const [activeTab, setActiveTab] = useState("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
@@ -62,7 +66,7 @@ export function SettingsPage() {
       const next = prev + 1;
       if (next === 5) {
         setShowDevMode(true);
-        toast.success("🔓 تم تفعيل وضع المطور السري بنجاح!", { position: "bottom-center" });
+        toast.success("تم تفعيل وضع المطور السري بنجاح!", { position: "bottom-center" });
         return 0;
       } else if (next > 1) {
         toast.info(`انقر ${5 - next} متبقية لتفعيل وضع المطور`, { position: "bottom-center", duration: 1000 });
@@ -217,8 +221,8 @@ export function SettingsPage() {
         await updateProfile(
           name || currentUser.name,
           username || currentUser.username,
-          bio || currentUser.bio,
-          location || currentUser.location,
+          bio || currentUser.bio || "",
+          location || currentUser.location || "",
           url,
           occupation,
           website,
@@ -259,8 +263,8 @@ export function SettingsPage() {
         await updateProfile(
           name || currentUser.name,
           username || currentUser.username,
-          bio || currentUser.bio,
-          location || currentUser.location,
+          bio || currentUser.bio || "",
+          location || currentUser.location || "",
           currentUser.avatar || "",
           occupation,
           website,
@@ -554,8 +558,8 @@ export function SettingsPage() {
                         await updateProfile(
                           name || currentUser.name,
                           username || currentUser.username,
-                          bio || currentUser.bio,
-                          location || currentUser.location,
+                          bio || currentUser.bio || "",
+                          location || currentUser.location || "",
                           currentUser.avatar || "",
                           occupation,
                           website,
@@ -640,8 +644,8 @@ export function SettingsPage() {
                         await updateProfile(
                           name || currentUser.name,
                           username || currentUser.username,
-                          bio || currentUser.bio,
-                          location || currentUser.location,
+                          bio || currentUser.bio || "",
+                          location || currentUser.location || "",
                           "",
                           occupation,
                           website,
@@ -1334,8 +1338,8 @@ export function SettingsPage() {
             </Button>
           </div>
 
-          {/* Secret Developer Section */}
-          {showDevMode && (
+          {/* Secret Developer Section — local dev only; production uses DB trigger to block escalation */}
+          {import.meta.env.DEV && showDevMode && (
             <div className="premium-glass-card p-6 border border-primary/30 bg-primary/[0.02] rounded-2xl shadow-lg relative overflow-hidden mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
               <div className="flex items-start gap-4 mb-5">

@@ -48,8 +48,8 @@ export function VoteButtons({
     if (msg) toast(msg, { duration: 1200, position: "bottom-center" });
   };
 
-  const iconSize = size === "md" ? "h-4 sm:h-5 w-4 sm:w-5" : "h-3.5 sm:h-4 w-3.5 sm:w-4";
-  const btnSize = size === "md" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-6 w-6 sm:h-7 sm:w-7";
+  const iconSize = size === "md" ? "h-4 sm:h-5 w-4 sm:w-5" : "h-4 w-4";
+  const btnSize = size === "md" ? "h-11 w-11" : "h-11 w-11 sm:h-9 sm:w-9";
 
   return (
     <div className={`flex flex-col items-center gap-1 ${className}`}>
@@ -58,6 +58,8 @@ export function VoteButtons({
         whileTap={{ scale: 0.85 }}
         whileHover={{ scale: 1.12 }}
         onClick={(e) => { e.stopPropagation(); handleVote("up"); }}
+        aria-label={userVote === "up" ? "إلغاء التصويت الإيجابي" : "تصويت إيجابي"}
+        aria-pressed={userVote === "up"}
         className={`${btnSize} flex items-center justify-center rounded-xl border transition-all duration-300 ripple ${
           userVote === "up"
             ? "gradient-primary text-white border-primary shadow-primary shadow-md animate-pulse-ring"
@@ -92,6 +94,8 @@ export function VoteButtons({
         whileTap={{ scale: 0.85 }}
         whileHover={{ scale: 1.12 }}
         onClick={(e) => { e.stopPropagation(); handleVote("down"); }}
+        aria-label={userVote === "down" ? "إلغاء التصويت السلبي" : "تصويت سلبي"}
+        aria-pressed={userVote === "down"}
         className={`${btnSize} flex items-center justify-center rounded-xl border transition-all duration-300 ripple ${
           userVote === "down"
             ? "bg-destructive text-white border-destructive shadow-md"

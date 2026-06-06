@@ -9,7 +9,7 @@ import { Badge } from "../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../components/ui/sheet";
 import { SlidersHorizontal, Search as SearchIcon, Loader2, X, RotateCcw } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
 import { questionToCardProps } from "../../lib/database.types";
 import { useBackendSearch } from "../../lib/hooks/use-search";
 import { useCategories } from "../../lib/hooks/use-categories";
@@ -136,7 +136,7 @@ function FilterPanel({
 // ── Main Search Page ──────────────────────────────────────────────────────────
 export function SearchPage() {
   const navigate = useNavigate();
-  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes = {} } = useAppState();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes } = useQuestionInteractions();
   const { categories: backendCategories } = useCategories(20);
   const { options: allLocations } = useLocations();
 

@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { supabase } from "../../lib/supabase";
 import { questionToCardProps } from "../../lib/database.types";
 import type { Question } from "../../lib/database.types";
-import { useAppState } from "../context/AppStateContext";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
 
 const TAG_COLORS: Record<string, { color: string; bgColor: string }> = {
   "برمجة":        { color: "text-primary",                          bgColor: "bg-primary-light border-primary/20" },
@@ -38,7 +38,7 @@ const DEFAULT_COLORS = { color: "text-primary", bgColor: "bg-primary-light borde
 export function TagDetailPage() {
   const { tag } = useParams<{ tag: string }>();
   const navigate = useNavigate();
-  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes = {} } = useAppState();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes } = useQuestionInteractions();
   const [activeTab, setActiveTab] = useState("recent");
   const [isFollowing, setIsFollowing] = useState(false);
 

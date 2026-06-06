@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-import { AccountType } from "../data/mock-data";
+import type { AccountType } from "../../lib/database.types";
 import { signUp, updateProfile } from "../../lib/services";
 
 const availableInterests = [
@@ -525,7 +525,7 @@ export function RegisterPage() {
                             ))}
                           </div>
                           <p className="text-xs text-muted-foreground font-medium">
-                            قوة كلمة المرور: <span className={passwordStrength === 3 ? "text-green-500" : passwordStrength === 2 ? "text-yellow-500" : "text-red-500"}>{strengthLabel}</span>
+                            قوة كلمة المرور: <span className={passwordStrength === 3 ? "text-success" : passwordStrength === 2 ? "text-warning" : "text-destructive"}>{strengthLabel}</span>
                           </p>
                         </div>
                       )}

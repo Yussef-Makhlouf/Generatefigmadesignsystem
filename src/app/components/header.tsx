@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   PenSquare, Moon, Sun, Bell, Search, X, Zap, LogOut, ChevronDown, User, Shield
 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useNotifications } from "../../lib/hooks/use-engagement";
 
 export function Header() {
   const [isDark, setIsDark] = useState(() => {
@@ -19,7 +20,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { notifications, currentUser } = useAppState();
+  const { currentUser, currentUserId } = useAuthSession();
+  const { data: notifications = [] } = useNotifications(currentUserId);
   const notifCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {

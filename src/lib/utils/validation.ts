@@ -31,16 +31,16 @@ const sanitizedString = (min: number, max: number, minMsg: string, maxMsg: strin
 
 export const questionSchema = z.object({
   title: sanitizedString(
-    5,
-    100,
-    "العنوان يجب أن لا يقل عن 5 أحرف ليكون واضحاً",
-    "العنوان طويل جداً، يرجى اختصاره إلى 100 حرف كحد أقصى"
+    15,
+    150,
+    "العنوان يجب أن لا يقل عن 15 حرفاً ليكون واضحاً",
+    "العنوان طويل جداً، يرجى اختصاره إلى 150 حرفاً كحد أقصى"
   ),
   content: sanitizedString(
-    15,
-    5000,
-    "تفاصيل السؤال يجب أن لا تقل عن 15 حرفاً لتوضيح استفسارك",
-    "السؤال طويل جداً، يرجى اختصاره إلى 5000 حرف كحد أقصى"
+    20,
+    3000,
+    "تفاصيل السؤال يجب أن لا تقل عن 20 حرفاً لتوضيح استفسارك",
+    "السؤال طويل جداً، يرجى اختصاره إلى 3000 حرف كحد أقصى"
   ),
   category: z.string().transform((val) => sanitizeInput(val)).optional(),
   location: z.string().transform((val) => sanitizeInput(val)).optional(),
@@ -109,6 +109,12 @@ export const profileSchema = z.object({
     50,
     "الاسم الكامل يجب أن لا يقل عن حرفين",
     "الاسم الكامل يجب أن لا يتجاوز 50 حرفاً"
+  ).optional(),
+  username: sanitizedString(
+    3,
+    30,
+    "اسم المستخدم يجب أن لا يقل عن 3 أحرف",
+    "اسم المستخدم يجب أن لا يتجاوز 30 حرفاً"
   ).optional(),
   bio: z
     .string()

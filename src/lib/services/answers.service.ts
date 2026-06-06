@@ -1,5 +1,6 @@
 import { supabase } from "../supabase";
 import type { Answer, CreateAnswerInput } from "../database.types";
+import { answerSchema } from "../utils/validation";
 
 // ── Fetch answers for a question ──────────────────────────────
 export async function getAnswers(questionId: string): Promise<Answer[]> {
@@ -30,14 +31,22 @@ export async function createAnswer(
   authorId: string,
   input: CreateAnswerInput
 ): Promise<Answer | null> {
+  const parsed = answerSchema.safeParse(input);
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("createAnswer validation:", fieldErrors);
+    throw new Error(`Validation failed: ${JSON.stringify(fieldErrors)}`);
+  }
+  const valid = parsed.data;
+
   const { data: answer, error: aErr } = await supabase
     .from("answers")
     .insert({
-      question_id: input.question_id,
+      question_id: valid.question_id,
       author_id: authorId,
-      content: input.content,
-      verified_type: input.verified_type ?? null,
-      verified_label: input.verified_type ? (input.verified_type === "photo" ? "تم التحقق بالصورة" : "من نفس المدينة") : null,
+      content: valid.content,
+      verified_type: valid.verified_type ?? null,
+      verified_label: valid.verified_type ? (valid.verified_type === "photo" ? "تم التحقق بالصورة" : "من نفس المدينة") : null,
     } as any)
     .select()
     .single();
@@ -50,8 +59,8 @@ export async function createAnswer(
   const answerId = (answer as any).id;
 
   // Insert image attachments
-  if (input.images?.length) {
-    const imageRows = input.images.map((url, i) => ({
+  if (valid.images?.length) {
+    const imageRows = valid.images.map((url, i) => ({
       answer_id: answerId,
       type: "image" as const,
       url,
@@ -61,8 +70,8 @@ export async function createAnswer(
   }
 
   // Insert link attachments
-  if (input.links?.length) {
-    const linkRows = input.links.map((l, i) => ({
+  if (valid.links?.length) {
+    const linkRows = valid.links.map((l, i) => ({
       answer_id: answerId,
       type: "link" as const,
       url: l.url,
@@ -73,18 +82,51 @@ export async function createAnswer(
   }
 
   // Insert location attachment
-  if (input.locationDetail) {
+  if (valid.locationDetail) {
     await supabase.from("answer_attachments").insert({
       answer_id: answerId,
       type: "location" as const,
-      title: input.locationDetail.name,
-      address: input.locationDetail.address ?? null,
-      lat: input.locationDetail.lat ?? null,
-      lng: input.locationDetail.lng ?? null,
+      title: valid.locationDetail.name,
+      address: valid.locationDetail.address ?? null,
+      lat: valid.locationDetail.lat ?? null,
+      lng: valid.locationDetail.lng ?? null,
     } as any);
   }
 
   return answer as unknown as Answer;
+}
+
+// ── Fetch answers by author (profile page) ─────────────────────
+export async function getAnswersByAuthor(authorId: string): Promise<Answer[]> {
+  const { data, error } = await supabase
+    .from("answers")
+    .select("id, question_id, author_id, content, votes_count, is_accepted, created_at")
+    .eq("author_id", authorId)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getAnswersByAuthor:", error);
+    return [];
+  }
+  return (data ?? []) as unknown as Answer[];
+}
+
+// ── Fetch answer content snippets for reputation log refs ──────
+export async function getAnswerSnippets(
+  ids: string[]
+): Promise<Array<{ id: string; content: string; question_id: string }>> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from("answers")
+    .select("id, content, question_id")
+    .in("id", ids);
+
+  if (error) {
+    console.error("getAnswerSnippets:", error);
+    return [];
+  }
+  return data ?? [];
 }
 
 // ── Accept answer (mark as accepted) ───────────────────────────

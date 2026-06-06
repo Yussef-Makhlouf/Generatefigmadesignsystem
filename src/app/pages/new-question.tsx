@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
@@ -16,6 +17,13 @@ import { QuestionCard } from "../components/question-card";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "../../lib/supabase";
+import {
+  CATEGORIES,
+  categoryAccentStyle,
+  getCategoryById,
+  getCategoryChipClass,
+} from "../../lib/categories";
+import { BgPattern } from "../components/bg-pattern";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface AttachmentLink { title: string; url: string; }
@@ -24,21 +32,6 @@ interface UploadingImage { file: File; preview: string; uploading: boolean; url?
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const DRAFT_KEY = "khapeer_new_question_draft";
-
-const CATEGORIES = [
-  { id: "tech", label: "تقنية وبرمجيات", icon: "💻", color: "from-blue-500/15 to-cyan-500/10 border-blue-500/30 text-blue-400" },
-  { id: "education", label: "تعليم وأكاديميا", icon: "🎓", color: "from-emerald-500/15 to-teal-500/10 border-emerald-500/30 text-emerald-400" },
-  { id: "health", label: "صحة وطب وعيادات", icon: "🏥", color: "from-red-500/15 to-rose-500/10 border-red-500/30 text-red-400" },
-  { id: "business", label: "ريادة وأعمال تجارية", icon: "💼", color: "from-amber-500/15 to-orange-500/10 border-amber-500/30 text-amber-400" },
-  { id: "science", label: "علوم وبحوث", icon: "🔬", color: "from-violet-500/15 to-purple-500/10 border-violet-500/30 text-violet-400" },
-  { id: "food", label: "مطاعم ومأكولات", icon: "🍽️", color: "from-orange-500/15 to-yellow-500/10 border-orange-500/30 text-orange-400" },
-  { id: "activity", label: "نشاطات وترفيه", icon: "🎯", color: "from-pink-500/15 to-fuchsia-500/10 border-pink-500/30 text-pink-400" },
-  { id: "travel", label: "سياحة وسفر", icon: "✈️", color: "from-sky-500/15 to-indigo-500/10 border-sky-500/30 text-sky-400" },
-  { id: "legal", label: "قانون وأنظمة", icon: "⚖️", color: "from-gray-500/15 to-slate-500/10 border-gray-500/30 text-gray-400" },
-  { id: "finance", label: "مالية واستثمار", icon: "💰", color: "from-lime-500/15 to-green-500/10 border-lime-500/30 text-lime-400" },
-  { id: "sports", label: "رياضة ولياقة", icon: "⚽", color: "from-teal-500/15 to-cyan-500/10 border-teal-500/30 text-teal-400" },
-  { id: "arts", label: "فنون وإبداع", icon: "🎨", color: "from-fuchsia-500/15 to-pink-500/10 border-fuchsia-500/30 text-fuchsia-400" },
-];
 
 const MAX_CATEGORIES = 3;
 const MAX_IMAGES = 6;
@@ -330,7 +323,8 @@ function LeafletMapPicker({
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export function NewQuestionPage() {
   const navigate = useNavigate();
-  const { addQuestion, currentUser } = useAppState();
+  const { currentUser } = useAuthSession();
+  const { addQuestion } = useAppActions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
@@ -518,10 +512,13 @@ export function NewQuestionPage() {
         links,
         finalLocationDetail
       );
+      if (!newId) {
+        toast.error("فشل نشر السؤال. يرجى مراجعة المحتوى والمحاولة مرة أخرى.");
+        return;
+      }
       localStorage.removeItem(DRAFT_KEY);
-      toast.success("تم نشر سؤالك بنجاح! 🎉", { duration: 3000 });
-      if (newId) navigate(`/questions/${newId}`);
-      else navigate("/");
+      toast.success("تم نشر سؤالك بنجاح!", { duration: 3000 });
+      navigate(`/questions/${newId}`);
     } catch (err: any) {
       toast.error(err?.message ?? "حدث خطأ أثناء النشر، يرجى المحاولة مجدداً");
     } finally {
@@ -543,7 +540,8 @@ export function NewQuestionPage() {
   const stepLabels = ["السؤال", "التصنيف", "المرفقات", "المعاينة"];
 
   return (
-    <div className="max-w-3xl w-full mx-auto pb-8" dir="rtl">
+    <div className="max-w-3xl w-full mx-auto pb-8 relative" dir="rtl">
+      <BgPattern variant={2} opacity="subtle" className="rounded-3xl -z-10" />
       {/* Draft Recovery Banner */}
       <AnimatePresence>
         {hasDraft && (
@@ -551,20 +549,20 @@ export function NewQuestionPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="mb-5 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl backdrop-blur-sm flex items-center gap-3 flex-wrap"
+            className="mb-5 p-4 bg-warning-light border border-warning/30 rounded-2xl backdrop-blur-sm flex items-center gap-3 flex-wrap"
           >
-            <div className="h-9 w-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
-              <Save className="h-4 w-4 text-amber-400" />
+            <div className="h-9 w-9 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+              <Save className="h-4 w-4 text-warning" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-amber-300">مسودة محفوظة سابقاً</p>
-              <p className="text-xs text-amber-400/70">تم العثور على مسودة سؤال لم تكتمل. هل تريد استعادتها؟</p>
+              <p className="text-sm font-bold text-warning">مسودة محفوظة سابقاً</p>
+              <p className="text-xs text-warning/80">تم العثور على مسودة سؤال لم تكتمل. هل تريد استعادتها؟</p>
             </div>
             <div className="flex gap-2 shrink-0">
-              <Button size="sm" onClick={restoreDraft} className="h-8 text-xs bg-amber-500 hover:bg-amber-400 text-white rounded-lg px-3">
+              <Button size="sm" onClick={restoreDraft} className="h-8 text-xs bg-warning hover:bg-warning/90 text-white rounded-lg px-3">
                 <RotateCcw className="h-3.5 w-3.5 ml-1" /> استعادة المسودة
               </Button>
-              <Button size="sm" variant="ghost" onClick={discardDraft} className="h-8 text-xs text-amber-400/70 hover:bg-amber-500/10 rounded-lg px-3">
+              <Button size="sm" variant="ghost" onClick={discardDraft} className="h-8 text-xs text-warning/80 hover:bg-warning/10 rounded-lg px-3">
                 تجاهل
               </Button>
             </div>
@@ -726,9 +724,10 @@ export function NewQuestionPage() {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">اختر تخصصاً واحداً أو أكثر يصف سؤالك (حتى {MAX_CATEGORIES} تخصصات)</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {CATEGORIES.map((cat) => {
                     const isSelected = selectedCategories.includes(cat.id);
+                    const CatIcon = cat.icon;
                     return (
                       <motion.button
                         key={cat.id}
@@ -736,13 +735,14 @@ export function NewQuestionPage() {
                         onClick={() => toggleCategory(cat.id)}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
-                        className={`relative p-3 rounded-xl border text-right flex items-center gap-2.5 transition-all duration-200 group
+                        style={categoryAccentStyle(cat.id)}
+                        className={`relative p-3 rounded-xl text-right flex items-center gap-2.5 transition-all duration-200 group min-h-[44px]
                           ${isSelected
-                            ? `bg-gradient-to-br ${cat.color} shadow-sm`
-                            : "border-border/30 hover:border-border/60 bg-muted/20 hover:bg-muted/35"
+                            ? `${getCategoryChipClass(true)} shadow-sm`
+                            : "border border-border/30 hover:border-border/60 bg-muted/20 hover:bg-muted/35"
                           }`}
                       >
-                        <span className="text-xl leading-none shrink-0">{cat.icon}</span>
+                        <CatIcon className={`h-4 w-4 category-chip-icon ${isSelected ? "" : "opacity-70"}`} aria-hidden />
                         <span className={`text-xs font-bold leading-tight flex-1 ${isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>
                           {cat.label}
                         </span>
@@ -1082,12 +1082,19 @@ export function NewQuestionPage() {
                 {selectedCategories.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {selectedCategories.map((catId) => {
-                      const cat = CATEGORIES.find((c) => c.id === catId);
-                      return cat ? (
-                        <Badge key={catId} className={`rounded-full px-3 py-1 bg-gradient-to-r ${cat.color} border text-xs font-semibold gap-1`}>
-                          <span>{cat.icon}</span> {cat.label}
+                      const cat = getCategoryById(catId);
+                      if (!cat) return null;
+                      const CatIcon = cat.icon;
+                      return (
+                        <Badge
+                          key={catId}
+                          style={categoryAccentStyle(cat.id)}
+                          className={`rounded-full px-3 py-1 ${getCategoryChipClass(true)} text-xs font-semibold gap-1.5 flex items-center`}
+                        >
+                          <CatIcon className="h-3.5 w-3.5 category-chip-icon" aria-hidden />
+                          {cat.label}
                         </Badge>
-                      ) : null;
+                      );
                     })}
                   </div>
                 )}
@@ -1157,7 +1164,7 @@ export function NewQuestionPage() {
 
                 {/* Uploading warning */}
                 {uploadingImages.some((u) => u.uploading) && (
-                  <div className="mt-4 flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
+                  <div className="mt-4 flex items-center gap-2 text-xs text-warning bg-warning-light border border-warning/20 p-3 rounded-xl">
                     <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                     بعض الصور لا تزال تُرفع... سيتم تضمينها عند اكتمال الرفع.
                   </div>

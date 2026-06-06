@@ -1,5 +1,6 @@
 import { supabase } from "../supabase";
 import type { Question, CreateQuestionInput } from "../database.types";
+import { questionSchema } from "../utils/validation";
 
 // ── Fetch paginated questions (Timeline) ─────────────────────
 export async function getQuestions(options?: {
@@ -115,15 +116,23 @@ export async function createQuestion(
   authorId: string,
   input: CreateQuestionInput
 ): Promise<Question | null> {
+  const parsed = questionSchema.safeParse(input);
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("createQuestion validation:", fieldErrors);
+    throw new Error(`Validation failed: ${JSON.stringify(fieldErrors)}`);
+  }
+  const valid = parsed.data;
+
   // 1. Insert question
   const { data: question, error: qErr } = await supabase
     .from("questions")
     .insert({
       author_id: authorId,
-      title: input.title,
-      content: input.content,
-      category: input.category ?? null,
-      location: input.location ?? null,
+      title: valid.title,
+      content: valid.content,
+      category: valid.category ?? null,
+      location: valid.location ?? null,
     })
     .select()
     .single();
@@ -133,8 +142,8 @@ export async function createQuestion(
   const questionId = question.id;
 
   // 2. Upsert tags and link them
-  if (input.tags.length > 0) {
-    for (const tagName of input.tags.slice(0, 5)) {
+  if (valid.tags.length > 0) {
+    for (const tagName of valid.tags.slice(0, 5)) {
       // Ensure tag exists
       const { data: existingTag } = await supabase
         .from("tags")
@@ -161,8 +170,8 @@ export async function createQuestion(
   }
 
   // 3. Insert image attachments
-  if (input.images?.length) {
-    const imageRows = input.images.map((url, i) => ({
+  if (valid.images?.length) {
+    const imageRows = valid.images.map((url, i) => ({
       question_id: questionId,
       type: "image" as const,
       url,
@@ -172,8 +181,8 @@ export async function createQuestion(
   }
 
   // 4. Insert link attachments
-  if (input.links?.length) {
-    const linkRows = input.links.map((l, i) => ({
+  if (valid.links?.length) {
+    const linkRows = valid.links.map((l, i) => ({
       question_id: questionId,
       type: "link" as const,
       url: l.url,
@@ -184,14 +193,14 @@ export async function createQuestion(
   }
 
   // 5. Insert location attachment
-  if (input.locationDetail) {
+  if (valid.locationDetail) {
     await supabase.from("question_attachments").insert({
       question_id: questionId,
       type: "location",
-      title: input.locationDetail.name,
-      address: input.locationDetail.address ?? null,
-      lat: input.locationDetail.lat ?? null,
-      lng: input.locationDetail.lng ?? null,
+      title: valid.locationDetail.name,
+      address: valid.locationDetail.address ?? null,
+      lat: valid.locationDetail.lat ?? null,
+      lng: valid.locationDetail.lng ?? null,
     });
   }
 

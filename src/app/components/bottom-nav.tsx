@@ -1,7 +1,8 @@
 import { Home, Search, Bell, User, Globe, Sun, Moon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { motion } from "motion/react";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useNotifications } from "../../lib/hooks/use-engagement";
 import { useState, useEffect } from "react";
 
 const NAV_ITEMS = [
@@ -14,7 +15,8 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   const { pathname } = useLocation();
-  const { notifications } = useAppState();
+  const { currentUserId } = useAuthSession();
+  const { data: notifications = [] } = useNotifications(currentUserId);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem("khapeer_theme");
@@ -28,10 +30,14 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden glass border-t border-border/60"
+      className="bottom-nav fixed bottom-0 left-0 right-0 z-40 md:hidden glass border-t border-border/60 shadow-lg"
       role="navigation"
       aria-label="التنقل الرئيسي"
     >
+      {/* Subtle top gradient accent */}
+      <div className="absolute top-0 inset-x-0 h-px opacity-50"
+           style={{ background: "linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent)" }} />
+      
       {/* Safe area padding for iOS home indicator */}
       <div
         className="flex items-center justify-around px-1 sm:px-2 relative"

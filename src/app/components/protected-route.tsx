@@ -3,7 +3,7 @@ import { Navigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Shield, LogIn, Crown, Lock, ChevronLeft } from "lucide-react";
 import { Button } from "./ui/button";
-import { useAppState } from "../context/AppStateContext";
+import { useIsAuthenticated, useIsAdmin } from "../../lib/hooks/use-auth-session";
 import { NotFoundPage } from "../pages/not-found";
 
 type RequiredRole = "user" | "admin";
@@ -25,10 +25,8 @@ export function ProtectedRoute({
   require = "user",
   redirectOnFail = false,
 }: ProtectedRouteProps) {
-  const { currentUser } = useAppState();
-
-  const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
-  const isAdmin = currentUser?.accountType === "admin";
+  const isAuthenticated = useIsAuthenticated();
+  const isAdmin = useIsAdmin();
 
   const hasAccess =
     require === "user"

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
-  getAnswers, 
+  getAnswers,
+  getAnswersByAuthor,
+  getAnswerSnippets,
   createAnswer, 
   acceptAnswer,
   unacceptAnswer,
@@ -9,14 +11,33 @@ import {
 } from "../services";
 import { supabase } from "../supabase";
 import type { Answer, CreateAnswerInput } from "../database.types";
+import { queryKeys } from "../query-keys";
 import { useEffect } from "react";
 
 // ── Answers Hooks ─────────────────────────────────────────────
 export function useAnswers(questionId: string) {
   return useQuery({
-    queryKey: ["answers", questionId],
+    queryKey: queryKeys.answers(questionId),
     queryFn: () => getAnswers(questionId),
     enabled: !!questionId,
+  });
+}
+
+export function useAnswersByAuthor(authorId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.answersByAuthor(authorId ?? ""),
+    queryFn: () => getAnswersByAuthor(authorId!),
+    enabled: !!authorId,
+    staleTime: 60_000,
+  });
+}
+
+export function useAnswerSnippets(ids: string[]) {
+  return useQuery({
+    queryKey: queryKeys.answerSnippets(ids),
+    queryFn: () => getAnswerSnippets(ids),
+    enabled: ids.length > 0,
+    staleTime: 60_000,
   });
 }
 

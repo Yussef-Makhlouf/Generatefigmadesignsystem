@@ -18,6 +18,18 @@ export type NotificationType = "like" | "answer" | "comment" | "follow" | "revie
 export type NotificationPriority = "low" | "normal" | "high" | "urgent";
 export type VerifiedType = "photo" | "location";
 
+export interface AttachmentLink {
+  title: string;
+  url: string;
+}
+
+export interface AttachmentLocation {
+  name: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+}
+
 // ── Profiles ────────────────────────────────────────────────
 export type Profile = {
   id: string;
@@ -351,6 +363,7 @@ export interface CreateAnswerInput {
 
 export interface UpdateProfileInput {
   name?: string;
+  username?: string;
   bio?: string;
   location?: string;
   avatar_url?: string;

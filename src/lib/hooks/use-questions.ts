@@ -10,6 +10,7 @@ import {
 import { supabase } from "../supabase";
 import { useSession } from "./use-auth";
 import type { Question, CreateQuestionInput } from "../database.types";
+import { queryKeys } from "../query-keys";
 import { useEffect } from "react";
 
 // ── Questions Hooks ───────────────────────────────────────────
@@ -17,15 +18,15 @@ export function useQuestions(
   options?: { filter?: "recent" | "popular" | "unanswered"; tag?: string; category?: string; search?: string; limit?: number; offset?: number }
 ) {
   return useQuery({
-    queryKey: ["questions", options],
+    queryKey: queryKeys.questions(options),
     queryFn: () => getQuestions(options),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 }
 
 export function useQuestion(id: string) {
   return useQuery({
-    queryKey: ["question", id],
+    queryKey: queryKeys.question(id),
     queryFn: () => getQuestionById(id),
     enabled: !!id,
   });
@@ -38,7 +39,7 @@ export function useCreateQuestion() {
     mutationFn: ({ authorId, input }: { authorId: string; input: CreateQuestionInput }) =>
       createQuestion(authorId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions() });
     },
   });
 }
@@ -63,7 +64,7 @@ export function useBookmarks() {
   const currentUserId = session?.user?.id;
 
   const bookmarksQuery = useQuery({
-    queryKey: ["bookmarks", currentUserId],
+    queryKey: queryKeys.bookmarks(currentUserId),
     queryFn: () => getBookmarkedQuestions(currentUserId!),
     enabled: !!currentUserId,
     staleTime: 1000 * 60 * 2,
@@ -73,8 +74,8 @@ export function useBookmarks() {
     mutationFn: ({ userId, questionId }: { userId: string; questionId: string }) =>
       toggleBookmark(userId, questionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
-      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks(currentUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions() });
     },
   });
 

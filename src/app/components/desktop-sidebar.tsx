@@ -4,7 +4,9 @@ import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Home, TrendingUp, Globe, Bookmark, Settings, Trophy, Flame, Zap, LogOut, Shield } from "lucide-react";
 import { ReputationBadge } from "./reputation-badge";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession, useIsAuthenticated, useIsAdmin } from "../../lib/hooks/use-auth-session";
+import { useFeedQuestions } from "../../lib/hooks/use-feed-queries";
+import { useAnswersByAuthor } from "../../lib/hooks/use-answers";
 import { useCategories } from "../../lib/hooks/use-categories";
 import { signOut } from "../../lib/services";
 import { cn } from "./ui/utils";
@@ -24,7 +26,11 @@ const QUICK_LINKS = [
 
 export function DesktopSidebar({ className }: { className?: string }) {
   const location = useLocation();
-  const { currentUser, questions, answers } = useAppState();
+  const { currentUser, currentUserId } = useAuthSession();
+  const { data: questions = [] } = useFeedQuestions();
+  const { data: authorAnswers = [] } = useAnswersByAuthor(
+    currentUserId && currentUserId !== "1" ? currentUserId : undefined
+  );
   const { categories, isLoading: categoriesLoading } = useCategories(6);
   const navigate = useNavigate();
 
@@ -33,11 +39,11 @@ export function DesktopSidebar({ className }: { className?: string }) {
     window.location.href = "/";
   };
 
-  const isAuthenticated = Boolean(currentUser && currentUser.id !== "1" && currentUser.username !== "guest");
-  const isAdmin = currentUser?.accountType === "admin";
-  
-  const userQuestionsCount = questions.filter(q => q.author_id === currentUser?.id).length;
-  const userAnswersCount = answers.filter(a => a.author_id === currentUser?.id).length;
+  const isAuthenticated = useIsAuthenticated();
+  const isAdmin = useIsAdmin();
+
+  const userQuestionsCount = questions.filter((q) => q.author_id === currentUser?.id).length;
+  const userAnswersCount = authorAnswers.length;
 
   const isActive = (path: string) =>
     path === "/"
@@ -103,7 +109,7 @@ export function DesktopSidebar({ className }: { className?: string }) {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted transition-colors group"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${cat.color}`} />
+                  <div className={cat.color} />
                   <span className="text-sm group-hover:text-foreground text-muted-foreground transition-colors">
                     {cat.name}
                   </span>
@@ -139,7 +145,7 @@ export function DesktopSidebar({ className }: { className?: string }) {
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">السلسلة</span>
-              <div className="flex items-center gap-1 text-orange-500 font-bold text-sm">
+              <div className="flex items-center gap-1 text-warning font-bold text-sm">
                 <Flame className="h-3.5 w-3.5" />
                 <span>٧ أيام</span>
               </div>

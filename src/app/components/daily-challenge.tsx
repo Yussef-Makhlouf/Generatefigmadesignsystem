@@ -19,7 +19,7 @@ export function DailyChallenge() {
 
       <div className="relative flex items-start gap-4">
         <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-          <Zap className="h-6 w-6 text-yellow-300" />
+          <Zap className="h-6 w-6 text-secondary" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -36,7 +36,7 @@ export function DailyChallenge() {
           </h3>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-xs text-white/80">
-              <Award className="h-3 w-3 text-yellow-300" />
+              <Award className="h-3 w-3 text-secondary" />
               <span>+50 نقطة للإجابة الأفضل</span>
             </div>
           </div>

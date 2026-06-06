@@ -11,11 +11,13 @@ import {
   Trophy, Sparkles, Flame, Zap, ChevronLeft,
   MessageSquare, Users, TrendingUp, PenSquare, Hash, Loader2,
 } from "lucide-react";
-import { useAppState } from "../context/AppStateContext";
+import { useFeedQuestions, useFeedUsers } from "../../lib/hooks/use-feed-queries";
+import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
 import { QuestionListSkeleton } from "../components/question-skeleton";
 import { questionToCardProps } from "../../lib/database.types";
 import { motion } from "motion/react";
 import { usePlatformStats, useTrendingTags, useHotQuestions, useTopContributors } from "../../lib/hooks/use-stats";
+import { BgPattern } from "../components/bg-pattern";
 
 const FILTERS = [
   { key: "recent",     label: "الأحدث",         icon: null },
@@ -30,7 +32,9 @@ function formatArabicNumber(n: number): string {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { questions, bookmarkedIds, voteQuestion, toggleBookmark, users = [], isQuestionsLoading, userVotes = {} } = useAppState();
+  const { data: questions = [], isLoading: isQuestionsLoading } = useFeedQuestions();
+  const { data: users = [] } = useFeedUsers();
+  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes } = useQuestionInteractions();
   const [filter, setFilter] = useState("recent");
 
   // Map real database profiles of experts/businesses or high reputation users
@@ -39,12 +43,12 @@ export function HomePage() {
     .map((u) => ({
       id: u.username ?? u.id,
       name: u.name,
-      avatar: u.avatar_url ?? undefined,
-      title: u.bio || u.business_category || "خبير معتمد",
-      specialty: u.business_category || "مساهم",
-      rating: parseFloat(u.business_rating ?? "5.0"),
+      avatar: u.avatar || u.avatar_url || undefined,
+      title: (u.bio as string) || u.businessCategory || "خبير معتمد",
+      specialty: u.businessCategory || "مساهم",
+      rating: parseFloat(String(u.businessRating ?? "5.0")),
       answers: u.reputation ?? 0,
-      verified: u.is_verified_entity || false,
+      verified: u.isVerifiedEntity || false,
     }))
     .slice(0, 3);
 
@@ -73,8 +77,8 @@ export function HomePage() {
       icon: TrendingUp,
       value: stats ? formatArabicNumber(stats.answers_count) : "…",
       label: "إجابة",
-      color: "text-green-600",
-      bg: "bg-green-100",
+      color: "text-success",
+      bg: "bg-success-light",
     },
   ];
 
@@ -97,7 +101,7 @@ export function HomePage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="md:col-span-2 relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
         >
-          {/* Subtle Arabesque Mesh Pattern background */}
+          <BgPattern variant={3} opacity="soft" />
           <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-15 pointer-events-none" />
           <div className="absolute inset-0 pattern-arabic opacity-10 pointer-events-none" />
           
@@ -112,7 +116,7 @@ export function HomePage() {
                 مجتمع المعرفة العربي الراقي
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 font-heading text-neutral-900 dark:text-neutral-50">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 font-heading text-foreground">
               ابدأ بسؤال،{" "}
               <span className="text-primary bg-clip-text">انهِ بمعرفة</span>
             </h1>
@@ -121,18 +125,18 @@ export function HomePage() {
             </p>
           </div>
 
-          <div className="relative z-10 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-4 pt-4 border-t border-neutral-100 dark:border-neutral-800/60">
+          <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-border/40">
             {/* Stats list */}
-            <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6">
               {PLATFORM_STATS.map((s) => {
                 const Icon = s.icon;
                 return (
                   <div key={s.label} className="flex items-center gap-2 text-xs sm:text-sm">
-                    <div className={cn("p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 shrink-0", s.bg, s.color)}>
+                    <div className={cn("p-1.5 rounded-lg bg-muted text-muted-foreground shrink-0", s.bg, s.color)}>
                       <Icon className="h-3.5 w-3.5 shrink-0" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-bold text-neutral-900 dark:text-neutral-50 font-numbers leading-none mb-0.5">{s.value}</span>
+                      <span className="font-bold text-foreground font-numbers leading-none mb-0.5">{s.value}</span>
                       <span className="text-muted-foreground text-[10px] leading-none">{s.label}</span>
                     </div>
                   </div>
@@ -141,7 +145,7 @@ export function HomePage() {
             </div>
 
             {/* Magnetic/Premium buttons */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 shrink-0 w-full sm:w-auto">
               <Button
                 className="rounded-xl h-11 px-5 bg-primary border-0 shadow-primary shadow-md hover:shadow-lg text-sm font-semibold text-white transition-all duration-280 ease-spring active:scale-95 flex items-center gap-2"
                 onClick={() => navigate("/questions/new")}
@@ -151,7 +155,7 @@ export function HomePage() {
               </Button>
               <Button
                 variant="outline"
-                className="rounded-xl h-11 px-4 border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium"
+                className="rounded-xl h-11 px-4 border-border text-foreground/80 hover:bg-muted/50 text-sm font-medium"
                 onClick={() => navigate("/search")}
               >
                 <span>استعرض الأسئلة</span>
@@ -178,14 +182,14 @@ export function HomePage() {
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
           >
+            <BgPattern variant={2} opacity="subtle" />
             <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-10 pointer-events-none" />
-            {/* Accent light source */}
             <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
 
             <div>
               <div className="flex items-center justify-between mb-4">
                 <Badge className="bg-secondary/15 text-secondary border border-secondary/25 text-[10px] px-2.5 py-0.5 rounded-full flex items-center font-semibold">
-                  <Zap className="h-3 w-3 ml-1 text-yellow-500 animate-bounce shrink-0" />
+                  <Zap className="h-3 w-3 ml-1 text-secondary animate-bounce shrink-0" />
                   الأكثر تصويتاً اليوم
                 </Badge>
                 <span className="text-[10px] text-muted-foreground font-numbers">
@@ -194,7 +198,7 @@ export function HomePage() {
               </div>
 
               <h3
-                className="font-bold text-neutral-800 dark:text-neutral-100 text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer"
+                className="font-bold text-foreground text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer"
                 onClick={() => navigate(`/questions/${hotQuestions[0].id}`)}
               >
                 {hotQuestions[0].title}
@@ -205,7 +209,7 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-4 flex items-center justify-between gap-3">
+            <div className="pt-4 border-t border-border/40 mt-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-1.5 text-xs text-secondary font-bold font-numbers">
                 <Trophy className="h-4 w-4 text-secondary animate-float shrink-0" />
                 <span>+٥٠ نقطة سمعة</span>
@@ -358,7 +362,7 @@ export function HomePage() {
 
           {/* Load More */}
           {!isQuestionsLoading && filteredQuestions.length > 0 && (
-            <div className="pt-2 text-center pb-20 sm:pb-24 md:pb-4">
+            <div className="pt-2 text-center pb-2 md:pb-4">
               <Button variant="outline" className="rounded-xl px-6 sm:px-8 h-10 sm:h-11 border-border/60 hover:border-primary/40 hover:text-primary transition-all text-sm">
                 تحميل المزيد
               </Button>
@@ -394,7 +398,7 @@ export function HomePage() {
                         className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold font-numbers border"
                         style={{
                           background: i === 0 ? "var(--gradient-primary)" : "var(--muted)",
-                          color: i === 0 ? "#fff" : "var(--foreground)",
+                          color: i === 0 ? "var(--text-on-primary)" : "var(--foreground)",
                           borderColor: i === 0 ? "var(--primary)" : "var(--border)",
                         }}
                       >
@@ -468,8 +472,8 @@ export function HomePage() {
                           </AvatarFallback>
                         </Avatar>
                         <div
-                          className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white border border-background shadow-sm ${
-                            i === 0 ? "bg-secondary" : i === 1 ? "bg-slate-400" : "bg-amber-700"
+                          className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border border-background shadow-sm ${
+                            i === 0 ? "rank-badge--gold" : i === 1 ? "rank-badge--silver" : "rank-badge--bronze"
                           }`}
                         >
                           {i + 1}

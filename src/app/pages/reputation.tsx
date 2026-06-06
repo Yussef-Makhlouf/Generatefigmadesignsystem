@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { useAppState } from "../context/AppStateContext";
+import { useAuthSession } from "../../lib/hooks/use-auth-session";
+import { useFeedQuestions } from "../../lib/hooks/use-feed-queries";
+import { useAnswerSnippets, useAnswersByAuthor } from "../../lib/hooks/use-answers";
+import { queryKeys } from "../../lib/query-keys";
 import {
   AreaChart,
   Area,
@@ -94,12 +97,12 @@ function mapLogToEvent(
 }
 
 const REPUTATION_LEVELS = [
-  { name: "مبتدئ", min: 0, max: 100, color: "bg-muted-foreground/30 text-muted-foreground" },
-  { name: "عضو", min: 100, max: 500, color: "bg-blue-500/20 text-blue-400 border border-blue-500/30" },
-  { name: "مساهم", min: 500, max: 1000, color: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" },
-  { name: "خبير", min: 1000, max: 2500, color: "bg-teal-500/20 text-teal-400 border border-teal-500/30" },
-  { name: "محترف", min: 2500, max: 5000, color: "bg-secondary/20 text-secondary border border-secondary/30" },
-  { name: "مشرف", min: 5000, max: Infinity, color: "bg-amber-500/20 text-amber-400 border border-amber-500/30" },
+  { name: "مبتدئ", min: 0, max: 100, color: "bg-muted text-muted-foreground border border-border" },
+  { name: "عضو", min: 100, max: 500, color: "bg-info-light text-info border border-info/30" },
+  { name: "مساهم", min: 500, max: 1000, color: "bg-success-light text-success border border-success/30" },
+  { name: "خبير", min: 1000, max: 2500, color: "bg-primary-light text-primary border border-primary/30" },
+  { name: "محترف", min: 2500, max: 5000, color: "bg-secondary-light text-secondary border border-secondary/30" },
+  { name: "مشرف", min: 5000, max: Infinity, color: "bg-warning-light text-warning border border-warning/30" },
 ];
 
 const CustomTooltip = ({ active, payload, label }: {
@@ -120,7 +123,8 @@ const CustomTooltip = ({ active, payload, label }: {
 
 export function ReputationPage() {
   const navigate = useNavigate();
-  const { currentUser, questions, answers } = useAppState();
+  const { currentUser } = useAuthSession();
+  const { data: questions = [] } = useFeedQuestions();
   const [chartRange, setChartRange] = useState<"week" | "month" | "year">("week");
 
   const currentPoints = currentUser.reputation ?? 0;
@@ -128,7 +132,7 @@ export function ReputationPage() {
 
   // ── Real reputation logs from Supabase ──────────────────
   const { data: reputationLogs = [], isLoading: logsLoading } = useQuery<ReputationLog[]>({
-    queryKey: ["reputationLogs", userId],
+    queryKey: queryKeys.reputationLogs(userId),
     queryFn: async () => {
       if (!userId || userId === "1") return [];
       const { data, error } = await supabase
@@ -143,7 +147,29 @@ export function ReputationPage() {
     enabled: !!userId && userId !== "1",
   });
 
-  const recentEvents = reputationLogs.slice(0, 10).map((log) => mapLogToEvent(log, questions, answers));
+  const answerRefIds = useMemo(
+    () =>
+      reputationLogs
+        .filter((log) => {
+          const refType = log.ref_type ?? log.reason ?? "";
+          return (
+            log.ref_id &&
+            (refType === "answer" ||
+              refType === "upvote_answer" ||
+              refType === "answer_accepted" ||
+              refType === "downvote")
+          );
+        })
+        .map((log) => log.ref_id as string),
+    [reputationLogs]
+  );
+
+  const { data: answerSnippets = [] } = useAnswerSnippets(answerRefIds);
+  const { data: userAnswersList = [] } = useAnswersByAuthor(userId !== "1" ? userId : undefined);
+
+  const recentEvents = reputationLogs
+    .slice(0, 10)
+    .map((log) => mapLogToEvent(log, questions, answerSnippets));
 
   // Build chart data from real logs
   const buildChartData = () => {
@@ -196,7 +222,7 @@ export function ReputationPage() {
     : 100;
 
   const userQuestionsCount = questions.filter(q => q.author_id === userId).length;
-  const userAnswersCount = answers.filter(a => a.author_id === userId).length;
+  const userAnswersCount = userAnswersList.length;
 
   const monthlyPoints = reputationLogs
     .filter((log) => {

@@ -66,30 +66,37 @@ serve(async (req) => {
       throw new Error("SUPABASE_URL env variable is not set")
     }
 
-    // Verify caller is either an admin/service account OR a valid authenticated user
+    // Only service role or verified admins may create notifications for users
     let isAuthorized = false
     const token = authHeader.replace("Bearer ", "").trim()
 
     if (supabaseServiceKey && token === supabaseServiceKey) {
       isAuthorized = true
     } else {
-      // Validate the user's JWT token
       const userClient = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authHeader } },
         auth: { persistSession: false }
       })
-      
+
       const { data: { user }, error: authError } = await userClient.auth.getUser()
       if (!authError && user) {
-        isAuthorized = true
+        const { data: profile } = await userClient
+          .from("profiles")
+          .select("account_type")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profile?.account_type === "admin") {
+          isAuthorized = true
+        }
       }
     }
 
     if (!isAuthorized) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized access: invalid token or key" }),
+        JSON.stringify({ error: "Forbidden: admin or service role required" }),
         {
-          status: 401,
+          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       )

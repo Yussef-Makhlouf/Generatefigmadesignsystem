@@ -4,7 +4,7 @@ import { router } from "./routes";
 import { Toaster } from "./components/ui/sonner";
 import { ErrorBoundary } from "./components/error-boundary";
 import { useEffect } from "react";
-import { AppStateProvider } from "./context/AppStateContext";
+import { AuthSessionProvider } from "../lib/hooks/use-auth-session";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,10 +25,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AppStateProvider>
+        <AuthSessionProvider>
           <RouterProvider router={router} />
           <Toaster />
-        </AppStateProvider>
+        </AuthSessionProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
