@@ -50,76 +50,158 @@ ON CONFLICT (id) DO UPDATE SET public = false;
 -- ============================================================
 
 -- ── Question Images ─────────────────────────────────────────
+DROP POLICY IF EXISTS "Public can view question images" ON storage.objects;
 CREATE POLICY "Public can view question images"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'question-images');
 
+DROP POLICY IF EXISTS "Authenticated can upload question images" ON storage.objects;
 CREATE POLICY "Authenticated can upload question images"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'question-images' AND auth.role() = 'authenticated');
 
--- ✅ ADDED: users can replace/remove their uploads
-CREATE POLICY "Authenticated can update question images"
+-- ✅ FIXED: only question authors can replace/remove their uploads
+-- Path convention: questions/{question_id}/filename.ext
+DROP POLICY IF EXISTS "Authenticated can update question images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can update own question images" ON storage.objects;
+CREATE POLICY "Authors can update own question images"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'question-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'question-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.questions
+      WHERE id::text = (storage.foldername(name))[2]
+        AND author_id = auth.uid()
+    )
+  );
 
-CREATE POLICY "Authenticated can delete question images"
+DROP POLICY IF EXISTS "Authenticated can delete question images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can delete own question images" ON storage.objects;
+CREATE POLICY "Authors can delete own question images"
   ON storage.objects FOR DELETE
-  USING (bucket_id = 'question-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'question-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.questions
+      WHERE id::text = (storage.foldername(name))[2]
+        AND author_id = auth.uid()
+    )
+  );
 
 -- ── Answer Images ───────────────────────────────────────────
+DROP POLICY IF EXISTS "Public can view answer images" ON storage.objects;
 CREATE POLICY "Public can view answer images"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'answer-images');
 
+DROP POLICY IF EXISTS "Authenticated can upload answer images" ON storage.objects;
 CREATE POLICY "Authenticated can upload answer images"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'answer-images' AND auth.role() = 'authenticated');
 
--- ✅ ADDED
-CREATE POLICY "Authenticated can update answer images"
+-- ✅ FIXED: only answer authors can replace/remove their uploads
+-- Path convention: answers/{answer_id}/filename.ext
+DROP POLICY IF EXISTS "Authenticated can update answer images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can update own answer images" ON storage.objects;
+CREATE POLICY "Authors can update own answer images"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'answer-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'answer-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.answers
+      WHERE id::text = (storage.foldername(name))[2]
+        AND author_id = auth.uid()
+    )
+  );
 
-CREATE POLICY "Authenticated can delete answer images"
+DROP POLICY IF EXISTS "Authenticated can delete answer images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can delete own answer images" ON storage.objects;
+CREATE POLICY "Authors can delete own answer images"
   ON storage.objects FOR DELETE
-  USING (bucket_id = 'answer-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'answer-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.answers
+      WHERE id::text = (storage.foldername(name))[2]
+        AND author_id = auth.uid()
+    )
+  );
 
 -- ── Review Images ───────────────────────────────────────────
+DROP POLICY IF EXISTS "Public can view review images" ON storage.objects;
 CREATE POLICY "Public can view review images"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'review-images');
 
+DROP POLICY IF EXISTS "Authenticated can upload review images" ON storage.objects;
 CREATE POLICY "Authenticated can upload review images"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'review-images' AND auth.role() = 'authenticated');
 
--- ✅ ADDED
-CREATE POLICY "Authenticated can update review images"
+-- ✅ FIXED: only review authors can replace/remove their uploads
+-- Path convention: reviews/{review_id}/filename.ext
+DROP POLICY IF EXISTS "Authenticated can update review images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can update own review images" ON storage.objects;
+CREATE POLICY "Authors can update own review images"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'review-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'review-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.reviews
+      WHERE id::text = (storage.foldername(name))[2]
+        AND reviewer_id = auth.uid()
+    )
+  );
 
-CREATE POLICY "Authenticated can delete review images"
+DROP POLICY IF EXISTS "Authenticated can delete review images" ON storage.objects;
+DROP POLICY IF EXISTS "Authors can delete own review images" ON storage.objects;
+CREATE POLICY "Authors can delete own review images"
   ON storage.objects FOR DELETE
-  USING (bucket_id = 'review-images' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'review-images'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.reviews
+      WHERE id::text = (storage.foldername(name))[2]
+        AND reviewer_id = auth.uid()
+    )
+  );
 
 -- ── Avatars ─────────────────────────────────────────────────
+DROP POLICY IF EXISTS "Public can view avatars" ON storage.objects;
 CREATE POLICY "Public can view avatars"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
 CREATE POLICY "Users can upload own avatar"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
 
--- ✅ ADDED
+-- ✅ FIXED: users can only update/delete their own avatar
+-- Path convention: avatars/{user_uuid}/filename.ext
+DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
 CREATE POLICY "Users can update own avatar"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'avatars'
+    AND auth.role() = 'authenticated'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
 
+DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
 CREATE POLICY "Users can delete own avatar"
   ON storage.objects FOR DELETE
-  USING (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+  USING (
+    bucket_id = 'avatars'
+    AND auth.role() = 'authenticated'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
 
 -- ============================================================
 -- 4. STORAGE POLICIES — PRIVATE BUCKETS
@@ -129,6 +211,7 @@ CREATE POLICY "Users can delete own avatar"
 -- Path convention: business-licenses/{user_uuid}/filename.ext
 -- Only the file owner (matched by folder name = auth.uid) can access
 
+DROP POLICY IF EXISTS "Owners can upload business license" ON storage.objects;
 CREATE POLICY "Owners can upload business license"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -137,6 +220,7 @@ CREATE POLICY "Owners can upload business license"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Owners can view own license" ON storage.objects;
 CREATE POLICY "Owners can view own license"
   ON storage.objects FOR SELECT
   USING (
@@ -144,6 +228,7 @@ CREATE POLICY "Owners can view own license"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Owners can update own license" ON storage.objects;
 CREATE POLICY "Owners can update own license"
   ON storage.objects FOR UPDATE
   USING (
@@ -151,6 +236,7 @@ CREATE POLICY "Owners can update own license"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Owners can delete own license" ON storage.objects;
 CREATE POLICY "Owners can delete own license"
   ON storage.objects FOR DELETE
   USING (
@@ -159,6 +245,7 @@ CREATE POLICY "Owners can delete own license"
   );
 
 -- ✅ ADDED: Admins can view any business license (for verification)
+DROP POLICY IF EXISTS "Admins can view all business licenses" ON storage.objects;
 CREATE POLICY "Admins can view all business licenses"
   ON storage.objects FOR SELECT
   USING (

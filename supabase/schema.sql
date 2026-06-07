@@ -1,6 +1,6 @@
 -- ============================================================
 -- KHAPEER SCHEMA — UPGRADE LOG
--- Date: 2026-05-31
+-- Date: 2026-06-07
 -- Changes:
 -- ✅ Fixed on_review_change trigger to handle DELETE events
 -- ✅ Fixed entity_verified_trigger to fire on INSERT OR UPDATE
@@ -24,6 +24,11 @@
 -- ✅ Added business_license storage-path guidance via column comment
 -- ✅ Reputation anti-abuse: daily vote cap via reputation_daily_limits table
 -- ✅ Added protect_profile_privileged_columns trigger (blocks self-admin escalation)
+-- ✅ Added notification triggers (5): answers, comments, votes, follows, reviews
+-- ✅ Added atomic RPCs: increment_view_count, cast_vote
+-- ✅ Added accept-answer RLS policy (question-author only)
+-- ✅ Added accepted-answer reputation trigger (+15 author, +2 asker)
+-- ✅ Enhanced on_review_change with soft-delete reputation revocation (-15)
 -- ============================================================
 
 -- ============================================================
@@ -1218,5 +1223,372 @@ CREATE POLICY "Admins can manage spaces"
   );
 
 -- ============================================================
--- END OF KHAPEER SCHEMA v2.0
+-- NOTIFICATION TRIGGERS (Automated Social Loop)
+-- ============================================================
+
+-- Notify question author when someone answers
+CREATE OR REPLACE FUNCTION public.notify_on_answer()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_question_author UUID;
+BEGIN
+  SELECT author_id INTO v_question_author
+  FROM public.questions WHERE id = NEW.question_id;
+
+  IF v_question_author IS NOT NULL AND v_question_author != NEW.author_id THEN
+    INSERT INTO public.notifications (
+      user_id, type, title, content,
+      notification_data, action_url, priority
+    ) VALUES (
+      v_question_author,
+      'answer',
+      'إجابة جديدة على سؤالك',
+      left(NEW.content, 120) || CASE WHEN length(NEW.content) > 120 THEN '...' ELSE '' END,
+      jsonb_build_object(
+        'answer_id', NEW.id,
+        'question_id', NEW.question_id,
+        'actor_id', NEW.author_id
+      ),
+      '/questions/' || NEW.question_id,
+      'normal'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS notify_answer_trigger ON public.answers;
+CREATE TRIGGER notify_answer_trigger
+  AFTER INSERT ON public.answers
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_answer();
+
+
+-- Notify answer author when someone comments
+CREATE OR REPLACE FUNCTION public.notify_on_comment()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_answer_author UUID;
+  v_question_id   UUID;
+BEGIN
+  SELECT author_id, question_id INTO v_answer_author, v_question_id
+  FROM public.answers WHERE id = NEW.answer_id;
+
+  IF v_answer_author IS NOT NULL AND v_answer_author != NEW.author_id THEN
+    INSERT INTO public.notifications (
+      user_id, type, title, content,
+      notification_data, action_url, priority
+    ) VALUES (
+      v_answer_author,
+      'comment',
+      'تعليق جديد على إجابتك',
+      left(NEW.content, 120) || CASE WHEN length(NEW.content) > 120 THEN '...' ELSE '' END,
+      jsonb_build_object(
+        'comment_id', NEW.id,
+        'answer_id', NEW.answer_id,
+        'question_id', v_question_id,
+        'actor_id', NEW.author_id
+      ),
+      '/questions/' || v_question_id,
+      'normal'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS notify_comment_trigger ON public.comments;
+CREATE TRIGGER notify_comment_trigger
+  AFTER INSERT ON public.comments
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_comment();
+
+
+-- Notify content author when someone votes
+CREATE OR REPLACE FUNCTION public.notify_on_vote()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_author_id   UUID;
+  v_title       TEXT;
+  v_action_url  TEXT;
+BEGIN
+  IF NEW.target_type = 'question' THEN
+    SELECT author_id INTO v_author_id FROM public.questions WHERE id = NEW.target_id;
+    v_title := CASE WHEN NEW.vote_type = 'up' THEN 'تصويت إيجابي على سؤالك' ELSE 'تصويت سلبي على سؤالك' END;
+    v_action_url := '/questions/' || NEW.target_id;
+  ELSE
+    SELECT author_id INTO v_author_id FROM public.answers WHERE id = NEW.target_id;
+    v_title := CASE WHEN NEW.vote_type = 'up' THEN 'تصويت إيجابي على إجابتك' ELSE 'تصويت سلبي على إجابتك' END;
+    SELECT '/questions/' || question_id INTO v_action_url
+    FROM public.answers WHERE id = NEW.target_id;
+  END IF;
+
+  IF v_author_id IS NOT NULL AND v_author_id != NEW.user_id THEN
+    INSERT INTO public.notifications (
+      user_id, type, title, content,
+      notification_data, action_url, priority
+    ) VALUES (
+      v_author_id,
+      'like',
+      v_title,
+      '',
+      jsonb_build_object(
+        'target_id', NEW.target_id,
+        'target_type', NEW.target_type,
+        'vote_type', NEW.vote_type,
+        'actor_id', NEW.user_id
+      ),
+      v_action_url,
+      CASE WHEN NEW.vote_type = 'up' THEN 'normal' ELSE 'low' END
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS notify_vote_trigger ON public.votes;
+CREATE TRIGGER notify_vote_trigger
+  AFTER INSERT ON public.votes
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_vote();
+
+
+-- Notify user when someone follows them
+CREATE OR REPLACE FUNCTION public.notify_on_follow()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.notifications (
+    user_id, type, title, content,
+    notification_data, action_url, priority
+  ) VALUES (
+    NEW.following_id,
+    'follow',
+    'متابع جديد',
+    'بدأ شخص بمتابعتك',
+    jsonb_build_object('follower_id', NEW.follower_id),
+    '/profile/' || NEW.follower_id,
+    'low'
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS notify_follow_trigger ON public.follows;
+CREATE TRIGGER notify_follow_trigger
+  AFTER INSERT ON public.follows
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_follow();
+
+
+-- Notify entity when someone reviews them
+CREATE OR REPLACE FUNCTION public.notify_on_review()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.entity_id != NEW.reviewer_id AND NEW.is_deleted = FALSE THEN
+    INSERT INTO public.notifications (
+      user_id, type, title, content,
+      notification_data, action_url, priority
+    ) VALUES (
+      NEW.entity_id,
+      'review',
+      'تقييم جديد',
+      left(NEW.comment, 120) || CASE WHEN length(NEW.comment) > 120 THEN '...' ELSE '' END,
+      jsonb_build_object(
+        'review_id', NEW.id,
+        'rating', NEW.rating,
+        'reviewer_id', NEW.reviewer_id
+      ),
+      '/profile/' || NEW.reviewer_id,
+      'normal'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS notify_review_trigger ON public.reviews;
+CREATE TRIGGER notify_review_trigger
+  AFTER INSERT ON public.reviews
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_review();
+
+
+-- ============================================================
+-- ATOMIC RPCs
+-- ============================================================
+
+-- Atomic view counter increment (replaces read-modify-write race)
+CREATE OR REPLACE FUNCTION public.increment_view_count(p_question_id UUID)
+RETURNS VOID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE public.questions
+  SET views_count = views_count + 1
+  WHERE id = p_question_id;
+$$;
+
+
+-- Atomic vote toggle (select + insert/update/delete in one transaction)
+CREATE OR REPLACE FUNCTION public.cast_vote(
+  p_user_id     UUID,
+  p_target_id   UUID,
+  p_target_type TEXT,
+  p_vote_type   TEXT
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing_id   UUID;
+  v_existing_type TEXT;
+BEGIN
+  IF p_target_type NOT IN ('question', 'answer') THEN
+    RAISE EXCEPTION 'Invalid target_type: %', p_target_type;
+  END IF;
+
+  IF p_vote_type NOT IN ('up', 'down') THEN
+    RAISE EXCEPTION 'Invalid vote_type: %', p_vote_type;
+  END IF;
+
+  SELECT id, vote_type INTO v_existing_id, v_existing_type
+  FROM public.votes
+  WHERE user_id = p_user_id
+    AND target_id = p_target_id
+    AND target_type = p_target_type;
+
+  IF v_existing_id IS NULL THEN
+    INSERT INTO public.votes (user_id, target_id, target_type, vote_type)
+    VALUES (p_user_id, p_target_id, p_target_type, p_vote_type);
+    RETURN 'inserted';
+  ELSIF v_existing_type = p_vote_type THEN
+    DELETE FROM public.votes WHERE id = v_existing_id;
+    RETURN 'deleted';
+  ELSE
+    UPDATE public.votes SET vote_type = p_vote_type WHERE id = v_existing_id;
+    RETURN 'updated';
+  END IF;
+END;
+$$;
+
+
+-- ============================================================
+-- ACCEPT ANSWER RLS POLICY
+-- ============================================================
+
+DROP POLICY IF EXISTS "Question authors can accept/unaccept answers" ON public.answers;
+CREATE POLICY "Question authors can accept/unaccept answers"
+  ON public.answers FOR UPDATE
+  USING (
+    auth.uid() IS NOT NULL
+    AND auth.uid() = (SELECT author_id FROM public.questions WHERE id = question_id)
+  );
+
+
+-- ============================================================
+-- ACCEPTED ANSWER REPUTATION TRIGGER
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.on_answer_accepted()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_question_author UUID;
+BEGIN
+  IF NEW.is_accepted = TRUE AND (OLD.is_accepted IS NULL OR OLD.is_accepted = FALSE) THEN
+    PERFORM public.award_reputation(NEW.author_id, 15, 'إجابة مقبولة', NEW.id, 'answer');
+    SELECT author_id INTO v_question_author FROM public.questions WHERE id = NEW.question_id;
+    IF v_question_author IS NOT NULL THEN
+      PERFORM public.award_reputation(v_question_author, 2, 'قبول إجابة', NEW.id, 'answer');
+    END IF;
+  ELSIF (NEW.is_accepted IS NULL OR NEW.is_accepted = FALSE) AND OLD.is_accepted = TRUE THEN
+    PERFORM public.award_reputation(NEW.author_id, -15, 'إلغاء قبول الإجابة', NEW.id, 'answer');
+    SELECT author_id INTO v_question_author FROM public.questions WHERE id = NEW.question_id;
+    IF v_question_author IS NOT NULL THEN
+      PERFORM public.award_reputation(v_question_author, -2, 'إلغاء قبول الإجابة', NEW.id, 'answer');
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS answer_accepted_trigger ON public.answers;
+CREATE TRIGGER answer_accepted_trigger
+  AFTER UPDATE ON public.answers
+  FOR EACH ROW EXECUTE FUNCTION public.on_answer_accepted();
+
+
+-- ============================================================
+-- ENHANCED REVIEW CHANGE (with soft-delete reputation revocation)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.on_review_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_entity_id  UUID;
+  v_avg_rating NUMERIC;
+  v_count      INTEGER;
+BEGIN
+  v_entity_id := COALESCE(NEW.entity_id, OLD.entity_id);
+
+  SELECT AVG(rating), COUNT(*) INTO v_avg_rating, v_count
+  FROM public.reviews
+  WHERE entity_id = v_entity_id AND is_deleted = FALSE;
+
+  UPDATE public.profiles
+  SET business_rating = ROUND(v_avg_rating, 1),
+      reviews_count   = v_count
+  WHERE id = v_entity_id;
+
+  IF TG_OP = 'INSERT' AND NEW.is_deleted = FALSE THEN
+    PERFORM public.award_reputation(v_entity_id, 15, 'استقبال تقييم', NEW.id, 'review');
+  END IF;
+
+  -- ✅ ADDED: Revoke reputation when review is soft-deleted
+  IF TG_OP = 'UPDATE' AND NEW.is_deleted = TRUE AND (OLD.is_deleted IS NULL OR OLD.is_deleted = FALSE) THEN
+    PERFORM public.award_reputation(v_entity_id, -15, 'حذف تقييم', NEW.id, 'review');
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+DROP TRIGGER IF EXISTS review_rating_trigger ON public.reviews;
+CREATE TRIGGER review_rating_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON public.reviews
+  FOR EACH ROW EXECUTE FUNCTION public.on_review_change();
+
+
+-- ============================================================
+-- END OF KHAPEER SCHEMA v2.1
 -- ============================================================

@@ -70,38 +70,45 @@ export function useNotifications(currentUserId: string | null) {
   useEffect(() => {
     if (!currentUserId) return;
 
-    // Ensure we don't reuse an already-subscribed channel instance.
-    // If a channel with the same topic exists and is subscribed, remove it first
-    // so we can safely register new `on(...)` callbacks below.
-    const topic = `notifications:${currentUserId}`;
-    try {
-      const existing = supabase.getChannels().find((c: any) => c.topic === `realtime:${topic}`);
-      if (existing) {
-        // removeChannel returns a promise; fire-and-forget is fine here
-        supabase.removeChannel(existing).catch(() => {});
-      }
-    } catch (err) {
-      // ignore errors from getChannels in older SDK versions
-    }
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    const channel = supabase
-      .channel(`notifications:${currentUserId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${currentUserId}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: queryKeys.notifications(currentUserId) });
+    const setup = async () => {
+      // Remove any existing channel with the same topic before re-subscribing
+      const topic = `notifications:${currentUserId}`;
+      try {
+        const existing = supabase.getChannels().find((c: any) => c.topic === `realtime:${topic}`);
+        if (existing) {
+          await supabase.removeChannel(existing);
         }
-      )
-      .subscribe();
+      } catch {
+        // ignore errors from getChannels in older SDK versions
+      }
+
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`notifications:${currentUserId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.notifications(currentUserId) });
+          }
+        )
+        .subscribe();
+    };
+
+    setup();
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [currentUserId, queryClient]);
 

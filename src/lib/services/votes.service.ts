@@ -1,66 +1,23 @@
 import { supabase } from "../supabase";
 import type { VoteType, TargetType } from "../database.types";
 
-// ── Cast vote on question or answer ───────────────────────────
+// ── Cast vote on question or answer (atomic RPC) ───────────────
 export async function castVote(
   userId: string,
   targetId: string,
   targetType: TargetType,
   voteType: VoteType
 ): Promise<boolean> {
-  // Check if vote already exists for this target by this user
-  const { data: existingVote, error: selectError } = await supabase
-    .from("votes")
-    .select("id, vote_type")
-    .eq("user_id", userId)
-    .eq("target_id", targetId)
-    .eq("target_type", targetType)
-    .maybeSingle();
+  const { error } = await supabase.rpc("cast_vote", {
+    p_user_id: userId,
+    p_target_id: targetId,
+    p_target_type: targetType,
+    p_vote_type: voteType,
+  } as any);
 
-  if (selectError) {
-    console.error("castVote check existing vote error:", selectError);
+  if (error) {
+    console.error("castVote:", error);
     return false;
-  }
-
-  if (existingVote) {
-    // If the vote type is already correct, delete/remove the vote (cancel it)
-    if (existingVote.vote_type === voteType) {
-      const { error: deleteError } = await supabase
-        .from("votes")
-        .delete()
-        .eq("id", existingVote.id);
-
-      if (deleteError) {
-        console.error("castVote delete vote error:", deleteError);
-        return false;
-      }
-      return true;
-    }
-    // Update the existing vote type
-    const { error: updateError } = await supabase
-      .from("votes")
-      .update({ vote_type: voteType } as any)
-      .eq("id", existingVote.id);
-
-    if (updateError) {
-      console.error("castVote update vote error:", updateError);
-      return false;
-    }
-  } else {
-    // Insert a brand new vote
-    const { error: insertError } = await supabase
-      .from("votes")
-      .insert({
-        user_id: userId,
-        target_id: targetId,
-        target_type: targetType,
-        vote_type: voteType,
-      } as any);
-
-    if (insertError) {
-      console.error("castVote insert vote error:", insertError);
-      return false;
-    }
   }
   return true;
 }

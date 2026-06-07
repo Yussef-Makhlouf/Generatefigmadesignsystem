@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 
-// ── Toggle follow using direct table ops (no RPC needed) ───────
+// ── Toggle follow using atomic RPC (schema.sql toggle_follow) ───
 export async function toggleFollow(
   followerId: string,
   followingId: string
@@ -10,37 +10,15 @@ export async function toggleFollow(
     return { success: false, isFollowing: false, error: "لا يمكنك متابعة نفسك" };
   }
 
-  try {
-    // Check if already following
-    const { data: existing } = await supabase
-      .from("follows")
-      .select("id")
-      .eq("follower_id", followerId)
-      .eq("following_id", followingId)
-      .maybeSingle();
+  const { data, error } = await supabase.rpc("toggle_follow", {
+    p_follower_id: followerId,
+    p_following_id: followingId,
+  });
 
-    if (existing) {
-      // Unfollow
-      const { error } = await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_id", followerId)
-        .eq("following_id", followingId);
-
-      if (error) return { success: false, isFollowing: true, error: error.message };
-      return { success: true, isFollowing: false };
-    } else {
-      // Follow
-      const { error } = await supabase
-        .from("follows")
-        .insert({ follower_id: followerId, following_id: followingId });
-
-      if (error) return { success: false, isFollowing: false, error: error.message };
-      return { success: true, isFollowing: true };
-    }
-  } catch (e: any) {
-    return { success: false, isFollowing: false, error: e?.message ?? "فشل العملية" };
+  if (error) {
+    return { success: false, isFollowing: false, error: error.message };
   }
+  return { success: true, isFollowing: data ?? false };
 }
 
 // ── Check if already following ─────────────────────────────────

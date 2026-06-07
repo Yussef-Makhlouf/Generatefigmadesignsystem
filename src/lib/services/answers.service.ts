@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 import type { Answer, CreateAnswerInput } from "../database.types";
-import { answerSchema } from "../utils/validation";
+import { answerSchema, sanitizeInput } from "../utils/validation";
 
 // ── Fetch answers for a question ──────────────────────────────
 export async function getAnswers(questionId: string): Promise<Answer[]> {
@@ -163,12 +163,15 @@ export async function addComment(
   authorId: string,
   content: string
 ): Promise<boolean> {
+  const clean = sanitizeInput(content);
+  if (clean.length < 1) return false;
+
   const { error } = await supabase
     .from("comments")
     .insert({
       answer_id: answerId,
       author_id: authorId,
-      content,
+      content: clean,
     });
 
   if (error) {

@@ -6,6 +6,7 @@ import {
   getCurrentUserProfile
 } from "../services";
 import { supabase } from "../supabase";
+import { queryKeys } from "../query-keys";
 import type { AccountType } from "../database.types";
 
 // ── Auth Hooks ───────────────────────────────────────────────
@@ -16,7 +17,8 @@ export function useAuth() {
     mutationFn: (params: { email: string; password: string }) =>
       signIn(params.email, params.password),
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: queryKeys.session });
+      queryClient.invalidateQueries({ queryKey: queryKeys.currentUser(null) });
     },
   });
 
@@ -29,7 +31,7 @@ export function useAuth() {
       accountType?: AccountType;
     }) => signUp(params.email, params.password, params.username, params.name, params.accountType),
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: queryKeys.session });
     },
   });
 

@@ -11,6 +11,18 @@ additional_redirect_urls = [
   "http://localhost:5173/*"
 ]
 
+[auth.rate_limit]
+sign_in = 30
+sign_up = 3
+token_refresh = 150
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+
+[api]
+max_rows = 1000
+
 [functions]
 path = "./functions"
 # Individual function configurations can be declared below if needed

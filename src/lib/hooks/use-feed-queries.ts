@@ -33,7 +33,7 @@ export function useFeedUsers() {
   return useQuery({
     queryKey: queryKeys.users,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*");
+      const { data } = await supabase.from("profiles").select("id, name, username, avatar_url, reputation, is_verified_entity, account_type");
       return (data ?? []).map((u) => mapProfileRow(u as Record<string, unknown>));
     },
   });

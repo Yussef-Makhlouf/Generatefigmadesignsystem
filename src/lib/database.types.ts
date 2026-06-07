@@ -442,6 +442,20 @@ export type Database = {
         };
         Returns: number;
       };
+      // ✅ ADDED: schema v2.1 — atomic operations
+      increment_view_count: {
+        Args: { p_question_id: string };
+        Returns: void;
+      };
+      cast_vote: {
+        Args: {
+          p_user_id: string;
+          p_target_id: string;
+          p_target_type: string;
+          p_vote_type: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

@@ -1,5 +1,6 @@
 import { supabase } from "../supabase";
 import type { Review, CreateReviewInput, Profile } from "../database.types";
+import { reviewSchema } from "../utils/validation";
 
 // ── Fetch reviews for an entity ───────────────────────────────
 export async function getReviews(entityId: string): Promise<Review[]> {
@@ -45,14 +46,22 @@ export async function createReview(
   reviewerId: string,
   input: CreateReviewInput
 ): Promise<Review | null> {
+  const parsed = reviewSchema.safeParse(input);
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("createReview validation:", fieldErrors);
+    throw new Error(`Validation failed: ${JSON.stringify(fieldErrors)}`);
+  }
+  const valid = parsed.data;
+
   const { data: review, error: rErr } = await supabase
     .from("reviews")
     .insert({
       reviewer_id: reviewerId,
-      entity_id: input.entity_id,
-      rating: input.rating,
-      comment: input.comment,
-      visit_date: input.visit_date ?? null,
+      entity_id: valid.entity_id,
+      rating: valid.rating,
+      comment: valid.comment,
+      visit_date: valid.visit_date ?? null,
     })
     .select()
     .single();
@@ -65,8 +74,8 @@ export async function createReview(
   const reviewId = review.id;
 
   // Insert attachments
-  if (input.images?.length) {
-    const imageRows = input.images.map((url) => ({
+  if (valid.images?.length) {
+    const imageRows = valid.images.map((url) => ({
       review_id: reviewId,
       type: "image" as const,
       url,
@@ -74,8 +83,8 @@ export async function createReview(
     await supabase.from("review_attachments").insert(imageRows as any);
   }
 
-  if (input.links?.length) {
-    const linkRows = input.links.map((l) => ({
+  if (valid.links?.length) {
+    const linkRows = valid.links.map((l) => ({
       review_id: reviewId,
       type: "link" as const,
       url: l.url,

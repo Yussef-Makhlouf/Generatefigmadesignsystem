@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase";
 import type { Question } from "../../lib/database.types";
@@ -6,15 +6,17 @@ import type { Question } from "../../lib/database.types";
 // Real-time questions subscription hook
 export function useRealtimeQuestions(onNewQuestion: (q: Question) => void) {
   const queryClient = useQueryClient();
+  const callbackRef = useRef(onNewQuestion);
+  callbackRef.current = onNewQuestion;
 
-  const setupRealtime = useCallback(() => {
+  useEffect(() => {
     const channel = supabase
       .channel("questions-feed")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "questions" },
         (payload) => {
-          onNewQuestion(payload.new as Question);
+          callbackRef.current(payload.new as Question);
         }
       )
       .on(
@@ -27,11 +29,7 @@ export function useRealtimeQuestions(onNewQuestion: (q: Question) => void) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [onNewQuestion, queryClient]);
-
-  useEffect(() => {
-    return setupRealtime();
-  }, [setupRealtime]);
+  }, [queryClient]);
 }
 
 // Real-time answers subscription hook

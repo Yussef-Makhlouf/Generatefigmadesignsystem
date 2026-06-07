@@ -17,6 +17,15 @@ export function sanitizeInput(text: string): string {
 }
 
 /**
+ * Escapes ILIKE wildcard characters (%, _, \) for safe use in Postgres ILIKE patterns.
+ * Use this before interpolating user input into .ilike() or .or(`...ilike...`) queries.
+ */
+export function escapeIlike(s: string): string {
+  if (!s) return "";
+  return s.replace(/[%_\\]/g, "\\$&");
+}
+
+/**
  * Trims and sanitizes standard strings.
  */
 const sanitizedString = (min: number, max: number, minMsg: string, maxMsg: string) =>
@@ -101,6 +110,39 @@ export const answerSchema = z.object({
 
 // ============================================================
 // 3. Profile Input Validation Schema
+// ============================================================
+
+// ============================================================
+// 3. Review Input Validation Schema
+// ============================================================
+
+export const reviewSchema = z.object({
+  entity_id: z.string().uuid("معرف النشاط غير صالح"),
+  rating: z
+    .number()
+    .int("التقييم يجب أن يكون رقماً صحيحاً")
+    .min(1, "أدنى تقييم هو نجمة واحدة")
+    .max(5, "أقصى تقييم هو 5 نجوم"),
+  comment: sanitizedString(
+    10,
+    2000,
+    "التعليق يجب أن لا يقل عن 10 أحرف",
+    "التعليق طويل جداً، يرجى اختصاره إلى 2000 حرف كحد أقصى"
+  ),
+  visit_date: z.string().optional(),
+  images: z.array(z.string().url("رابط الصورة المرفقة غير صالح")).optional(),
+  links: z
+    .array(
+      z.object({
+        title: z.string().transform((val) => sanitizeInput(val)),
+        url: z.string().url("رابط المرجع المرفق غير صالح"),
+      })
+    )
+    .optional(),
+});
+
+// ============================================================
+// 4. Profile Input Validation Schema
 // ============================================================
 
 export const profileSchema = z.object({

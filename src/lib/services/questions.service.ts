@@ -56,8 +56,8 @@ export async function getQuestionById(id: string): Promise<Question | null> {
 
   if (error) { console.error("getQuestionById:", error); return null; }
 
-  // Increment view count (fire and forget)
-  supabase.from("questions").update({ views_count: ((data as any).views_count ?? 0) + 1 } as any).eq("id", id).then(() => {});
+  // Increment view count atomically via RPC (fire and forget)
+  supabase.rpc("increment_view_count", { p_question_id: id } as any).then(() => {});
 
   // Map to UI-compatible Question shape (same transform as the bulk query)
   const q = data as any;

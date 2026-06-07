@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 import type { Profile, UpdateProfileInput } from "../database.types";
-import { profileSchema } from "../utils/validation";
+import { profileSchema, escapeIlike } from "../utils/validation";
 
 // ── Fetch a profile by username ───────────────────────────────
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
@@ -48,7 +48,8 @@ export async function updateProfile(
 // ── Upload avatar ────────────────────────────────────────────
 export async function uploadAvatar(userId: string, file: File): Promise<string | null> {
   const ext = file.name.split(".").pop();
-  const path = `avatars/${userId}.${ext}`;
+  const ts = Date.now();
+  const path = `avatars/${userId}/${ts}.${ext}`;
   const { error } = await supabase.storage
     .from("avatars")
     .upload(path, file, { upsert: true });
@@ -60,7 +61,8 @@ export async function uploadAvatar(userId: string, file: File): Promise<string |
 // ── Upload cover image ─────────────────────────────────────────
 export async function uploadCoverImage(userId: string, file: File): Promise<string | null> {
   const ext = file.name.split(".").pop();
-  const path = `covers/${userId}.${ext}`;
+  const ts = Date.now();
+  const path = `covers/${userId}/${ts}.${ext}`;
   const { error } = await supabase.storage
     .from("avatars")
     .upload(path, file, { upsert: true });
@@ -78,10 +80,10 @@ export async function uploadLicenseDocument(userId: string, file: File): Promise
     .upload(path, file, { upsert: true });
   if (error) { console.error("uploadLicenseDocument upload:", error); return null; }
   
-  // Generate a signed URL valid for 10 years (315,360,000 seconds)
+  // Generate a signed URL valid for 1 hour (3600 seconds)
   const { data, error: signError } = await supabase.storage
     .from("business-licenses")
-    .createSignedUrl(path, 315360000);
+    .createSignedUrl(path, 3600);
   if (signError || !data) { console.error("uploadLicenseDocument signing:", signError); return null; }
   
   return data.signedUrl;
@@ -92,7 +94,7 @@ export async function uploadLicenseDocument(userId: string, file: File): Promise
 export async function getLeaderboard(limit = 20): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, name, username, avatar_url, reputation, is_verified_entity, account_type")
     .order("reputation", { ascending: false })
     .limit(limit);
   if (error) return [];
@@ -140,10 +142,11 @@ export async function toggleEntityVerification(
 
 // ── Search users ─────────────────────────────────────────────
 export async function searchUsers(query: string): Promise<Profile[]> {
+  const escaped = escapeIlike(query);
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
-    .or(`name.ilike.%${query}%,username.ilike.%${query}%`)
+    .or(`name.ilike.%${escaped}%,username.ilike.%${escaped}%`)
     .limit(20);
   if (error) return [];
   return (data ?? []) as Profile[];
