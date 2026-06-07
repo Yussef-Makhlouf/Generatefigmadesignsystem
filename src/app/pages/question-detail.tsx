@@ -1488,7 +1488,7 @@ export function QuestionDetailPage() {
                 const tagStr = typeof tag === "string" ? tag : (tag as any).name;
                 return (
                   <Link key={tagStr} to={`/tags/${encodeURIComponent(tagStr)}`}>
-                    <Badge variant="secondary" className="rounded-full text-xs px-3 py-1 bg-muted/40 border border-border/20 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all duration-300 font-medium tag-pill cursor-pointer">
+                    <Badge variant="secondary" className="rounded-full text-primary text-xs px-3 py-1 bg-muted/40 border border-border/20 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all duration-300 font-medium tag-pill cursor-pointer">
                       #{tagStr}
                     </Badge>
                   </Link>

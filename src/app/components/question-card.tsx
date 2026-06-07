@@ -88,20 +88,15 @@ export function QuestionCard({
 
   return (
     <Card
-      className="group relative overflow-hidden cursor-pointer premium-glass-card animate-fade-in hover:shadow-card-hover"
+      className="group relative overflow-hidden cursor-pointer premium-glass-card animate-fade-in hover:shadow-card-hover pattern-hex-mesh"
       style={{ borderRadius: "var(--radius-lg)" }}
       onClick={onClick}
     >
-      {/* Top accent hover line — gradient */}
-      <div className="absolute top-0 inset-x-0 h-0.5 opacity-0 group-hover:opacity-100 transition-all duration-500"
-           style={{ background: "linear-gradient(90deg, var(--primary), var(--secondary))" }} />
+      {/* Desert Luxury: arabesque gold top accent on hover */}
+      <div className="absolute top-0 inset-x-[10%] h-0.5 opacity-0 group-hover:opacity-100 transition-all duration-500"
+           style={{ background: "var(--gradient-gold-line)" }} />
 
-      {/* Decorative corner glow — appears on hover */}
-      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-700 pointer-events-none blur-3xl"
-           style={{ background: "var(--primary)" }} />
-
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none arabic-geometric-mesh" />
+      {/* Subtle pattern overlay — hex mesh via CSS class on parent */}
 
       <div className="p-3 sm:p-5 relative z-10">
         <div className="flex gap-2 sm:gap-4">

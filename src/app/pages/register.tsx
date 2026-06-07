@@ -350,7 +350,7 @@ export function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center p-4 relative overflow-y-auto bg-background pb-[calc(2rem+env(safe-area-inset-bottom))]">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-secondary/5 blur-3xl pointer-events-none" style={{ animationDelay: "2s" }} />
-        <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-25 pointer-events-none" />
+        <div className="absolute inset-0 pattern-islamic-star pointer-events-none" />
 
      
 

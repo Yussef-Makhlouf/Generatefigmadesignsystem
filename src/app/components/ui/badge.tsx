@@ -17,6 +17,9 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 shadow-sm",
         outline:
           "text-foreground border-border [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // Desert Luxury — gold border + subtle gold foil bg
+        luxury:
+          "gold-foil-bg text-white border border-secondary/30 font-semibold shadow-sm",
       },
     },
     defaultVariants: {

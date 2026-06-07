@@ -74,6 +74,17 @@ const buttonVariants = cva(
           "hover:translate-y-0", // override lift — ghost stays flat
         ].join(" "),
 
+        // ── Desert Luxury — Gold foil gradient CTA ───────────
+        luxury: [
+          "gold-foil-bg text-white font-bold border border-secondary/30",
+          "shadow-[var(--shadow-secondary)]",
+          "hover:shadow-[var(--shadow-secondary-lg),var(--shadow-gold)]",
+          "active:scale-[0.97]",
+          "relative overflow-hidden group",
+          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent",
+          "before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:ease-out",
+        ].join(" "),
+
         // ── Link ───────────────────────────────────────
         link: [
           "text-primary underline-offset-4 hover:underline",

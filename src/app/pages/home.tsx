@@ -18,6 +18,7 @@ import { questionToCardProps } from "../../lib/database.types";
 import { motion } from "motion/react";
 import { usePlatformStats, useTrendingTags, useHotQuestions, useTopContributors } from "../../lib/hooks/use-stats";
 import { BgPattern } from "../components/bg-pattern";
+import { GoldFiligreeCorner } from "../components/decorative/geometric-patterns";
 
 const FILTERS = [
   { key: "recent",     label: "الأحدث",         icon: null },
@@ -102,23 +103,23 @@ export function HomePage() {
           className="md:col-span-2 relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
         >
           <BgPattern variant={3} opacity="soft" />
-          <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-15 pointer-events-none" />
+          {/* Desert Luxury: hex mesh backdrop (replaces dot grid) */}
+          <div className="absolute inset-0 pattern-hex-mesh pointer-events-none" />
           <div className="absolute inset-0 pattern-arabic opacity-10 pointer-events-none" />
           
-          {/* Ambient glassmorphic blobs */}
+          {/* Ambient glassmorphic blob — restrained to one */}
           <div className="absolute top-0 left-0 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full bg-secondary/5 blur-2xl pointer-events-none" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
-              <Badge className="bg-primary/10 text-primary border border-primary/20 text-[10px] sm:text-xs px-3 py-1 rounded-full flex items-center font-medium">
+              <Badge className="gold-shimmer-sweep bg-primary/10 text-primary border border-primary/20 text-[10px] sm:text-xs px-3 py-1 rounded-full flex items-center font-medium">
                 <Sparkles className="h-3 w-3 ml-1.5 text-secondary animate-pulse-gold shrink-0" />
-                مجتمع المعرفة العربي الراقي
+                <span className="font-brand">مجتمع المعرفة العربي الراقي</span>
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 font-heading text-foreground">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 font-hero text-foreground animate-calligraphy">
               ابدأ بسؤال،{" "}
-              <span className="text-primary bg-clip-text">انهِ بمعرفة</span>
+              <span className="gold-underline gold-foil-text">انهِ بمعرفة</span>
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-lg mb-6">
               اطرح أسئلتك واحصل على إجابات موثوقة من خبراء المجتمع العربي. شارك خبرتك، راكم سمعتك، وساعد الآخرين على الازدهار.
@@ -183,8 +184,10 @@ export function HomePage() {
             className="md:col-span-1 relative overflow-hidden rounded-2xl p-6 border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] via-transparent to-transparent flex flex-col justify-between min-h-[260px] sm:min-h-[280px]"
           >
             <BgPattern variant={2} opacity="subtle" />
-            <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-10 pointer-events-none" />
-            <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
+            {/* Desert Luxury: gold Islamic star tessellation */}
+            <div className="absolute inset-0 pattern-islamic-star-gold pointer-events-none" />
+            {/* One decoration: gold filigree corner */}
+            <GoldFiligreeCorner position="top-right" size={90} />
 
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -373,8 +376,8 @@ export function HomePage() {
         {/* ── Right Panel (Desktop) ── */}
         <aside className="hidden lg:flex flex-col w-72 shrink-0 gap-4">
 
-          {/* Hot Today — Real backend data */}
-          <Card className="p-4 premium-glass-card" style={{ borderRadius: "var(--radius-lg)" }}>
+          {/* Hot Today — Desert Luxury: islamic star watermark */}
+          <Card className="p-4 premium-glass-card relative overflow-hidden pattern-islamic-star" style={{ borderRadius: "var(--radius-lg)" }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-secondary/15 border border-secondary/30">
@@ -427,8 +430,8 @@ export function HomePage() {
             </div>
           </Card>
  
-          {/* Featured Experts */}
-          <Card className="p-4 premium-glass-card" style={{ borderRadius: "var(--radius-lg)" }}>
+          {/* Featured Experts — Desert Luxury: arabesque gold top border */}
+          <Card className="p-4 premium-glass-card arabesque-border" style={{ borderRadius: "var(--radius-lg)" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20">
@@ -447,9 +450,9 @@ export function HomePage() {
             </div>
           </Card>
  
-          {/* Top Contributors — Real backend data */}
+          {/* Top Contributors — Desert Luxury: gold filigree corner */}
           <Card className="p-4 premium-gold-card overflow-hidden relative" style={{ borderRadius: "var(--radius-lg)" }}>
-            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-secondary/5 blur-xl pointer-events-none" />
+            <GoldFiligreeCorner position="top-right" size={72} />
             <div className="flex items-center gap-2 mb-4">
               <div className="p-1.5 rounded-lg bg-secondary/15 border border-secondary/30 animate-pulse-gold">
                 <Trophy className="h-4 w-4 text-secondary" />

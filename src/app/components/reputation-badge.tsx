@@ -35,7 +35,7 @@ export function ReputationBadge({ points, className = "", showLabel = true }: Re
         <TooltipContent side="bottom" className="text-xs">
           <p>المستوى: <strong>{tier.name}</strong></p>
           {tier.max < Infinity && (
-            <p className="text-muted-foreground">
+            <p className="text-white">
               {(tier.max - points).toLocaleString("ar-SA")} نقطة للمستوى التالي
             </p>
           )}

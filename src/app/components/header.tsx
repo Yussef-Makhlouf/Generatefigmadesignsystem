@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAuthSession } from "../../lib/hooks/use-auth-session";
 import { useNotifications } from "../../lib/hooks/use-engagement";
+import { IslamicStarIcon } from "./decorative/geometric-patterns";
 
 export function Header() {
   const [isDark, setIsDark] = useState(() => {
@@ -68,12 +69,12 @@ export function Header() {
             : "bg-background/80 backdrop-blur-xl border-b border-transparent"
           }`}
       >
-        {/* Top accent line — only visible on scroll */}
+        {/* Top accent line — Desert Luxury gold gradient, visible on scroll */}
         <div
-          className={`absolute top-0 inset-x-0 h-[1px] transition-opacity duration-300 ${scrolled ? "opacity-100" : "opacity-0"
+          className={`absolute top-0 inset-x-0 h-[1.5px] transition-opacity duration-300 ${scrolled ? "opacity-100" : "opacity-0"
             }`}
           style={{
-            background: "linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent)",
+            background: "var(--gradient-gold-line)",
           }}
         />
 
@@ -85,22 +86,27 @@ export function Header() {
             className="flex-shrink-0 flex items-center gap-2.5 group"
             aria-label="الرئيسية - خبير"
           >
-            <div
-              className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105"
-              style={{
-                background: "var(--primary)",
-                boxShadow: "0 4px 14px -4px var(--primary)",
-              }}
-            >
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-white fill-white/20" />
-              {/* Glow ring on hover */}
-              <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ring-2 ring-primary/50 ring-offset-2 ring-offset-background" />
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+              {/* Desert Luxury: Islamic star frame behind logo */}
+              <IslamicStarIcon
+                size={44}
+                className="absolute text-primary/30 group-hover:text-primary/50 transition-colors duration-300"
+              />
+              <div
+                className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center"
+                style={{
+                  background: "var(--primary)",
+                  boxShadow: "0 4px 14px -4px var(--primary)",
+                }}
+              >
+                <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white fill-white/20" />
+              </div>
             </div>
             <div className="hidden xs:flex flex-col leading-none">
               <span className="text-base sm:text-lg font-extrabold text-primary tracking-tight font-heading">
                 خبير
               </span>
-              <span className="text-[8px] sm:text-[9px] text-muted-foreground tracking-[0.12em] uppercase font-medium">
+              <span className="text-[8px] sm:text-[9px] text-muted-foreground tracking-[0.12em] uppercase font-brand font-medium">
                 مجتمع المعرفة
               </span>
             </div>

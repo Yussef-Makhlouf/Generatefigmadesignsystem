@@ -360,7 +360,7 @@ export function TagDetailPage() {
                   <Link key={t} to={`/tags/${encodeURIComponent(t)}`}>
                     <Badge
                       variant="secondary"
-                      className="tag-pill rounded-xl px-3 py-1 cursor-pointer bg-muted/40 hover:bg-primary border border-border/40 hover:border-primary transition-all duration-300"
+                      className="tag-pill text-primary rounded-xl px-3 py-1 cursor-pointer bg-muted/40 hover:bg-primary border border-border/40 hover:border-primary transition-all duration-300"
                     >
                       #{t}
                     </Badge>

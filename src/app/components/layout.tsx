@@ -5,6 +5,7 @@ import { DesktopSidebar } from "./desktop-sidebar";
 import { FloatingActionButton } from "./floating-action-button";
 import { NavProgress } from "./nav-progress";
 import { BgPattern } from "./bg-pattern";
+import { IslamicStarIcon } from "./decorative/geometric-patterns";
 import { motion } from "motion/react";
 
 const FULL_WIDTH_ROUTES = ["/admin"];
@@ -55,8 +56,13 @@ export function Layout() {
           style={{ background: "radial-gradient(circle, var(--secondary-50) 0%, transparent 70%)", animationDelay: "2s" }}
         />
         
-        {/* Geometric mesh overlay */}
-        <div className="fixed inset-0 arabic-geometric-mesh opacity-[0.18] dark:opacity-[0.10] pointer-events-none z-0" />
+        {/* Desert Luxury: Islamic star tessellation overlay (replaces dot grid) */}
+        <div className="fixed inset-0 pattern-islamic-star pointer-events-none z-0" />
+
+        {/* Desert Luxury: slow-rotating geometric watermark — very subtle */}
+        {/* <div className="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 animate-geo-rotate opacity-[0.04]">
+          <IslamicStarIcon size={600} className="text-primary" />
+        </div> */}
 
         {/* ── Main app shell ────────────────────────────── */}
         <div className="relative z-10">

@@ -29,6 +29,23 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   letter-spacing: -0.01em;
 }
 
+/* Hero display calligraphy — Amiri ONLY for h1 hero and decorative quotes */
+.font-hero,
+.hero-heading {
+  font-family: 'Amiri', 'Tajawal', serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+/* Brand accent Kufic — badges, short brand labels */
+.font-brand,
+.font-kufi {
+  font-family: 'Reem Kufi', 'Tajawal', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 code, pre, .font-mono {
   font-family: 'IBM Plex Mono', 'Courier New', monospace;
   direction: ltr;
@@ -149,6 +166,93 @@ code, pre, .font-mono {
   );
 }
 
+/* ─── Desert Luxury Utilities ─────────────────────────── */
+/* Calligraphic Amiri for decorative quotes and hero subtext */
+.font-calligraphy {
+  font-family: 'Amiri', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.8;
+}
+
+/* Gold foil text effect — dark mode first, then light */
+.gold-foil-text {
+  background: linear-gradient(
+    135deg,
+    hsl(43, 96%, 56%) 0%,
+    hsl(38, 100%, 68%) 30%,
+    hsl(43, 96%, 45%) 60%,
+    hsl(48, 100%, 62%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .gold-foil-text {
+  background: linear-gradient(
+    135deg,
+    hsl(43, 92%, 54%) 0%,
+    hsl(38, 96%, 70%) 30%,
+    hsl(43, 90%, 50%) 60%,
+    hsl(48, 96%, 65%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gold foil background — for card headers, badge areas */
+.gold-foil-bg {
+  background: var(--gradient-gold-foil);
+}
+
+/* Gold shimmer sweep — overlay on elements */
+.gold-shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.gold-shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-gold-shimmer);
+  background-size: 200% 100%;
+  animation: goldShimmerSweep 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Arabesque border — single decorative top border for cards */
+.arabesque-border {
+  position: relative;
+}
+.arabesque-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--gradient-gold-line);
+  opacity: 0.5;
+}
+
+/* Gold accent underline — for hero headings */
+.gold-underline {
+  position: relative;
+  display: inline-block;
+}
+.gold-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--gradient-gold-line);
+  border-radius: 1px;
+}
+
 /* ─── Geometric Arabic Background Patterns ──────────── */
 .arabic-geometric-mesh {
   background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
@@ -162,6 +266,47 @@ code, pre, .font-mono {
   background-image:
     repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(13, 148, 136, 0.025) 18px, rgba(13, 148, 136, 0.025) 19px),
     repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(202, 138, 4, 0.02) 18px, rgba(202, 138, 4, 0.02) 19px);
+}
+
+/* ─── Desert Luxury Pattern Utilities (CSS background-image) ── */
+/* Islamic 8-point star tessellation — subtle, tileable */
+.pattern-islamic-star {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpolygon points='24.00,2.40 27.71,13.53 38.40,8.40 31.07,18.07 42.00,20.29 31.07,24.00 38.40,33.60 27.71,28.47 24.00,39.60 20.29,28.47 9.60,33.60 16.93,24.00 6.00,20.29 16.93,18.07 9.60,8.40 20.29,13.53' fill='none' stroke='rgba(13,148,136,0.06)' stroke-width='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 48px 48px;
+}
+.dark .pattern-islamic-star {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpolygon points='24.00,2.40 27.71,13.53 38.40,8.40 31.07,18.07 42.00,20.29 31.07,24.00 38.40,33.60 27.71,28.47 24.00,39.60 20.29,28.47 9.60,33.60 16.93,24.00 6.00,20.29 16.93,18.07 9.60,8.40 20.29,13.53' fill='none' stroke='rgba(13,148,136,0.10)' stroke-width='0.6'/%3E%3C/svg%3E");
+}
+
+/* Gold variant — for featured/prominent sections */
+.pattern-islamic-star-gold {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpolygon points='24.00,2.40 27.71,13.53 38.40,8.40 31.07,18.07 42.00,20.29 31.07,24.00 38.40,33.60 27.71,28.47 24.00,39.60 20.29,28.47 9.60,33.60 16.93,24.00 6.00,20.29 16.93,18.07 9.60,8.40 20.29,13.53' fill='none' stroke='rgba(202,138,4,0.06)' stroke-width='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 48px 48px;
+}
+.dark .pattern-islamic-star-gold {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpolygon points='24.00,2.40 27.71,13.53 38.40,8.40 31.07,18.07 42.00,20.29 31.07,24.00 38.40,33.60 27.71,28.47 24.00,39.60 20.29,28.47 9.60,33.60 16.93,24.00 6.00,20.29 16.93,18.07 9.60,8.40 20.29,13.53' fill='none' stroke='rgba(202,138,4,0.10)' stroke-width='0.6'/%3E%3C/svg%3E");
+}
+
+/* Arabesque interlocking mesh — organic lattice for card backgrounds */
+.pattern-arabesque-mesh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 20 Q10 0 20 20 Q30 40 40 20' fill='none' stroke='rgba(13,148,136,0.05)' stroke-width='0.5'/%3E%3Cpath d='M20 0 Q40 10 20 20 Q0 30 20 40' fill='none' stroke='rgba(13,148,136,0.05)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 40px 40px;
+}
+.dark .pattern-arabesque-mesh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 20 Q10 0 20 20 Q30 40 40 20' fill='none' stroke='rgba(13,148,136,0.08)' stroke-width='0.5'/%3E%3Cpath d='M20 0 Q40 10 20 20 Q0 30 20 40' fill='none' stroke='rgba(13,148,136,0.08)' stroke-width='0.5'/%3E%3C/svg%3E");
+}
+
+/* Hexagonal tessellation — upgrade from dot grid */
+.pattern-hex-mesh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='55.4' viewBox='0 0 32 55.4'%3E%3Cpolygon points='16,4.7 27.7,11.5 27.7,25.0 16,31.7 4.3,25.0 4.3,11.5' fill='none' stroke='rgba(13,148,136,0.05)' stroke-width='0.4'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 32px 55.4px;
+}
+.dark .pattern-hex-mesh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='55.4' viewBox='0 0 32 55.4'%3E%3Cpolygon points='16,4.7 27.7,11.5 27.7,25.0 16,31.7 4.3,25.0 4.3,11.5' fill='none' stroke='rgba(13,148,136,0.08)' stroke-width='0.4'/%3E%3C/svg%3E");
 }
 
 /* ─── Image Background Patterns (public/bg-paatern*.png) ─ */
@@ -351,6 +496,27 @@ code, pre, .font-mono {
   50%      { border-color: var(--primary); }
 }
 
+/* ─── Desert Luxury Keyframes (transform/opacity ONLY — perf safe) ── */
+@keyframes goldPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.04); }
+}
+@keyframes geometricRotate {
+  0%   { transform: rotate(0deg);   opacity: 0.12; }
+  50%  { transform: rotate(180deg); opacity: 0.20; }
+  100% { transform: rotate(360deg); opacity: 0.12; }
+}
+@keyframes calligraphyReveal {
+  0%   { opacity: 0; transform: translateY(10px) scaleY(0.92); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+@keyframes goldShimmerSweep {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
 /* ─── Animation Utility Classes ─────────────────────── */
 .animate-fade-in       { animation: fadeIn 0.35s var(--ease-smooth) both; }
 .animate-fade-in-up    { animation: fadeInUp 0.45s var(--ease-smooth) both; }
@@ -366,6 +532,9 @@ code, pre, .font-mono {
 .animate-glow          { animation: glow 3s ease-in-out infinite; }
 .animate-orb-float     { animation: orbFloat 20s ease-in-out infinite; }
 .animate-spin          { animation: spin 1s linear infinite; }
+.animate-gold-pulse    { animation: goldPulse 3s ease-in-out infinite; }
+.animate-geo-rotate    { animation: geometricRotate 40s linear infinite; }
+.animate-calligraphy   { animation: calligraphyReveal 0.6s var(--ease-smooth) both; }
 
 /* Stagger children for list animations */
 .stagger > *:nth-child(1) { animation-delay:  0ms; }

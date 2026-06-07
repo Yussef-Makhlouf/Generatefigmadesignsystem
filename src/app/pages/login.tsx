@@ -10,6 +10,7 @@ import { Eye, EyeOff, Zap, Sparkles, Shield, MessageSquare, ChevronLeft, Star, T
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { signIn } from "../../lib/services";
+import { GoldFiligreeCorner } from "../components/decorative/geometric-patterns";
 
 const FEATURES = [
   { icon: MessageSquare, text: "آلاف الأسئلة والإجابات التقنية" },
@@ -73,8 +74,8 @@ export function LoginPage() {
   return (
     <div className="min-h-screen md:h-screen w-full flex flex-col md:flex-row relative overflow-y-auto md:overflow-hidden bg-neutral-950 text-white font-sans">
       
-      {/* Dynamic Ambient Background (Universal) */}
-      <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-20 pointer-events-none z-0" />
+      {/* Desert Luxury: gold Islamic star tessellation on dark */}
+      <div className="absolute inset-0 pattern-islamic-star-gold pointer-events-none z-0" />
       
       {/* ── LEFT SIDE: Elegant Auth Form Panel ── */}
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 md:p-16 z-10 relative bg-neutral-950/70 backdrop-blur-md min-h-screen md:min-h-0 pb-[calc(2rem+env(safe-area-inset-bottom))]">
@@ -106,6 +107,8 @@ export function LoginPage() {
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <div className="mb-8 text-right">
+              {/* Desert Luxury: gold accent line above heading */}
+              <div className="w-16 h-0.5 mb-4 rounded-full" style={{ background: "var(--gradient-gold-line)" }} />
               <h2 className="text-2xl sm:text-3xl font-bold font-heading text-white mb-2">مرحباً بعودتك</h2>
               <p className="text-sm text-neutral-400">سجّل دخولك الآن للوصول إلى شبكة خبراء خبير واستئناف رحلة المعرفة</p>
             </div>
@@ -210,7 +213,7 @@ export function LoginPage() {
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
         
         {/* Top-right subtle brand tagline */}
-        <div className="absolute top-10 left-10 flex items-center gap-1.5 text-neutral-400 text-xs font-heading">
+        <div className="absolute top-10 left-10 flex items-center gap-1.5 text-neutral-400 text-xs font-brand">
           <Sparkles className="h-3 w-3 text-secondary animate-float" />
           <span>منصة المعرفة العربية الراقية</span>
         </div>
@@ -232,14 +235,18 @@ export function LoginPage() {
             </p>
           </div>
 
+          {/* Desert Luxury: Amiri calligraphic quote */}
+          <p className="font-calligraphy text-lg text-neutral-500/70 max-w-md leading-loose">
+            العلم نورٌ يضيء دروب الحياة
+          </p>
+
           {/* Testimonial component (Featured Expert highlight) */}
           <div className="bg-neutral-900/60 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 rounded-2xl relative overflow-hidden shadow-2xl group hover:border-primary/30 transition-all duration-300">
+            {/* Desert Luxury: one decoration — gold filigree corner */}
+            <GoldFiligreeCorner position="top-right" size={80} />
             {/* Ambient subtle light spots inside */}
             <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-secondary/5 blur-2xl pointer-events-none" />
-            
-            {/* Editorial quote backdrop */}
-            <Quote className="absolute -top-2 left-4 h-16 w-16 text-primary/10 -rotate-12 pointer-events-none" />
             
             <div className="flex justify-between items-center mb-5">
               <div className="flex items-center gap-0.5 text-amber-500">
