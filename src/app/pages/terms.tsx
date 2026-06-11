@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "../components/ui/accordion";
 import { Button } from "../components/ui/button";
 import { FileText, ArrowRight, ShieldCheck, Scale, AlertTriangle, Users } from "lucide-react";
+import { SEO } from "../components/seo";
 
 export function TermsPage() {
   const navigate = useNavigate();
 
   return (
     <div className="w-full animate-fade-in pb-12 relative text-right" dir="rtl">
-      {/* Background ambient light */}
+      <SEO title="الشروط والأحكام" description="الشروط والأحكام لاستخدام منصة خبير - مجتمع المعرفة العربي." canonical="/terms" />
       <div className="absolute top-12 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-12 right-1/4 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none -z-10" />
 

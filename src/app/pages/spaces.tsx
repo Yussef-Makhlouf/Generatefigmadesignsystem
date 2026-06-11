@@ -11,6 +11,7 @@ import {
   Globe, Monitor, Bot, Palette, TrendingUp, BookOpen,
   Leaf, Microscope, Shield, Rocket, Earth, Loader2, Hash,
 } from "lucide-react";
+import { SEO, breadcrumbSchema, SITE_URL } from "../components/seo";
 import { getActiveSpaces } from "../../lib/services/spaces.service";
 import type { Space } from "../../lib/database.types";
 
@@ -65,7 +66,7 @@ export function SpacesPage() {
 
   return (
     <div className="w-full animate-fade-in pb-4 relative">
-      {/* Background ambient auroras */}
+      <SEO title="المساحات المجتمعية" description="استكشف المساحات المجتمعية على منصة خبير - انضم لمجتمعات متخصصة في التقنية، الأعمال، الصحة، وغيرها." canonical="/spaces" structuredData={breadcrumbSchema([{ name: "الرئيسية", url: `${SITE_URL}/` }, { name: "المساحات", url: `${SITE_URL}/spaces` }])} />
       <div className="absolute top-12 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
       <div className="absolute bottom-12 right-1/4 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
 

@@ -7,6 +7,7 @@ import { NavProgress } from "./nav-progress";
 import { BgPattern } from "./bg-pattern";
 import { IslamicStarIcon } from "./decorative/geometric-patterns";
 import { motion } from "motion/react";
+import { SEO, webSiteSchema, organizationSchema } from "./seo";
 
 const FULL_WIDTH_ROUTES = ["/admin"];
 const NO_SIDEBAR_ROUTES = [
@@ -32,6 +33,11 @@ export function Layout() {
 
   return (
     <>
+      {/* ── Global SEO: WebSite + Organization schemas ── */}
+      <SEO
+        structuredData={[webSiteSchema(), organizationSchema()]}
+      />
+
       {/* ── Scroll to top on every route change ────────── */}
       <ScrollRestoration />
 

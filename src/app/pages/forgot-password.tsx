@@ -7,6 +7,7 @@ import { Zap, Sparkles, ChevronLeft, ArrowRight, Mail } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { sendPasswordReset } from "../../lib/services";
+import { SEO } from "../components/seo";
 
 export function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-neutral-950 text-white font-sans px-4">
-      {/* Ambient background decoration */}
+      <SEO title="نسيت كلمة المرور" description="استعد كلمة مرور حسابك على منصة خبير." canonical="/auth/forgot-password" noindex />
       <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-20 pointer-events-none z-0" />
       <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />

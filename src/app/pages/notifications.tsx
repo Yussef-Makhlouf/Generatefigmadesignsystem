@@ -7,6 +7,7 @@ import { useAuthSession } from "../../lib/hooks/use-auth-session";
 import { useNotifications } from "../../lib/hooks/use-engagement";
 import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { useNavigate } from "react-router";
+import { SEO } from "../components/seo";
 
 export function NotificationsPage() {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export function NotificationsPage() {
 
   return (
     <div className="max-w-3xl w-full mx-auto animate-fade-in pb-4 relative">
-      {/* Decorative Ambient Auroras */}
+      <SEO title="الإشعارات" description="تابع إشعاراتك وتفاعلاتك على منصة خبير." canonical="/notifications" noindex />
       <div className="absolute top-0 right-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none -z-10 animate-float" />
       <div className="absolute bottom-1/4 left-1/4 w-[250px] h-[250px] bg-secondary/5 rounded-full blur-[80px] pointer-events-none -z-10" />
 

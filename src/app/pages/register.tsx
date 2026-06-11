@@ -28,6 +28,7 @@ import {
   PenLine
 } from "lucide-react";
 import { toast } from "sonner";
+import { SEO } from "../components/seo";
 import { motion } from "motion/react";
 import type { AccountType } from "../../lib/database.types";
 import { signUp, updateProfile } from "../../lib/services";
@@ -347,6 +348,7 @@ export function RegisterPage() {
 
   return (
     <>
+      <SEO title="إنشاء حساب جديد" description="انضم إلى منصة خبير - مجتمع المعرفة العربي. أنشئ حسابك وابدأ بطرح الأسئلة والإجابة عليها." canonical="/auth/register" noindex />
       <div className="min-h-screen flex items-center justify-center p-4 relative overflow-y-auto bg-background pb-[calc(2rem+env(safe-area-inset-bottom))]">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-secondary/5 blur-3xl pointer-events-none" style={{ animationDelay: "2s" }} />

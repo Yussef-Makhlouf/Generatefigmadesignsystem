@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
 import { Home, Search, Compass, MessageSquare, User, HelpCircle, AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { SEO } from "../components/seo";
 
 export function NotFoundPage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export function NotFoundPage() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4 relative z-10">
-      
+      <SEO title="الصفحة غير موجودة" description="الصفحة التي تحاول الوصول إليها غير موجودة على منصة خبير." noindex />
       {/* Abstract Glowing Portal Backdrop */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-gradient-to-tr from-primary/10 to-secondary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border border-primary/5 pointer-events-none -z-10 animate-pulse-ring" />

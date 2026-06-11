@@ -19,6 +19,7 @@ import {
   HelpCircle as QuestionIcon
 } from "lucide-react";
 import { motion } from "motion/react";
+import { SEO, breadcrumbSchema, SITE_URL } from "../components/seo";
 
 const faqCategories = [
   {
@@ -264,8 +265,15 @@ export function HelpPage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto relative z-10">
-      
-      {/* Decorative Glow Orbs */}
+      <SEO
+        title="مركز المساعدة"
+        description="احصل على المساعدة والإجابات حول استخدام منصة خبير. دليل شامل للأسئلة الشائعة."
+        canonical="/help"
+        structuredData={breadcrumbSchema([
+          { name: "الرئيسية", url: `${SITE_URL}/` },
+          { name: "مركز المساعدة", url: `${SITE_URL}/help` },
+        ])}
+      />
       <div className="absolute top-12 left-1/4 w-72 h-72 rounded-full bg-primary/5 blur-[80px] pointer-events-none -z-10" />
       <div className="absolute bottom-20 right-1/4 w-80 h-80 rounded-full bg-secondary/4 blur-[100px] pointer-events-none -z-10" />
 

@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { QuestionCard } from "../components/question-card";
 import { EmptyState } from "../components/empty-state";
+import { questionUrl } from "../components/seo";
 import {
   ArrowRight,
   Tag,
@@ -25,6 +26,7 @@ import { supabase } from "../../lib/supabase";
 import { questionToCardProps } from "../../lib/database.types";
 import type { Question } from "../../lib/database.types";
 import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
+import { SEO, breadcrumbSchema, SITE_URL } from "../components/seo";
 
 const TAG_COLORS: Record<string, { color: string; bgColor: string }> = {
   "برمجة":        { color: "text-primary",                          bgColor: "bg-primary-light border-primary/20" },
@@ -217,7 +219,7 @@ export function TagDetailPage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto animate-fade-in pb-4 relative">
-      {/* Background radial glow */}
+      <SEO title={`وسم: ${tag}`} description={`استكشف الأسئلة المرتبطة بوسم "${tag}" على منصة خبير.`} canonical={`/tags/${tag}`} structuredData={breadcrumbSchema([{ name: "الرئيسية", url: `${SITE_URL}/` }, { name: "الوسوم", url: `${SITE_URL}/tags` }, { name: tag as string, url: `${SITE_URL}/tags/${tag}` }])} />
       <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
       
       {/* Back Button */}
@@ -336,7 +338,7 @@ export function TagDetailPage() {
                       userVote={userVotes[q.id]}
                       onVote={(dir) => voteQuestion(q.id, dir)}
                       onBookmark={() => toggleBookmark(q.id)}
-                      onClick={() => navigate(`/questions/${q.id}`)}
+                      onClick={() => navigate(questionUrl(q.id, q.title))}
                     />
                   ))
                 )}

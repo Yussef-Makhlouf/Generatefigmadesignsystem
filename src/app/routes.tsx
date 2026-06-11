@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/layout";
 import { ProtectedRoute } from "./components/protected-route";
 import { PageLoader } from "./components/page-loader";
+import { ErrorBoundary } from "./components/error-boundary";
 
 // ── Eagerly-loaded (tiny, needed immediately on first paint) ──────────────────
 import { HomePage }           from "./pages/home";
@@ -49,30 +50,35 @@ function S({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
+/** Wraps a route in an ErrorBoundary so a page crash renders a fallback instead of white-screening the app */
+function E({ children }: { children: React.ReactNode }) {
+  return <ErrorBoundary>{children}</ErrorBoundary>;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
       // ── Public routes ─────────────────────────────────────────────
-      { index: true,             element: <HomePage /> },
-      { path: "search",          element: <S><SearchPage /></S> },
-      { path: "leaderboard",     element: <S><LeaderboardPage /></S> },
-      { path: "spaces",          element: <S><SpacesPage /></S> },
-      { path: "help",            element: <S><HelpPage /></S> },
-      { path: "about",           element: <S><AboutPage /></S> },
-      { path: "privacy",         element: <S><PrivacyPage /></S> },
-      { path: "terms",           element: <S><TermsPage /></S> },
-      { path: "tags/:tag",       element: <S><TagDetailPage /></S> },
-      { path: "profile/:username", element: <S><ProfilePage /></S> },
-      { path: "questions/:id",   element: <S><QuestionDetailPage /></S> },
+      { index: true,             element: <E><HomePage /></E> },
+      { path: "search",          element: <E><S><SearchPage /></S></E> },
+      { path: "leaderboard",     element: <E><S><LeaderboardPage /></S></E> },
+      { path: "spaces",          element: <E><S><SpacesPage /></S></E> },
+      { path: "help",            element: <E><S><HelpPage /></S></E> },
+      { path: "about",           element: <E><S><AboutPage /></S></E> },
+      { path: "privacy",         element: <E><S><PrivacyPage /></S></E> },
+      { path: "terms",           element: <E><S><TermsPage /></S></E> },
+      { path: "tags/:tag",       element: <E><S><TagDetailPage /></S></E> },
+      { path: "profile/:username", element: <E><S><ProfilePage /></S></E> },
+      { path: "questions/:id/:slug?", element: <E><S><QuestionDetailPage /></S></E> },
 
       // ── Authenticated-user routes ──────────────────────────────────
       {
         path: "questions/new",
         element: (
           <ProtectedRoute require="user">
-            <S><NewQuestionPage /></S>
+            <E><S><NewQuestionPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -80,7 +86,7 @@ export const router = createBrowserRouter([
         path: "notifications",
         element: (
           <ProtectedRoute require="user">
-            <S><NotificationsPage /></S>
+            <E><S><NotificationsPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -88,7 +94,7 @@ export const router = createBrowserRouter([
         path: "saved",
         element: (
           <ProtectedRoute require="user">
-            <S><SavedPage /></S>
+            <E><S><SavedPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -96,7 +102,7 @@ export const router = createBrowserRouter([
         path: "reputation",
         element: (
           <ProtectedRoute require="user">
-            <S><ReputationPage /></S>
+            <E><S><ReputationPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -104,7 +110,7 @@ export const router = createBrowserRouter([
         path: "settings",
         element: (
           <ProtectedRoute require="user">
-            <S><SettingsPage /></S>
+            <E><S><SettingsPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -114,7 +120,7 @@ export const router = createBrowserRouter([
         path: "admin",
         element: (
           <ProtectedRoute require="admin">
-            <S><AdminPage /></S>
+            <E><S><AdminPage /></S></E>
           </ProtectedRoute>
         ),
       },
@@ -126,10 +132,10 @@ export const router = createBrowserRouter([
   {
     path: "/auth",
     children: [
-      { path: "login",           element: <LoginPage /> },
-      { path: "register",        element: <RegisterPage /> },
-      { path: "forgot-password", element: <ForgotPasswordPage /> },
-      { path: "reset-password",  element: <ResetPasswordPage /> },
+      { path: "login",           element: <E><LoginPage /></E> },
+      { path: "register",        element: <E><RegisterPage /></E> },
+      { path: "forgot-password", element: <E><ForgotPasswordPage /></E> },
+      { path: "reset-password",  element: <E><ResetPasswordPage /></E> },
     ],
   },
 ]);

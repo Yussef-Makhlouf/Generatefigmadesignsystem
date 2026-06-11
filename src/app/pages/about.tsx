@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Info, ArrowRight, Award, Compass, MessageSquare, Shield, Sparkles, Check } from "lucide-react";
+import { SEO, breadcrumbSchema, SITE_URL } from "../components/seo";
 
 export function AboutPage() {
   const navigate = useNavigate();
@@ -33,6 +34,15 @@ export function AboutPage() {
 
   return (
     <div className="w-full animate-fade-in pb-12 relative text-right" dir="rtl">
+      <SEO
+        title="من نحن"
+        description="تعرف على منصة خبير - مجتمع المعرفة العربي الأول للأسئلة والأجوبة والخبراء المعتمدين."
+        canonical="/about"
+        structuredData={breadcrumbSchema([
+          { name: "الرئيسية", url: `${SITE_URL}/` },
+          { name: "من نحن", url: `${SITE_URL}/about` },
+        ])}
+      />
       {/* Background ambient auroras */}
       <div className="absolute top-12 left-1/3 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none -z-10 animate-pulse" />
       <div className="absolute bottom-12 right-1/3 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none -z-10 animate-pulse" />

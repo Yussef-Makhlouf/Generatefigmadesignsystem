@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { QuestionCard } from "../components/question-card";
 import { EmptyState } from "../components/empty-state";
 import { questionToCardProps } from "../../lib/database.types";
+import { questionUrl } from "../components/seo";
 import {
   Bookmark,
   Search,
@@ -18,6 +19,7 @@ import {
   Trash2,
   SortAsc,
 } from "lucide-react";
+import { SEO } from "../components/seo";
 import { toast } from "sonner";
 
 export function SavedPage() {
@@ -63,7 +65,7 @@ export function SavedPage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto animate-fade-in pb-4 relative">
-      {/* Immersive background glow */}
+      <SEO title="المحفوظات" description="أسئلتك المحفوظة على منصة خبير." canonical="/saved" noindex />
       <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
       
       {/* Page Header */}
@@ -210,7 +212,7 @@ export function SavedPage() {
                       userVote={userVotes[item.id]}
                       onVote={(dir) => voteQuestion(item.id, dir)}
                       onBookmark={() => toggleBookmark(item.id)}
-                      onClick={() => navigate(`/questions/${item.id}`)}
+                      onClick={() => navigate(questionUrl(item.id, item.title))}
                     />
                     
                     {/* Remove button overlay with premium touch */}

@@ -24,6 +24,7 @@ import {
   getCategoryChipClass,
 } from "../../lib/categories";
 import { BgPattern } from "../components/bg-pattern";
+import { SEO } from "../components/seo";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface AttachmentLink { title: string; url: string; }
@@ -541,6 +542,7 @@ export function NewQuestionPage() {
 
   return (
     <div className="max-w-3xl w-full mx-auto pb-8 relative" dir="rtl">
+      <SEO title="اطرح سؤالاً جديداً" description="اطرح سؤالك على خبراء منصة خبير واحصل على إجابات موثوقة من متخصصين." canonical="/questions/new" noindex />
       <BgPattern variant={2} opacity="subtle" className="rounded-3xl -z-10" />
       {/* Draft Recovery Banner */}
       <AnimatePresence>
@@ -915,7 +917,7 @@ export function NewQuestionPage() {
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {uploadingImages.map((img) => (
                           <div key={img.preview} className="group relative h-20 rounded-xl overflow-hidden border border-border/30">
-                            <img src={img.preview} className="w-full h-full object-cover" alt="preview" />
+                            <img src={img.preview} className="w-full h-full object-cover" alt="preview" loading="lazy" />
                             {/* Loading overlay */}
                             {img.uploading && (
                               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center gap-1">
@@ -1125,7 +1127,7 @@ export function NewQuestionPage() {
                         </span>
                         <div className="flex gap-1.5 flex-wrap">
                           {successfulImages.map((img, i) => (
-                            <img key={i} src={img.url} className="w-14 h-14 object-cover rounded-lg border border-border" alt="attached" />
+                            <img key={i} src={img.url} className="w-14 h-14 object-cover rounded-lg border border-border" alt="attached" loading="lazy" />
                           ))}
                         </div>
                       </div>

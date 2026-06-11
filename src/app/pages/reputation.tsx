@@ -8,6 +8,7 @@ import { useAuthSession } from "../../lib/hooks/use-auth-session";
 import { useFeedQuestions } from "../../lib/hooks/use-feed-queries";
 import { useAnswerSnippets, useAnswersByAuthor } from "../../lib/hooks/use-answers";
 import { queryKeys } from "../../lib/query-keys";
+import { SEO } from "../components/seo";
 import {
   AreaChart,
   Area,
@@ -234,7 +235,7 @@ export function ReputationPage() {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Dynamic Background Mesh & Ambient Glow */}
+      <SEO title="سجل السمعة" description="تابع تقدم سمعتك المعرفية على منصة خبير - نقاط، أوسمة، ومستويات." canonical="/reputation" noindex />
       <div className="absolute inset-0 arabic-geometric-mesh-fine pointer-events-none opacity-40 z-0" />
       <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] rounded-full bg-primary/5 blur-[120px] pointer-events-none z-0" />
       <div className="absolute bottom-[20%] left-[-15%] w-[400px] h-[400px] rounded-full bg-secondary/5 blur-[150px] pointer-events-none z-0" />

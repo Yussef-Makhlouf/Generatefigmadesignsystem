@@ -17,4 +17,9 @@ export const queryKeys = {
   platformStats: ["platformStats"] as const,
   hotQuestions: ["hotQuestions"] as const,
   trendingTags: ["trendingTags"] as const,
+  // ── Feed-specific infinite query keys ──────────────────────────
+  recentFeed: ["recentFeed"] as const,
+  forYouFeed: (userId: string | null | undefined) => ["forYouFeed", userId] as const,
+  followingFeed: (userId: string | null | undefined) => ["followingFeed", userId] as const,
+  trendingFeed: ["trendingFeed"] as const,
 };

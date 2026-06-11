@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { signIn } from "../../lib/services";
 import { GoldFiligreeCorner } from "../components/decorative/geometric-patterns";
+import { SEO } from "../components/seo";
 
 const FEATURES = [
   { icon: MessageSquare, text: "آلاف الأسئلة والإجابات التقنية" },
@@ -72,6 +73,13 @@ export function LoginPage() {
   };
 
   return (
+    <>
+    <SEO
+      title="تسجيل الدخول"
+      description="سجل دخولك إلى منصة خبير لطرح الأسئلة والإجابة عليها والتفاعل مع مجتمع المعرفة العربي."
+      canonical="/auth/login"
+      noindex
+    />
     <div className="min-h-screen md:h-screen w-full flex flex-col md:flex-row relative overflow-y-auto md:overflow-hidden bg-neutral-950 text-white font-sans">
       
       {/* Desert Luxury: gold Islamic star tessellation on dark */}
@@ -298,5 +306,6 @@ export function LoginPage() {
       </div>
       
     </div>
+    </>
   );
 }

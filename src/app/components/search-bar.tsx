@@ -5,6 +5,7 @@ import { Search, Loader2 } from "lucide-react";
 import { Card } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useAutocomplete } from "../../lib/hooks";
+import { questionUrl } from "./seo";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -69,7 +70,7 @@ export function SearchBar({
                   onClick={() => {
                     // Smart Premium Routing
                     if (result.type === "question") {
-                      navigate(`/questions/${result.id}`);
+                      navigate(questionUrl(result.id, result.title));
                     } else if (result.type === "user" && result.metadata) {
                       navigate(`/profile/${result.metadata}`);
                     } else if (result.type === "tag" && result.metadata) {

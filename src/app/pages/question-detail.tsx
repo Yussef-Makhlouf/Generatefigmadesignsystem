@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { AttachmentLink, AttachmentLocation } from "../../lib/database.types";
 import type { Answer } from "../../lib/database.types";
 import { supabase } from "../../lib/supabase";
+import { SEO, qaPageSchema, breadcrumbSchema, generateSlug, SITE_URL } from "../components/seo";
 
 // ─── Compact Leaflet Map Component for Answers ────────────────────────────────
 function LeafletMapPicker({
@@ -694,7 +695,40 @@ export function QuestionDetailPage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto pb-4 animate-fade-in">
-      {/* Back */}
+      {/* ── Question SEO ── */}
+      <SEO
+        title={question.title}
+        description={(question.content || "").slice(0, 160)}
+        canonical={`/questions/${id}${question.title ? `/${generateSlug(question.title)}` : ""}`}
+        type="article"
+        meta={[
+          { property: "article:published_time", content: question.created_at || "" },
+          ...(question.tags ?? []).map((t: any) => ({ property: "article:tag", content: typeof t === "string" ? t : t.name })),
+        ]}
+        structuredData={[
+          qaPageSchema({
+            title: question.title,
+            body: question.content || "",
+            id: id!,
+            authorName: question.author?.name,
+            authorUrl: question.author?.username ? `/profile/${question.author.username}` : undefined,
+            dateCreated: question.created_at,
+            tags: (question.tags ?? []).map((t: any) => typeof t === "string" ? t : t.name),
+            answers: rawAnswers.map((a: any) => ({
+              body: a.content,
+              authorName: a.author?.name,
+              dateCreated: a.created_at,
+              upvoteCount: a.votes_count ?? 0,
+              isAccepted: a.is_accepted ?? false,
+            })),
+          }),
+          breadcrumbSchema([
+            { name: "الرئيسية", url: `${SITE_URL}/` },
+            { name: "الأسئلة", url: `${SITE_URL}/search` },
+            { name: question.title, url: `${SITE_URL}/questions/${id}` },
+          ]),
+        ]}
+      />
       <Button variant="ghost" className="mb-3 sm:mb-4 -mr-2 hover:bg-muted rounded-xl text-sm h-9" onClick={() => navigate(-1)}>
         <ArrowRight className="h-4 w-4 ml-2" />
         رجوع
@@ -741,7 +775,7 @@ export function QuestionDetailPage() {
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {question.images.map((img, idx) => (
                               <div key={idx} className="group relative h-28 rounded-xl overflow-hidden border border-border/40 cursor-zoom-in">
-                                <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Question attachment" />
+                                <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Question attachment" loading="lazy" />
                               </div>
                             ))}
                           </div>
@@ -934,7 +968,7 @@ export function QuestionDetailPage() {
                                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                                   {answer.images.map((img, i) => (
                                     <div key={i} className="group relative h-16 rounded-lg overflow-hidden border border-border/40 cursor-zoom-in">
-                                      <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Answer proof" />
+                                      <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Answer proof" loading="lazy" />
                                     </div>
                                   ))}
                                 </div>

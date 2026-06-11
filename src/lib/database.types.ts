@@ -456,6 +456,78 @@ export type Database = {
         };
         Returns: string;
       };
+      // ✅ ADDED: Feed ranking RPCs
+      get_for_you_feed: {
+        Args: {
+          p_user_id: string;
+          p_limit?: number;
+          p_cursor?: string | null;
+          p_cursor_id?: string | null;
+        };
+        Returns: {
+          id: string;
+          author_id: string;
+          title: string;
+          content: string;
+          category: string | null;
+          location: string | null;
+          votes_count: number;
+          answers_count: number;
+          views_count: number;
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+          rank_score: number;
+          author: Record<string, unknown>;
+        }[];
+      };
+      get_trending_feed: {
+        Args: {
+          p_limit?: number;
+          p_cursor?: string | null;
+          p_cursor_id?: string | null;
+        };
+        Returns: {
+          id: string;
+          author_id: string;
+          title: string;
+          content: string;
+          category: string | null;
+          location: string | null;
+          votes_count: number;
+          answers_count: number;
+          views_count: number;
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+          rank_score: number;
+          author: Record<string, unknown>;
+        }[];
+      };
+      get_following_feed: {
+        Args: {
+          p_user_id: string;
+          p_limit?: number;
+          p_cursor?: string | null;
+          p_cursor_id?: string | null;
+        };
+        Returns: {
+          id: string;
+          author_id: string;
+          title: string;
+          content: string;
+          category: string | null;
+          location: string | null;
+          votes_count: number;
+          answers_count: number;
+          views_count: number;
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+          rank_score: number;
+          author: Record<string, unknown>;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

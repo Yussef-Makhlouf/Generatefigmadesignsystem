@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "../components/ui/accordion";
 import { Button } from "../components/ui/button";
 import { Shield, ArrowRight, Eye, Key, HeartHandshake, HelpCircle } from "lucide-react";
+import { SEO } from "../components/seo";
 
 export function PrivacyPage() {
   const navigate = useNavigate();
 
   return (
     <div className="w-full animate-fade-in pb-12 relative text-right" dir="rtl">
-      {/* Background ambient light */}
+      <SEO title="سياسة الخصوصية" description="سياسة الخصوصية لمنصة خبير - تعرف على كيفية حماية بياناتك الشخصية." canonical="/privacy" />
       <div className="absolute top-12 left-1/3 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-12 right-1/3 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none -z-10" />
 

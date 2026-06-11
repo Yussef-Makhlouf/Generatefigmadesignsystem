@@ -9,3 +9,4 @@ export * from "./spaces.service";
 export * from "./stats.service";
 export * from "./follows.service";
 export * from "./settings.service";
+export * from "./feed.service";

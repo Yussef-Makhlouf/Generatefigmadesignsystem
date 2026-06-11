@@ -10,6 +10,7 @@ import { QuestionCard } from "../components/question-card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
+import { questionUrl } from "../components/seo";
 import {
   Settings,
   UserPlus,
@@ -50,6 +51,7 @@ import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { useAnswersByAuthor } from "../../lib/hooks/use-answers";
 import { toast } from "sonner";
 import { isFollowing as checkFollowing, toggleFollow, getFollowerCount, getFollowingCount } from "../../lib/services";
+import { SEO, personSchema, breadcrumbSchema, SITE_URL } from "../components/seo";
 
 const BADGES = [
   { icon: Trophy, label: "متصدر", color: "border-[hsla(43,96%,45%,0.3)] bg-[hsla(43,96%,45%,0.08)] text-[hsl(43,96%,54%)] dark:text-[hsl(43,96%,60%)] shadow-[0_0_10px_rgba(245,158,11,0.08)]" },
@@ -263,6 +265,28 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto animate-fade-in pb-4">
+      <SEO
+        title={`ملف ${user.name} الشخصي`}
+        description={user.bio || `تابع ${user.name} على منصة خبير - أسئلة، إجابات، وتقييمات`}
+        canonical={`/profile/${username || "me"}`}
+        type="profile"
+        image={user.avatar || undefined}
+        structuredData={[
+          personSchema({
+            name: user.name,
+            username: user.username || username || "",
+            bio: user.bio as string | undefined,
+            avatar: user.avatar || undefined,
+            reputation: user.reputation,
+            location: user.location as string | undefined,
+            website: user.settings?.website as string | undefined,
+          }),
+          breadcrumbSchema([
+            { name: "الرئيسية", url: `${SITE_URL}/` },
+            { name: user.name, url: `${SITE_URL}/profile/${username || "me"}` },
+          ]),
+        ]}
+      />
       {/* Profile Header Card */}
       <div className="premium-glass-card overflow-hidden mb-4 sm:mb-6 rounded-3xl border border-border/30 relative shadow-xl">
         {/* Banner with custom image or solid background overlay */}
@@ -856,7 +880,7 @@ export function ProfilePage() {
                   userVote={userVotes[question.id]}
                   onVote={(dir) => voteQuestion(question.id, dir)}
                   onBookmark={() => toggleBookmark(question.id)}
-                  onClick={() => navigate(`/questions/${question.id}`)}
+                  onClick={() => navigate(questionUrl(question.id, question.title))}
                 />
               ))
             )}
@@ -890,7 +914,7 @@ export function ProfilePage() {
                     userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
-                    onClick={() => navigate(`/questions/${question.id}`)}
+                    onClick={() => navigate(questionUrl(question.id, question.title))}
                   />
                 ))
               )}
@@ -920,7 +944,7 @@ export function ProfilePage() {
                     userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
-                    onClick={() => navigate(`/questions/${question.id}`)}
+                    onClick={() => navigate(questionUrl(question.id, question.title))}
                   />
                 ))
               )}
@@ -1004,7 +1028,7 @@ export function ProfilePage() {
                     userVote={userVotes[question.id]}
                     onVote={(dir) => voteQuestion(question.id, dir)}
                     onBookmark={() => toggleBookmark(question.id)}
-                    onClick={() => navigate(`/questions/${question.id}`)}
+                    onClick={() => navigate(questionUrl(question.id, question.title))}
                   />
                 ))
               )}
@@ -1150,7 +1174,7 @@ export function ProfilePage() {
                   
                   {reviewImages.map((img, idx) => (
                     <div key={idx} className="relative h-9 w-12 rounded-lg border border-border/20 overflow-hidden">
-                      <img src={img} alt="مرفق" className="h-full w-full object-cover" />
+                      <img src={img} alt="مرفق" loading="lazy" className="h-full w-full object-cover" />
                       <button
                         className="absolute inset-0 bg-black/40 hover:bg-black/60 flex items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity"
                         onClick={() => setReviewImages(reviewImages.filter((_, i) => i !== idx))}

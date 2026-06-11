@@ -15,6 +15,7 @@ import { useBackendSearch } from "../../lib/hooks/use-search";
 import { useCategories } from "../../lib/hooks/use-categories";
 import { useLocations } from "../../lib/hooks/use-locations";
 import { CATEGORY_LABELS } from "../../lib/services/stats.service";
+import { SEO, breadcrumbSchema, SITE_URL, questionUrl } from "../components/seo";
 
 // Locations are fetched dynamically from the DB — see useLocations() below
 
@@ -192,6 +193,16 @@ export function SearchPage() {
 
   return (
     <div className="max-w-5xl w-full mx-auto animate-fade-in pb-8">
+      <SEO
+        title="البحث والاستكشاف"
+        description="ابحث في آلاف الأسئلة والإجابات على منصة خبير. صفي حسب التصنيف، الموقع، أو حالة الإجابة."
+        canonical="/search"
+        noindex={searchQuery.trim().length > 0}
+        structuredData={breadcrumbSchema([
+          { name: "الرئيسية", url: `${SITE_URL}/` },
+          { name: "البحث", url: `${SITE_URL}/search` },
+        ])}
+      />
       {/* Ambient glow */}
       <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10" />
       <div className="absolute bottom-[20%] left-[-10%] w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[100px] pointer-events-none -z-10" />
@@ -358,7 +369,7 @@ export function SearchPage() {
                   userVote={userVotes[question.id]}
                   onVote={(dir) => voteQuestion(question.id, dir)}
                   onBookmark={() => toggleBookmark(question.id)}
-                  onClick={() => navigate(`/questions/${question.id}`)}
+                  onClick={() => navigate(questionUrl(question.id, question.title))}
                 />
               ))}
             </div>

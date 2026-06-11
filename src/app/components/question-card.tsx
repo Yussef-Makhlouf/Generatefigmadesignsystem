@@ -7,6 +7,7 @@ import { VoteButtons } from "./vote-buttons";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { formatTimestamp } from "../lib/utils";
+import { questionUrl } from "./seo";
 
 interface QuestionCardProps {
   id: string;
@@ -78,7 +79,7 @@ export function QuestionCard({
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard?.writeText(window.location.origin + `/questions/${id}`);
+    navigator.clipboard?.writeText(window.location.origin + questionUrl(id, title));
     toast.success("تم نسخ رابط السؤال", { duration: 1500, position: "bottom-center" });
     onShare?.();
   };

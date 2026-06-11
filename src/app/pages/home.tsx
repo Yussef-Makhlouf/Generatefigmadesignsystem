@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { QuestionCard } from "../components/question-card";
 import { ExpertCard } from "../components/expert-card";
 import { Card } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
@@ -9,22 +8,26 @@ import { Button } from "../components/ui/button";
 import { cn } from "../components/ui/utils";
 import {
   Trophy, Sparkles, Flame, Zap, ChevronLeft,
-  MessageSquare, Users, TrendingUp, PenSquare, Hash, Loader2,
+  MessageSquare, Users, TrendingUp, PenSquare, Hash, Loader2, Clock, UserCheck,
 } from "lucide-react";
-import { useFeedQuestions, useFeedUsers } from "../../lib/hooks/use-feed-queries";
-import { useQuestionInteractions } from "../../lib/hooks/use-question-interactions";
-import { QuestionListSkeleton } from "../components/question-skeleton";
-import { questionToCardProps } from "../../lib/database.types";
+import { useFeedUsers } from "../../lib/hooks/use-feed-queries";
 import { motion } from "motion/react";
 import { usePlatformStats, useTrendingTags, useHotQuestions, useTopContributors } from "../../lib/hooks/use-stats";
 import { BgPattern } from "../components/bg-pattern";
 import { GoldFiligreeCorner } from "../components/decorative/geometric-patterns";
+import { FeedList } from "../components/feed/feed-list";
+import { useRecentFeed } from "../../lib/hooks/use-feed";
+import { useForYouFeed } from "../../lib/hooks/use-for-you-feed";
+import { useFollowingFeed } from "../../lib/hooks/use-following-feed";
+import { useTrendingFeed } from "../../lib/hooks/use-trending-feed";
+import { useSession } from "../../lib/hooks/use-auth";
+import { SEO, breadcrumbSchema, SITE_URL, questionUrl } from "../components/seo";
 
 const FILTERS = [
-  { key: "recent",     label: "الأحدث",         icon: null },
-  { key: "popular",    label: "الأكثر شعبية",    icon: Flame },
+  { key: "recent",     label: "الأحدث",         icon: Clock },
   { key: "foryou",     label: "مخصص لك",         icon: Sparkles },
-  { key: "unanswered", label: "بدون إجابة",       icon: null },
+  { key: "following",  label: "المتابَعون",       icon: UserCheck },
+  { key: "trending",   label: "رائج",             icon: Flame },
 ];
 
 function formatArabicNumber(n: number): string {
@@ -33,10 +36,15 @@ function formatArabicNumber(n: number): string {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { data: questions = [], isLoading: isQuestionsLoading } = useFeedQuestions();
+  const { data: session } = useSession();
   const { data: users = [] } = useFeedUsers();
-  const { bookmarkedIds, voteQuestion, toggleBookmark, userVotes } = useQuestionInteractions();
   const [filter, setFilter] = useState("recent");
+
+  // ── Feed hooks (only the active one fetches) ────────────────
+  const recentQuery = useRecentFeed();
+  const forYouQuery = useForYouFeed();
+  const followingQuery = useFollowingFeed();
+  const trendingQuery = useTrendingFeed();
 
   // Map real database profiles of experts/businesses or high reputation users
   const realFeaturedExperts = [...users]
@@ -58,6 +66,16 @@ export function HomePage() {
   const { data: trendingTags = [] } = useTrendingTags(10);
   const { data: hotQuestions = [], isLoading: hotLoading } = useHotQuestions(5);
   const { data: topContributors = [], isLoading: contributorsLoading } = useTopContributors(3);
+
+  // ── Map filter to active query ─────────────────────────────
+  const activeQuery = (() => {
+    switch (filter) {
+      case "foryou":     return forYouQuery;
+      case "following":  return followingQuery;
+      case "trending":   return trendingQuery;
+      default:           return recentQuery;
+    }
+  })();
 
   const PLATFORM_STATS = [
     {
@@ -83,14 +101,14 @@ export function HomePage() {
     },
   ];
 
-  const filteredQuestions = filter === "popular"
-    ? [...questions].sort((a, b) => b.votes_count - a.votes_count)
-    : filter === "unanswered"
-    ? questions.filter((q) => q.answers_count === 0)
-    : questions;
-
   return (
     <div className="max-w-7xl w-full">
+      <SEO
+        canonical="/"
+        structuredData={breadcrumbSchema([
+          { name: "الرئيسية", url: `${SITE_URL}/` },
+        ])}
+      />
 
       {/* ── Bento Grid Hero Section ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
@@ -202,7 +220,7 @@ export function HomePage() {
 
               <h3
                 className="font-bold text-foreground text-base leading-snug mb-3 hover:text-primary transition-colors cursor-pointer"
-                onClick={() => navigate(`/questions/${hotQuestions[0].id}`)}
+                onClick={() => navigate(questionUrl(hotQuestions[0].id, hotQuestions[0].title))}
               >
                 {hotQuestions[0].title}
               </h3>
@@ -219,7 +237,7 @@ export function HomePage() {
               </div>
               <Button
                 className="rounded-xl h-9 text-xs px-4 bg-secondary border-0 shadow-secondary shadow-sm hover:shadow-md text-white font-semibold"
-                onClick={() => navigate(`/questions/${hotQuestions[0].id}`)}
+                onClick={() => navigate(questionUrl(hotQuestions[0].id, hotQuestions[0].title))}
               >
                 أجب الآن
               </Button>
@@ -311,66 +329,46 @@ export function HomePage() {
             >
               <Sparkles className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-primary shrink-0" />
               <p className="text-xs sm:text-sm text-primary">
-                أسئلة مختارة بناءً على اهتماماتك في <strong>تقنية، تعليم</strong>
+                أسئلة مختارة بناءً على اهتماماتك وتفاعلاتك
               </p>
             </motion.div>
           )}
 
-          {/* Questions */}
-          <div className="space-y-2 sm:space-y-3 stagger">
-            {isQuestionsLoading ? (
-              <QuestionListSkeleton count={3} />
-            ) : filteredQuestions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center bg-card rounded-2xl border border-border/40 py-12">
-                <div className="p-3 bg-primary/5 rounded-full mb-4 text-primary">
-                  <MessageSquare className="h-8 w-8 stroke-[1.5]" />
-                </div>
-                <h3 className="font-semibold text-lg mb-1">لا توجد أسئلة بعد</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mb-6">
-                  {filter === "unanswered"
-                    ? "كل الأسئلة الحالية تمت الإجابة عليها. رائع!"
-                    : filter === "foryou"
-                    ? "لم نجد أسئلة مخصصة لك حالياً. جرب تصفح الأقسام الأخرى."
-                    : "كن أول من يطرح سؤالاً في هذا القسم ويشارك المعرفة!"}
-                </p>
-                <Button
-                  onClick={() => navigate("/questions/new")}
-                  className="rounded-xl bg-primary hover:bg-primary/95 text-white gap-2 font-medium"
-                >
-                  <PenSquare className="h-4 w-4" />
-                  اطرح سؤالاً الآن
-                </Button>
-              </div>
-            ) : (
-              filteredQuestions.map((q) => (
-                <motion.div
-                  key={q.id}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <QuestionCard
-                    {...questionToCardProps(q)}
-                    isBookmarked={bookmarkedIds.includes(q.id)}
-                    userVote={userVotes[q.id]}
-                    onVote={(dir) => voteQuestion(q.id, dir)}
-                    onBookmark={() => toggleBookmark(q.id)}
-                    onClick={() => navigate(`/questions/${q.id}`)}
-                  />
-                </motion.div>
-              ))
-            )}
-          </div>
-
-          {/* Load More */}
-          {!isQuestionsLoading && filteredQuestions.length > 0 && (
-            <div className="pt-2 text-center pb-2 md:pb-4">
-              <Button variant="outline" className="rounded-xl px-6 sm:px-8 h-10 sm:h-11 border-border/60 hover:border-primary/40 hover:text-primary transition-all text-sm">
-                تحميل المزيد
-              </Button>
-            </div>
+          {/* "Following" hint */}
+          {filter === "following" && !session && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="flex items-center gap-2 p-2.5 sm:p-3 bg-muted/30 rounded-xl border border-border/40"
+            >
+              <UserCheck className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground shrink-0" />
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                سجّل الدخول لرؤية أسئلة المتابَعين
+              </p>
+            </motion.div>
           )}
+
+          {/* Feed (infinite scroll) */}
+          <FeedList
+            query={activeQuery}
+            emptyTitle={
+              filter === "following"
+                ? "لا تتابع أحداً بعد"
+                : filter === "foryou"
+                ? "لا توجد أسئلة مخصصة لك"
+                : filter === "trending"
+                ? "لا يوجد محتوى رائج"
+                : "لا توجد أسئلة بعد"
+            }
+            emptyDescription={
+              filter === "following"
+                ? "تابع خبراء ومهتمين لرؤية أسئلتهم هنا"
+                : filter === "foryou"
+                ? "تفاعل أكثر لتحسين التوصيات"
+                : "كن أول من يطرح سؤالاً ويشارك المعرفة!"
+            }
+            requireAuth={filter === "following" || filter === "foryou"}
+          />
         </div>
 
         {/* ── Right Panel (Desktop) ── */}
@@ -394,7 +392,7 @@ export function HomePage() {
                 ? hotQuestions.map((q, i) => (
                     <button
                       key={q.id}
-                      onClick={() => navigate(`/questions/${q.id}`)}
+                      onClick={() => navigate(questionUrl(q.id, q.title))}
                       className="w-full flex gap-3 text-right group hover:bg-muted/40 rounded-xl p-2 -m-2 transition-all duration-300 border border-transparent hover:border-border/30"
                     >
                       <div

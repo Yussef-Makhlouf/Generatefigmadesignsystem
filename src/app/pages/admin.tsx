@@ -39,6 +39,7 @@ import {
 import { useFeedQuestions, useFeedUsers, useFeedReviews } from "../../lib/hooks/use-feed-queries";
 import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { toast } from "sonner";
+import { SEO } from "../components/seo";
 
 const growthData = [
   { month: "يناير", users: 120, questions: 320, answers: 650 },
@@ -168,7 +169,7 @@ export function AdminPage() {
 
   return (
     <div className="w-full relative animate-fade-in">
-      {/* Background Decorative Elements */}
+      <SEO title="لوحة التحكم" description="لوحة تحكم المشرفين على منصة خبير." noindex />
       <div className="absolute inset-0 arabic-geometric-mesh-fine pointer-events-none opacity-30 z-0" />
       <div className="absolute top-[-5%] right-[-5%] w-[350px] h-[350px] rounded-full bg-primary/5 blur-[100px] pointer-events-none z-0" />
       <div className="absolute bottom-[10%] left-[-10%] w-[350px] h-[350px] rounded-full bg-secondary/5 blur-[100px] pointer-events-none z-0" />

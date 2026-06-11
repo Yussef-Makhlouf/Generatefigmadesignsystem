@@ -7,6 +7,7 @@ import { Zap, Sparkles, ChevronLeft, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { completePasswordReset } from "../../lib/services";
+import { SEO } from "../components/seo";
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-neutral-950 text-white font-sans px-4">
-      {/* Ambient background decoration */}
+      <SEO title="إعادة تعيين كلمة المرور" description="أعد تعيين كلمة مرور حسابك على منصة خبير." canonical="/auth/reset-password" noindex />
       <div className="absolute inset-0 arabic-geometric-mesh-fine opacity-20 pointer-events-none z-0" />
       <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />

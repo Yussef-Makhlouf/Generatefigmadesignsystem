@@ -1,0 +1,30 @@
+# robots.txt for khapeer.com (خبير - Arabic Q&A Platform)
+User-agent: *
+Allow: /
+
+# Disallow private/authenticated routes
+Disallow: /auth/
+Disallow: /settings
+Disallow: /notifications
+Disallow: /saved
+Disallow: /reputation
+Disallow: /admin
+Disallow: /questions/new
+
+# Allow public content
+Allow: /questions/
+Allow: /profile/
+Allow: /search
+Allow: /leaderboard
+Allow: /spaces
+Allow: /help
+Allow: /about
+Allow: /privacy
+Allow: /terms
+Allow: /tags/
+
+# Sitemap location
+Sitemap: https://khapeer.com/sitemap.xml
+
+# Crawl delay for polite bots
+Crawl-delay: 1

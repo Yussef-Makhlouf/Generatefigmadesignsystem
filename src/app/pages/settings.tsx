@@ -41,6 +41,7 @@ import { useAppActions } from "../../lib/hooks/use-app-actions";
 import { signOut, getUserSettings, saveUserSettings, getDefaultSettings, uploadAvatar, uploadCoverImage, uploadLicenseDocument } from "../../lib/services";
 import { supabase } from "../../lib/supabase";
 import type { UserSettings } from "../../lib/services/settings.service";
+import { SEO } from "../components/seo";
 
 export function SettingsPage() {
   const navigate = useNavigate();
@@ -446,6 +447,7 @@ export function SettingsPage() {
 
   return (
     <div className="max-w-4xl w-full mx-auto animate-fade-in relative pb-8" >
+      <SEO title="الإعدادات" description="إدارة إعدادات حسابك على منصة خبير." canonical="/settings" noindex />
       {/* Decorative Ambient Auroras */}
       <div className="absolute top-0 right-1/4 w-[350px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" />
       <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none -z-10" />

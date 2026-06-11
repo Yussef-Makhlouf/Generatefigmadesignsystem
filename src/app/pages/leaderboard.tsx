@@ -8,6 +8,7 @@ import { Trophy, Medal, Flame, TrendingUp, Award, Star, Loader2 } from "lucide-r
 import { useAuthSession } from "../../lib/hooks/use-auth-session";
 import { useLeaderboard } from "../../lib/hooks/use-leaderboard";
 import type { LeaderboardPeriod } from "../../lib/services/stats.service";
+import { SEO, breadcrumbSchema, SITE_URL } from "../components/seo";
 import { BgPattern } from "../components/bg-pattern";
 
 const rankMedal = (rank: number) => {
@@ -64,7 +65,7 @@ export function LeaderboardPage() {
 
   return (
     <div className="max-w-3xl w-full mx-auto animate-fade-in pb-4">
-      {/* Header with geometric backgrounds */}
+      <SEO title="لوحة الصدارة" description="تعرف على أنشط المساهمين والخبراء في منصة خبير. تصدّر القائمة وارك سمعتك المعرفية." canonical="/leaderboard" structuredData={breadcrumbSchema([{ name: "الرئيسية", url: `${SITE_URL}/` }, { name: "لوحة الصدارة", url: `${SITE_URL}/leaderboard` }])} />
       <div className="text-center mb-8 relative overflow-hidden rounded-3xl py-6">
         <BgPattern variant={1} opacity="subtle" />
         <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
